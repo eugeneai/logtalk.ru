@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH_TO_PACKAGE=${1:-"../code-states-visualizer"};
+PATH_TO_PACKAGE=${1:-"../tmp/code-states-visualizer"};
 
 
 if [ ! -d "$PATH_TO_PACKAGE" ]; then
@@ -8,7 +8,7 @@ if [ ! -d "$PATH_TO_PACKAGE" ]; then
       exit 1
 fi
 
-rm -r ./node_modules/code-states-visualizer;
+rm -rf ./node_modules/code-states-visualizer;
 mkdir ./node_modules/code-states-visualizer;
 
 if [ ! -d "$PATH_TO_PACKAGE/dist" ]; then
