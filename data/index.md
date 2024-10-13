@@ -79,10 +79,9 @@ Please note, that exam dates and similar information in the older recordings may
       <td><a href="https://docs.google.com/presentation/d/1PBVezc4Bm2Be9cRBtVComzJlLYVURC_5DUEFG_jtb8o/edit?usp=sharing">Slides</a></td>
     </tr>
     <tr>
-      <td>Part 6 (2023)</td>
-      <td><a href="https://pt.irnok.net/w/87MrHxDA5kWsQhoGVKVZZj">File operations, Recursion</td>
-      <td><a href="https://youtu.be/UjWu85v73YI">Recording 12.10.2023</a></td>
-      <td><a href="https://docs.google.com/presentation/d/1kVjKar8gVwIyFerqMmgg6y1RRGlWHVC2Xh0oKH_hjJI/edit?usp=sharing">Slides</a></td>
+      <td>Part 6 </td>
+      <td><a href="https://youtu.be/bXmvPZbPkW0">Recording 10.10.2024</a></td>
+      <td><a href="https://docs.google.com/presentation/d/1kVjKar8gVwIyFerqMmgg6y1RRGlWHVC2Xh0oKH_
     </tr>
     <tr>
       <td>Part 7 (2023)</td>
