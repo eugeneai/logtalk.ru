@@ -80,7 +80,7 @@ Please note, that exam dates and similar information in the older recordings may
     </tr>
     <tr>
       <td>Part 6 </td>
-      <td><a href="https://pt.irnok.net/w/87MrHxDA5kWsQhoGVKVZZj">File operations, Recursion</td>
+      <td><a href="https://pt.irnok.net/w/cjzvZPXe7j2GPGbvhQrrdH">File operations, Recursion</td>
       <td><a href="https://youtu.be/bXmvPZbPkW0">Recording 10.10.2024</a></td>
       <td><a href="https://docs.google.com/presentation/d/1kVjKar8gVwIyFerqMmgg6y1RRGlWHVC2Xh0oKH_hjJI/edit?usp=sharing">Slides</a></td>
     </tr>
