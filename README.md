@@ -21,6 +21,15 @@ Requirements: recent Node
 ```sh
 npm ci --legacy-peer-deps
 npm run develop
+npm run build
+```
+
+With ```yarn```, seems better:
+```
+yarn install
+npm ci
+npm run develop
+npm run build
 ```
 
 Content is in the `data` folder.
