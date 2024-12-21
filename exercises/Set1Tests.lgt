@@ -62,7 +62,7 @@
    :- public(print/1).
    print(MaxNum) :-
        forall(between(1,MaxNum, V),
-          (score_(V, 1) -> write('1'); write(0))),
+          (score_(V, 1) -> write('\e[1;31m1\e[0m'); write('\e[1;34m0\e[0m'))),
        nl.
 
 :- end_object.
