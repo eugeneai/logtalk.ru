@@ -3,9 +3,15 @@
     % Минимизируем объем вывода ошибок, ограничимся только самыми важными
     % (ошибки, предупреждения)
     set_logtalk_flag(report, warnings),
+    set_logtalk_flag(events, allow),
+    set_logtalk_flag(debug, on),
+    set_prolog_flag(verbose_load, true),
     % Загрузка библитоек, требуемых приложению; например,
     %%% logtalk_load(basic_types(loader)),
     % Загрузка библиотеки тестирования
+    logtalk_load(tutor(loader)),
+    logtalk_load(tools(loader)),  % debugging, tracing, trace
+    logtalk_load(debugger(loader)),  % debugging
     logtalk_load(lgtunit(loader)),
     % Загрузка файлов основной программы (например, "source.lgt"), при этом разрешаем
     % оценивать покрытие (code coverage), что требует от компилятора работать в режиме
@@ -24,5 +30,6 @@
     logtalk_load('Set1Tests', [hook(lgtunit)]),
     % Теперь осуществляем запуск всех тестов; здесь предполагается, что
     % в файле tests.lgt определен объект "tests".
-    tests::run
+    tests::runexp,
+    tests::print(10)
 )).

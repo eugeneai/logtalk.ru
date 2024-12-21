@@ -5,12 +5,12 @@
 % чтобы проверить, правильно ли вы выпонили задание,
 % запускайте
 %
-% swilgt Set1TestLoader.lgt -q halt
+% swilgt -l Set1TestLoader.lgt -g halt
 %
 % Также можно после проверки задания перейти в командную
 % строку Logtalk (top-level) и позадавать запросы.
 %
-% swilgt Set1TestLoader.lgt
+% swilgt -l Set1TestLoader.lgt
 %
 % Данный набор тестов содержит задачи по темам
 %
@@ -31,10 +31,12 @@
 % к вашим животным.
 
 :- object(first).
-   :- public([dog/1,cat/1]).
+     % :- public([dog/1,cat/1]).
+     :- public([dog/1]).
+     :- public([cat/1]).
 
-   cat(butsy).
-   dog(flash).
+     cat(butsy).
+     dog(flash).
 
 :- end_object.
 
@@ -52,7 +54,8 @@
       extends(first)).
    :- public(animal/1).
 
-   animal(X) :- ::dog(X); ::cat(X).
+   animal(X) :- ::dog(X).
+   animal(X) :- ::cat(X).
 
 :- end_object.
 
@@ -81,13 +84,14 @@
       extends(third)).
    :- public(animal/1).
 
-   animal(X) :- ::dog(X); ::cat(X).
+   animal(X) :- ::dog(X).
+   animal(X) :- ::cat(X).
 
 :- end_object.
 
 % -----------------------------------------------------
 % Упражнение 5: Реализуйте объект fifth, унаслевдовав
-% объекты third и fourth. В новом объекте задайте
+% объект fourth. В новом объекте задайте
 % факт, что star и iron - это лошади (horse).
 % Область видимости horse/1 - объекты-наследники.
 % задайте правило, что и лошади тоже животные.
@@ -97,14 +101,18 @@
 % оператором ^^/1.
 
 :- object(fifth,
-    extends([third,fourth])).
+    extends(fourth)).
     :- protected(horse/1).
 
     horse(star).
+    horse(iron).
     animal(X):- ^^animal(X).
     animal(X):- ::horse(X).
 
-    pet(X):- ::dog(X); ::cat(X).
+    :- public(pet/1).
+
+    % pet(X):- ::dog(X).
+    % pet(X):- ::cat(X).
 :- end_object.
 
 % -----------------------------------------------------
@@ -132,7 +140,7 @@
 % типа sixth.
 % Примечание 1: Для получения всех ответов предиката
 % Можно использовать кострукции с fail или forall/2.
-% Примечание 2: Печать на экран - смотритее описание format/3.
+% Примечание 2: Печать на экран - смотритее описание format/2.
 % Примечание 3: Вызов метода объекта реализуется
 % оператором ::/2. Пример - red_hat::walk_to_forest(F).
 
@@ -140,8 +148,8 @@
    :- public(print/1).
 
    print(World):-
-        forall(World::owner(Owner, Animal)),
-        format("~w:~w\n",[Owner, Animal]).
+        forall(World::owner(Owner, Animal),
+            format("~w:~w\n",[Owner, Animal])).
 
 :- end_object.
 
@@ -219,13 +227,13 @@
    fact(N, M):-
            N1 is N-1,
            fact(N1, M1), !,
-           M is M * N.
+           M is M1 * N.
 
    sqr(A, B):- B is A*A.
 
    :- public(exp/3).
-   exp(X, 0, 0.0):-!.
-   exp(X, 1, 1):-!.
+   exp(_X, 0, 0.0):-!.
+   exp(_X, 1, 1):-!.
    exp(X, N, Y):-
            N>1,!,
            N1 is N-1,
@@ -256,13 +264,13 @@
        eval(A, f), !.
    eval(and(_, B), f):-
        eval(B, f), !.
-   eval(and(_, _, t)):-!.
+   eval(and(_, _), t):-!.
 
    eval(or(A, _), t):-
        eval(A, t), !.
    eval(or(_, B), t):-
        eval(B, t), !.
-   eval(or(_, _, f)):-!.
+   eval(or(_, _), f):-!.
 
    eval(not(A), f):-
        eval(A, t), !.
