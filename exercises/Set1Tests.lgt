@@ -80,7 +80,7 @@
        current_object(_O_).
 
    explain(object_not_defined,
-        "Вы не создали объект:\n:- create_object(~w).\n % . . . \n:- end_object.",
+        "Вы не создали объект:\n:- create_object(~w,...).\n % . . . \n:- end_object.",
         [_O_]):- \+ current_object(_O_).
 
 :- end_object.
@@ -189,10 +189,10 @@
    :- protected(check_list/1).
    check_list([]).
    check_list([H|T]):-
-      test_prop(H), !,
+      ::test_prop(H), !,
       check_list(T).
 
-   succeeds(all_animals) :- ok.
+   succeeds(all_objects_have_property) :- ok.
    ok:-
       check_list(_Animals_).
 
@@ -219,8 +219,53 @@
       [_O_, X, _O_]) :-
         fourth::animal(X), \+ _O_::animal(X).
 
-%   explain(A,B,C) :-
-%      ^^explain(A,B,C).
+:- end_object.
+
+:- object(test_pet_call(_O_, _Animals_),
+   extends(test_animals_call(_O_, _Animals_))).
+
+   :- use_module(lists, [member/2]).
+   explain(is_pet(Animal),
+      "В объекте '~w' не известно, что '~w' - это домашнее животное (pet/1). \nПроверьте наличие деклараци правила pet/1 в объекте '~w'",
+      [_O_, Animal, _O_]) :-
+          member(Animal, _Animals_),
+          \+ _O_::pet(Animal).
+
+   test_prop(Animal) :- _O_::pet(Animal).
+
+:- end_object.
+
+
+:- object(test_owners(_O_),
+   extends(lgtunit),
+   imports(explainc)).
+
+   :- use_module(lists, [list_to_set/2, subtract/3]).
+   succeeds(kate_owns_all_pets) :- ok(kate, [butsy, flash]).
+   succeeds(bob_owns_star) :- ok(bob, [star]).
+
+   :- protected(ok/2).
+   ok(kate, Animals):-
+      findall(X, (_O_::pet(X), _O_::owner(kate, X)), L),
+      list_to_set(L, S1),
+      list_to_set(Animals, S2),
+      subtract(S2, S1, []).
+
+   ok(bob, [X]):-
+      _O_::owner(bob, X).
+
+   ok:-
+      ok(kate, [butsy, flash]),
+      ok(bob, [star]).
+
+   explain(kate_must_own(Animal),
+      "В объекте '~w' Kate (kate) должна владеть '~w'. Задано ли правило, что kate владеет всеми домашними животными? ",[_O_, Animal]) :-
+      _O_::pet(Animal), \+ _O_::owner(kate, Animal).
+
+   explain(bob_owns_star(star),
+      "В объекте '~w' Bob (bob) должен владеть '~w'. Задано ли правило, что bob владеет лошадью 'star'? ",
+      [_O_, star]) :- \+ _O_::owner(bob, star).
+
 
 :- end_object.
 
@@ -285,8 +330,21 @@
               test_predicates_defined(O, Predicates)
          , (test_predicates_defined(O, Predicates)::predicates_defined) -
               test_animals_call_fifth(O, [butsy, flash, star, iron])
-         , (test_animals_call_fifth(O, [butsy, flash, star, iron])::ok) - stub_tests
+         , (test_animals_call_fifth(O, [butsy, flash, star, iron])::ok) - test_pet_call(O, [butsy, flash])
+         , (test_pet_call(O, [butsy, flash])::ok) - stub_tests
          , (::score(5, 1)) - stub_tests
        ]).
 
+   succeeds(6-sixth_owners) :-
+       Predicates = [owner/2 - public],
+       O = sixth,
+       ::runexp([
+           test_object(O)
+         , (test_extending(O, fifth)::ok) -
+              test_predicates_defined(O, Predicates)
+         , (test_predicates_defined(O, Predicates)::predicates_defined) -
+              test_owners(O)
+         , (test_owners(O)::ok) - stub_tests
+         , (::score(6, 1)) - stub_tests
+       ]).
 :- end_object.
