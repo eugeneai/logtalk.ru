@@ -5,12 +5,12 @@
 % чтобы проверить, правильно ли вы выпонили задание,
 % запускайте
 %
-% swilgt Set1Test.lgt -q halt
+% swilgt Set1TestLoader.lgt -q halt
 %
 % Также можно после проверки задания перейти в командную
 % строку Logtalk (top-level) и позадавать запросы.
 %
-% swilgt Set1Test.lgt
+% swilgt Set1TestLoader.lgt
 %
 % Данный набор тестов содержит задачи по темам
 %
@@ -160,7 +160,7 @@
 % (и/или композицию), можно использовать объекты-протоколы.
 %
 % Пример использования:
-% ?- dog_object::say_something.
+% | ?- dog_object::say_something.
 % wow!!!
 % true
 
