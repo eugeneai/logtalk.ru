@@ -61,8 +61,16 @@
 
    :- public(print/1).
    print(MaxNum) :-
+       nl,
        forall(between(1,MaxNum, V),
-          (score_(V, 1) -> write('\e[1;31m1\e[0m'); write('\e[1;34m0\e[0m'))),
+          (N is V div 10,
+             (N == 0 -> write(' ') ; write(N)))),
+       nl,
+       forall(between(1,MaxNum, V),
+          (N is V mod 10, write(N))),
+       nl,
+       forall(between(1,MaxNum, V),
+          (score_(V, 1) -> write('\e[1;32m1\e[0m'); write('\e[1;31m0\e[0m'))),
        nl.
 
 :- end_object.
