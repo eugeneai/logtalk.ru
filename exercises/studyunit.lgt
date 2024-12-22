@@ -113,7 +113,7 @@
    :- public(print/0).
    :- mode(print, zero_or_one).
    :- info(print/0, [
-        comment is "Print scores as 1's and 0's colored.",
+        comment is "Print scores as 1's and 0's colored green and red.",
         argnames is []
       ]).
    print :-
@@ -123,7 +123,7 @@
 
 :- object(stub_tests,
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 :- end_object.
 
 :- category(test_object_c(_O_)).
@@ -142,7 +142,7 @@
    succeeds(predicates_defined_test) :-
        ::predicates_defined.
 
-   :- use_module(lists, [member/2]).
+   :- use_module(library(lists), [member/2]).
    :- public(predicates_defined/0).
    predicates_defined:-
        check(_Predicates_).
