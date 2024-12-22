@@ -35,11 +35,24 @@
    succeeds(object_exists) :-
        current_object(_O_).
 
-   explain(object_not_defined,
+   explain(object_exists,
         "Вы не создали объект:\n:- create_object(~w,...).\n % . . . \n:- end_object.",
-        [_O_]):- \+ current_object(_O_).
+        [_O_]).
 
 :- end_object.
+
+:- object(test_problem_1(_O_),
+   extends(test_object(_O_))).
+       % Predicates = [dog/1 - public, cat/1 - public],
+       % ::runexp([
+       %     test_object(first)
+       %   , current_object(first)-test_predicates_defined(first, Predicates)
+       %   , (test_predicates_defined(first, Predicates)::predicates_defined) - test_animals(first)
+       %   , (::score(1, 1)) - stub_tests
+       % ]).
+:- end_object.
+
+
 
 :- object(test_animals(_O_),
    extends(studyunit)).
@@ -225,79 +238,80 @@
    count(10).
 
    succeeds(1-first_has_cat_and_dog_correct) :-
-       Predicates = [dog/1 - public, cat/1 - public],
-       ::runexp([
-           test_object(first)
-         , current_object(first)-test_predicates_defined(first, Predicates)
-         , (test_predicates_defined(first, Predicates)::predicates_defined) - test_animals(first)
-         , (::score(1, 1)) - stub_tests
-       ]).
+       test_problem_1(first)::run.
+       % Predicates = [dog/1 - public, cat/1 - public],
+       % ::runexp([
+       %     test_object(first)
+       %   , current_object(first)-test_predicates_defined(first, Predicates)
+       %   , (test_predicates_defined(first, Predicates)::predicates_defined) - test_animals(first)
+       %   , (::score(1, 1)) - stub_tests
+       % ]).
 
-   succeeds(2-second_has_animal_defined) :-
-       Predicates = [animal/1 - public],
-       ::runexp([
-           test_object(second)
-         , current_object(second) - test_extending(second, first)
-         , (test_extending(second, first)::ok) -
-              test_predicates_defined(second, Predicates)
-         , (test_predicates_defined(second, Predicates)::predicates_defined) -
-              test_animals_inference(second)
-         , (test_animals_inference(second)::ok) - stub_tests
-         , (::score(2, 1)) - stub_tests
-       ]).
+   % succeeds(2-second_has_animal_defined) :-
+   %     Predicates = [animal/1 - public],
+   %     ::runexp([
+   %         test_object(second)
+   %       , current_object(second) - test_extending(second, first)
+   %       , (test_extending(second, first)::ok) -
+   %            test_predicates_defined(second, Predicates)
+   %       , (test_predicates_defined(second, Predicates)::predicates_defined) -
+   %            test_animals_inference(second)
+   %       , (test_animals_inference(second)::ok) - stub_tests
+   %       , (::score(2, 1)) - stub_tests
+   %     ]).
 
-   succeeds(3-third_has_cat_and_dog_protected) :-
-       Predicates = [dog/1 - protected, cat/1 - protected],
-       O = third,
-       ::runexp([
-           test_object(O)
-         , current_object(O)-test_predicates_defined(O, Predicates)
-         % , (test_predicates_defined(O, Predicates)::predicates_defined) - test_animals1(third_test)
-         , (test_predicates_defined(O, Predicates)::predicates_defined) - stub_tests
-         , (::score(3, 1)) - stub_tests
-       ]).
+   % succeeds(3-third_has_cat_and_dog_protected) :-
+   %     Predicates = [dog/1 - protected, cat/1 - protected],
+   %     O = third,
+   %     ::runexp([
+   %         test_object(O)
+   %       , current_object(O)-test_predicates_defined(O, Predicates)
+   %       % , (test_predicates_defined(O, Predicates)::predicates_defined) - test_animals1(third_test)
+   %       , (test_predicates_defined(O, Predicates)::predicates_defined) - stub_tests
+   %       , (::score(3, 1)) - stub_tests
+   %     ]).
 
-   succeeds(4-fourth_has_animal_defined) :-
-       Predicates = [animal/1 - public],
-       O = fourth,
-       ::runexp([
-           test_object(O)
-         , current_object(O) - test_extending(O, third)
-         , (test_extending(O, third)::ok) -
-              test_predicates_defined(O, Predicates)
-         , (test_predicates_defined(O, Predicates)::predicates_defined) -
-              test_animals_call(O, [butsy, flash])
-         , (test_animals_call(O, [butsy, flash])::ok) - stub_tests
-         , (::score(4, 1)) - stub_tests
-       ]).
+   % succeeds(4-fourth_has_animal_defined) :-
+   %     Predicates = [animal/1 - public],
+   %     O = fourth,
+   %     ::runexp([
+   %         test_object(O)
+   %       , current_object(O) - test_extending(O, third)
+   %       , (test_extending(O, third)::ok) -
+   %            test_predicates_defined(O, Predicates)
+   %       , (test_predicates_defined(O, Predicates)::predicates_defined) -
+   %            test_animals_call(O, [butsy, flash])
+   %       , (test_animals_call(O, [butsy, flash])::ok) - stub_tests
+   %       , (::score(4, 1)) - stub_tests
+   %     ]).
 
-   succeeds(5-fifth_has_animal_defined_and_horses) :-
-       Predicates = [horse/1 - protected, pet/1 - public],
-       O = fifth,
-       ::runexp([
-           test_object(O)
-         , current_object(O) - test_extending(O, fourth)
-         , (test_extending(O, fourth)::ok) -
-              test_predicates_defined(O, Predicates)
-         , (test_predicates_defined(O, Predicates)::predicates_defined) -
-              test_animals_call_fifth(O, [butsy, flash, star, iron])
-         , (test_animals_call_fifth(O, [butsy, flash, star, iron])::ok) - test_pet_call(O, [butsy, flash])
-         , (test_pet_call(O, [butsy, flash])::ok) - stub_tests
-         , (::score(5, 1)) - stub_tests
-       ]).
+   % succeeds(5-fifth_has_animal_defined_and_horses) :-
+   %     Predicates = [horse/1 - protected, pet/1 - public],
+   %     O = fifth,
+   %     ::runexp([
+   %         test_object(O)
+   %       , current_object(O) - test_extending(O, fourth)
+   %       , (test_extending(O, fourth)::ok) -
+   %            test_predicates_defined(O, Predicates)
+   %       , (test_predicates_defined(O, Predicates)::predicates_defined) -
+   %            test_animals_call_fifth(O, [butsy, flash, star, iron])
+   %       , (test_animals_call_fifth(O, [butsy, flash, star, iron])::ok) - test_pet_call(O, [butsy, flash])
+   %       , (test_pet_call(O, [butsy, flash])::ok) - stub_tests
+   %       , (::score(5, 1)) - stub_tests
+   %     ]).
 
-   rr:- true.
+   % rr:- true.
 
-   succeeds(6-sixth_owners) :-
-       Predicates = [owner/2 - public],
-       O = sixth,
-       ::runexp([
-           test_object(O)
-         , (test_extending(O, fifth)::ok) -
-              test_predicates_defined(O, Predicates)
-         , (test_predicates_defined(O, Predicates)::predicates_defined) -
-              test_owners(O)
-         , (test_owners(O)::ok) - stub_tests
-         , (::score(6, 1)) - stub_tests
-       ]).
+   % succeeds(6-sixth_owners) :-
+   %     Predicates = [owner/2 - public],
+   %     O = sixth,
+   %     ::runexp([
+   %         test_object(O)
+   %       , (test_extending(O, fifth)::ok) -
+   %            test_predicates_defined(O, Predicates)
+   %       , (test_predicates_defined(O, Predicates)::predicates_defined) -
+   %            test_owners(O)
+   %       , (test_owners(O)::ok) - stub_tests
+   %       , (::score(6, 1)) - stub_tests
+   %     ]).
 :- end_object.

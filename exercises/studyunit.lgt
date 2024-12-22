@@ -131,6 +131,25 @@
       ::count(N),!,
       ::print(N).
 
+   :- public(depends/1).
+   :- mode(depends(+list(+atom)), one).
+   :- info(depends/1, [
+        comment is "Run this thest if dependant are successful.",
+        argnames is ['List_of_test_objects']
+      ]).
+   depends([]).
+
+   condition:-
+      depends(L),
+      check_depends(L).
+
+   check_depends([]).
+   check_depends([H|T]):-
+      \+ H::condition,
+      \+ H::has_failed_tests, !,
+      check_depends(T).
+
+
    :- private(test_state/3).
    :- dynamic(test_state/3).
    :- protected(clear_test_state/0).

@@ -42,6 +42,6 @@
     logtalk_load('Set1Tests', [hook(lgtunit)]),
     % Теперь осуществляем запуск всех тестов; здесь предполагается, что
     % в файле tests.lgt определен объект "tests".
-    tests::runexp,
+    tests::run,
     tests::print
 )).
