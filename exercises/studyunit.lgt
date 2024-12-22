@@ -69,6 +69,15 @@
         argnames is ['Number']
       ]).
 
+   :- public(name/1).
+   :- mode(name(?atom), one).
+   :- info(name/1, [
+        comment is "Name of test object assuming one object is devoted to one student problem.",
+        argnames is ['Name']
+      ]).
+
+   name(Name) :-
+      self(Name),!.
 
    :- protected(score/2).
    :- mode(score(?integer, ?integer), zero_or_more).
@@ -119,6 +128,48 @@
    print :-
       ::count(N),!,
       ::print(N).
+
+   :- private(test_state/3).
+   :- dynamic(test_state/3).
+   :- protected(clear_test_state/0).
+   clear_test_state:-
+      retractall(test_state(_,_,_)).
+
+   :- public(test_passed/2).
+   :- mode(test_passed(+atom,+list(+atom)), one).
+   :- info(test_passed/2, [
+        comment is "Message received about test have passed from ourselves via print_message/3.",
+        argnames is ['Test', 'Options']
+      ]).
+   test_passed(Test, Options):-
+      assertz(test_state(pass, Test, Options)).
+
+   :- public(test_failed/2).
+   :- mode(test_failed(+atom,+list(+atom)), one).
+   :- info(test_failed/2, [
+        comment is "Message received about test have been failed from ourselves via print_message/3.",
+        argnames is ['Test', 'Options']
+      ]).
+   test_failed(Test, Options):-
+      assertz(test_state(fail, Test, Options)).
+
+   :- public(has_failed_tests/0).
+   has_failed_tests :-
+      test_state(fail, _, _).
+
+   :- uses(logtalk, [
+      print_message(error, studyunit, Message) as err(Message)
+   ]).
+
+   run :-
+      ::clear_scores,
+      ::clear_test_state,
+      ^^run,
+      (::has_failed_tests ->
+         self(Self),
+         ::name(Name),
+         err('Найдены неудавшиеся тесты для \'~w\' втест-объекте \'~w\', .'+[Self, Name]) ; true).
+
 :- end_object.
 
 :- object(stub_tests,

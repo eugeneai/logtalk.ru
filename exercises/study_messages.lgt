@@ -118,13 +118,17 @@
 		message_tokens(tests_runtime(_Object, CPUTime, WallTime)) -->
 			['время исполенния: ~9f/~9f ЦП/всего секунд'-[CPUTime, WallTime], nl].
 
-		message_tokens(passed_test(_Object, Test, _File, _Position, Note, CPUTime, WallTime)) -->
+		message_tokens(passed_test(Object, Test, File, Position, Note, CPUTime, WallTime)) -->
+            {Object::test_passed(Test, [file(File), position(Position),
+                                        note(Note), cpu(CPUTime), wall(WallTime)]) ; true},
 			(	{Note == ''} ->
 				['~q: успешно (in ~9f/~9f  ЦП/всего секунд)'-[Test, CPUTime, WallTime], nl]
 			;	['~q: успешно (~w) (за ~9f/~9f  ЦП/всего секунд)'-[Test, Note, CPUTime, WallTime], nl]
 			).
 
-		message_tokens(failed_test(_Object, Test, File, Position, Reason, Flaky, Note, CPUTime, WallTime)) -->
+		message_tokens(failed_test(Object, Test, File, Position, Reason, Flaky, Note, CPUTime, WallTime)) -->
+            {Object::test_failed(Test, [file(File), position(Position), reason(Reason), flaky(Flaky),
+                                        note(Note), cpu(CPUTime), wall(WallTime)]) ; true},
 			(	{Note == ''} ->
 				['~q: неуспех'-[Test]], flaky(Flaky), ['(за ~9f/~9f ЦП/всего секунд)'-[CPUTime, WallTime], nl]
 			;	['~q: неуспех (~w)'-[Test, Note]], flaky(Flaky), ['(за ~9f/~9f ЦП/всего секунд)'-[CPUTime, WallTime], nl]
@@ -138,13 +142,17 @@
 		message_tokens(tests_runtime(_Object, CPUTime, WallTime)) -->
 			['время тсполнения: ~w/~w секунд'-[CPUTime, WallTime], nl].
 
-		message_tokens(passed_test(_Object, Test, _File, _Position, Note, CPUTime, WallTime)) -->
+		message_tokens(passed_test(Object, Test, _File, Position, Note, CPUTime, WallTime)) -->
+            {Object::test_passed(Test, [file(File), position(Position),
+                                        note(Note), cpu(CPUTime), wall(WallTime)]) ; true},
 			(	{Note == ''} ->
 				['~q: успех (in ~w/~w ЦП/всего секунд)'-[Test, CPUTime, WallTime], nl]
 			;	['~q: успех (~w) (in ~w/~w ЦП/всего секунд)'-[Test, Note, CPUTime, WallTime], nl]
 			).
 
-		message_tokens(failed_test(_Object, Test, File, Position, Reason, Flaky, Note, CPUTime, WallTime)) -->
+		message_tokens(failed_test(Object, Test, File, Position, Reason, Flaky, Note, CPUTime, WallTime)) -->
+            {Object::test_failed(Test, [file(File), position(Position), reason(Reason), flaky(Flaky),
+                                        note(Note), cpu(CPUTime), wall(WallTime)]) ; true},
 			(	{Note == ''} ->
 				['~q: неуспех'-[Test]], flaky(Flaky), ['(за ~w/~w ЦП/всего секунд)'-[CPUTime, WallTime], nl]
 			;	['~q: неуспех (~w)'-[Test, Note]], flaky(Flaky), ['(за ~w/~w ЦП/всего секунд)'-[CPUTime, WallTime], nl]
