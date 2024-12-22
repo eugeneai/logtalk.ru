@@ -343,7 +343,9 @@
          , (::score(5, 1)) - stub_tests
        ]).
 
-   succeeds(6-sixth_owners) :-
+   rr:- true.
+
+   test(6-sixth_owners, true, [note(bar(seconds-Time))]) :-
        Predicates = [owner/2 - public],
        O = sixth,
        ::runexp([
