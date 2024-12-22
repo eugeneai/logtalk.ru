@@ -169,10 +169,12 @@
          (explain(Name, Msg, Arguments) ->
            (
               format(atom(S), Msg, Arguments),
-              err('~w!'+[A])
+              err('~w!'+[S])
            ); true)).
 
    :- public(explain/3).
+   % Default explain
+   explain(Test, 'Тест \'~w\' не сработал.', [Test]).
 
    run :-
       ::clear_scores,

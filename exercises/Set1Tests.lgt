@@ -1,7 +1,7 @@
 
 
 :- object(note_lgtunit,
-   extends(lgtunit)).
+   extends(studyunit)).
 
    :- protected(score/2).
    score(Num, V) :-
@@ -29,13 +29,8 @@
 
 :- end_object.
 
-:- object(stub_tests,
-   extends(lgtunit),
-   imports(explain_c)).
-:- end_object.
-
 :- object(test_object(_O_),
-   extends(lgtunit),
+   extends(studyunit),
    imports(explain_c)).
 
    succeeds(object_exists) :-
@@ -48,7 +43,7 @@
 :- end_object.
 
 :- object(test_animals(_O_),
-   extends(lgtunit),
+   extends(studyunit),
    imports(explain_c)).
 
    succeeds(butsy_is_a_cat) :- _O_::cat(butsy).
@@ -73,7 +68,7 @@
 :- end_object.
 
 :- object(test_predicates_defined(_O_, _Predicates_),
-   extends(lgtunit),
+   extends(studyunit),
    imports(explain_c)).
 
    succeeds(predicates_defined_test) :-
@@ -105,7 +100,7 @@
 :- end_object.
 
 :- object(test_extending(_O_, _Parent_),
-   extends(lgtunit),
+   extends(studyunit),
    imports(explain_c)).
 
    ok :-
@@ -121,7 +116,7 @@
 :- end_object.
 
 :- object(test_animals_inference(_O_),
-   extends(lgtunit),
+   extends(studyunit),
    imports(explain_c)).
 
    succeeds(x_is_a_cat_and_animal) :- _O_::cat(X), _O_::animal(X).
@@ -140,7 +135,7 @@
 :- end_object.
 
 :- object(test_animals_call(_O_, _Animals_),
-   extends(lgtunit),
+   extends(studyunit),
    imports(explain_c)).
 
    :- use_module(lists, [member/2]).
@@ -199,7 +194,7 @@
 
 
 :- object(test_owners(_O_),
-   extends(lgtunit),
+   extends(studyunit),
    imports(explain_c)).
 
    :- use_module(lists, [list_to_set/2, subtract/3]).
@@ -301,7 +296,7 @@
 
    rr:- true.
 
-   test(6-sixth_owners, true, [note(bar(seconds-Time))]) :-
+   succeeds(6-sixth_owners) :-
        Predicates = [owner/2 - public],
        O = sixth,
        ::runexp([

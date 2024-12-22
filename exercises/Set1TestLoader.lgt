@@ -9,10 +9,21 @@
     % Загрузка библитоек, требуемых приложению; например,
     %%% logtalk_load(basic_types(loader)),
     % Загрузка библиотеки тестирования
+    % logtalk_load(lgtunit(loader)),
+	logtalk_load(basic_types(loader)),
+	logtalk_load(os(loader)),
+	logtalk_load(arbitrary(loader)),
+	% define a flag to allow the logtalk_tester script to pass the
+	% option to suppress the test file and directory path prefix
+	create_logtalk_flag(suppress_path_prefix, '', [type(atom), keep(true)]),
+	logtalk_load([
+                  lgtunit(lgtunit),
+                  %lgtunit(lgtunit_messages),
+                  'study_messages'],
+         [optimize(on)]),
     logtalk_load(tutor(loader)),
     logtalk_load(tools(loader)),  % debugging, tracing, trace
     logtalk_load(debugger(loader)),  % debugging
-    logtalk_load(lgtunit(loader)),
     logtalk_load('studyunit', [source_data(on), debug(on)]),  % Библиотека средств тестирования
     % Загрузка файлов основной программы (например, "source.lgt"), при этом разрешаем
     % оценивать покрытие (code coverage), что требует от компилятора работать в режиме
