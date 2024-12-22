@@ -1,49 +1,49 @@
 
-:- category(explain_c).
-   :- protected(explain/2).
-   :- meta_predicate(explain(0, 0)).
-   explain(Test, Expl) :-
-      (
-        call(Test) -> true;
-        (call(Expl) -> true; true)
-      ).
-   :- public(explain/0).
-   % :- uses([dbg/1]).
-   :- uses(logtalk, [
-      print_message(error, test_suite, Message) as err(Message)
-   ]).
-   explain :-
-      forall(
-          ::explain(Name, Str, Args),
-          ( format(atom(A), Str, Args),
-            err('~w: ~w'+[Name, A]) ) ).
-   :- protected(explain/3).
-   :- public(runexp/0).
-   runexp :-
-     ::run, explain.
+% :- category(explain_c).
+%    :- protected(explain/2).
+%    :- meta_predicate(explain(0, 0)).
+%    explain(Test, Expl) :-
+%       (
+%         call(Test) -> true;
+%         (call(Expl) -> true; true)
+%       ).
+%    :- public(explain/0).
+%    % :- uses([dbg/1]).
+%    :- uses(logtalk, [
+%       print_message(error, test_suite, Message) as err(Message)
+%    ]).
+%    explain :-
+%       forall(
+%           ::explain(Name, Str, Args),
+%           ( format(atom(A), Str, Args),
+%             err('~w: ~w'+[Name, A]) ) ).
+%    :- protected(explain/3).
+%    :- public(runexp/0).
+%    runexp :-
+%      ::run, explain.
 
-   :- private(runexp/2).
-   :- meta_predicate(runexp(0,*)).
-   runexp(Cond, TestSuite) :-
-     call(Cond), !,
-     TestSuite::runexp.
+%    :- private(runexp/2).
+%    :- meta_predicate(runexp(0,*)).
+%    runexp(Cond, TestSuite) :-
+%      call(Cond), !,
+%      TestSuite::runexp.
 
-   :- private(runexp1/1).
-   runexp1(Cond-Body):-!,
-     runexp(Cond,Body).
+%    :- private(runexp1/1).
+%    runexp1(Cond-Body):-!,
+%      runexp(Cond,Body).
 
-   runexp1(Body):-!,
-     runexp(true,Body).
+%    runexp1(Body):-!,
+%      runexp(true,Body).
 
-   :- public(runexp/1).
-   runexp([]).
-   runexp([H|T]):-
-     runexp1(H) -> runexp(T);
-     true.
+%    :- public(runexp/1).
+%    runexp([]).
+%    runexp([H|T]):-
+%      runexp1(H) -> runexp(T);
+%      true.
 
-   :- public(ok/0).
+%    :- public(ok/0).
 
-:- end_category.
+% :- end_category.
 
 :- object(studyunit,
    extends(lgtunit)).
@@ -189,8 +189,7 @@
 :- end_object.
 
 :- object(stub_tests,
-   extends(lgtunit),
-   imports(explain_c)).
+   extends(studyunit)).
 :- end_object.
 
 :- category(test_object_c(_O_)).

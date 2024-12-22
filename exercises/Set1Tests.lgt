@@ -30,8 +30,7 @@
 :- end_object.
 
 :- object(test_object(_O_),
-   extends(studyunit),
-   imports(explain_c)).
+   extends(studyunit)).
 
    succeeds(object_exists) :-
        current_object(_O_).
@@ -43,8 +42,7 @@
 :- end_object.
 
 :- object(test_animals(_O_),
-   extends(studyunit),
-   imports(explain_c)).
+   extends(studyunit)).
 
    succeeds(butsy_is_a_cat) :- _O_::cat(butsy).
    succeeds(flash_is_a_dog) :- _O_::dog(flash).
@@ -68,8 +66,7 @@
 :- end_object.
 
 :- object(test_predicates_defined(_O_, _Predicates_),
-   extends(studyunit),
-   imports(explain_c)).
+   extends(studyunit)).
 
    succeeds(predicates_defined_test) :-
        ::predicates_defined.
@@ -100,8 +97,7 @@
 :- end_object.
 
 :- object(test_extending(_O_, _Parent_),
-   extends(studyunit),
-   imports(explain_c)).
+   extends(studyunit)).
 
    ok :-
       extends_object(_O_, _Parent_).
@@ -116,8 +112,7 @@
 :- end_object.
 
 :- object(test_animals_inference(_O_),
-   extends(studyunit),
-   imports(explain_c)).
+   extends(studyunit)).
 
    succeeds(x_is_a_cat_and_animal) :- _O_::cat(X), _O_::animal(X).
    succeeds(x_is_a_dog_and_animal) :- _O_::dog(X), _O_::animal(X).
@@ -135,8 +130,7 @@
 :- end_object.
 
 :- object(test_animals_call(_O_, _Animals_),
-   extends(studyunit),
-   imports(explain_c)).
+   extends(studyunit)).
 
    :- use_module(lists, [member/2]).
 
@@ -194,8 +188,7 @@
 
 
 :- object(test_owners(_O_),
-   extends(studyunit),
-   imports(explain_c)).
+   extends(studyunit)).
 
    :- use_module(lists, [list_to_set/2, subtract/3]).
    succeeds(kate_owns_all_pets) :- ok(kate, [butsy, flash]).
@@ -227,8 +220,7 @@
 :- end_object.
 
 :- object(tests,
-   extends(studyunit),
-   imports([explain_c])).
+   extends(studyunit)).
 
    count(10).
 
