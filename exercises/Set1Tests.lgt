@@ -29,30 +29,17 @@
 
 :- end_object.
 
-:- object(test_object(_O_),
+:- object(test_problem_1(_O_),
    extends(studyunit)).
 
-   succeeds(object_exists) :-
-       current_object(_O_).
-
-   explain(object_exists,
-        "Вы не создали объект:\n:- create_object(~w,...).\n % . . . \n:- end_object.",
-        [_O_]).
-
-:- end_object.
-
-:- object(test_problem_1(_O_),
-   extends(test_object(_O_))).
        % Predicates = [dog/1 - public, cat/1 - public],
        % ::runexp([
        %     test_object(first)
-       %   , current_object(first)-test_predicates_defined(first, Predicates)
+       %   , current_object(first)-
        %   , (test_predicates_defined(first, Predicates)::predicates_defined) - test_animals(first)
        %   , (::score(1, 1)) - stub_tests
        % ]).
 :- end_object.
-
-
 
 :- object(test_animals(_O_),
    extends(studyunit)).
@@ -75,37 +62,6 @@
    explain(not_a_dog,
        "В объекте '~w' нет ни одной собаки (dog/1)",
        [_O_]):- \+ _O_::dog(_).
-
-:- end_object.
-
-:- object(test_predicates_defined(_O_, _Predicates_),
-   extends(studyunit)).
-
-   succeeds(predicates_defined_test) :-
-       ::predicates_defined.
-
-   % :- uses(logtalk, [
-   %    object_property(_O_, Property) as has_prop(Property)
-   % ]).
-   :- use_module(lists, [member/2]).
-   :- public(predicates_defined/0).
-   predicates_defined:-
-       check(_Predicates_).
-
-   check([]).
-   check([Pred - Scope|T]) :-
-      check(Pred, Scope), !,
-      check(T).
-
-   check(Pred, Scope) :-
-      object_property(_O_, declares(Pred, Props)),
-      member(Scope, Props).
-
-   explain(should_have_predicate(Pred),
-      "В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w([~w,...]).",
-      [_O_, Scope, Pred, Scope, Pred]) :-
-          member(Pred - Scope, _Predicates_),
-          \+ check(Pred, Scope).
 
 :- end_object.
 

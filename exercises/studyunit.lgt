@@ -81,6 +81,19 @@
    name(Name) :-
       self(Name),!.
 
+   :- protected(score/1).
+   :- mode(score(?integer), zero_or_one).
+   :- info(score/1, [
+        comment is "Set score for the study case. If unset means 0",
+        argnames is ['Number']
+      ]).
+
+   score(V) :-
+       retractall(score_(_)),
+       assertz(score_(V)).
+
+   :- dynamic(score_/1).
+
    :- protected(score/2).
    :- mode(score(?integer, ?integer), zero_or_more).
    :- info(score/2, [
@@ -93,6 +106,7 @@
        assertz(score_(Num, V)).
 
    :- dynamic(score_/2).
+
    :- protected(clear_scores/0).
    :- mode(clear_scores, one).
    :- info(clear_scores/0, [
@@ -100,7 +114,8 @@
         argnames is []
       ]).
    clear_scores:-
-       retractall(score_(_,_)).
+       retractall(score_(_,_)),
+       retractall(score_(_)).
 
    :- public(print/1).
    :- mode(print(+integer), one).
@@ -185,7 +200,7 @@
    :- public(explain/0).
    explain:-
       forall(::test_state(fail, Name, _),
-         (explain(Name, Msg, Arguments) ->
+         (::explain(Name, Msg, Arguments) ->
            (
               format(atom(S), Msg, Arguments),
               err('~w!'+[S])
@@ -193,17 +208,20 @@
 
    :- public(explain/3).
    % Default explain
-   explain(Test, 'Тест \'~w\' не сработал.', [Test]).
+   % explain(Test, 'Тест \'~w\' не сработал.', [Test]).
 
    run :-
       ::clear_scores,
       ::clear_test_state,
       ^^run,
       (::has_failed_tests ->
+         % debugger::trace,
          self(Self),
          ::name(Name),
+         ::explain,
          err('Найдены неудавшиеся тесты для тест-задания \'~w\' втест-объекте \'~w\', .'+[Name, Self]),
-         ::explain ; true).
+         ::score(0)
+         ; ::score(1)).
 
 :- end_object.
 
@@ -211,18 +229,21 @@
    extends(studyunit)).
 :- end_object.
 
-:- category(test_object_c(_O_)).
+
+:- object(test_object(_O_),
+   extends(studyunit)).
 
    succeeds(object_exists) :-
        current_object(_O_).
 
-   explain(not(object_exists(_O_)),
+   explain(object_exists,
         "Вы не создали объект:\n:- create_object(~w,...).\n % . . . \n:- end_object.",
-        [_O_]):- \+ current_object(_O_).
+        [_O_]).
 
-:- end_category.
+:- end_object.
 
-:- category(test_predicates_defined_c(_O_, _Predicates_)).
+:- object(test_predicates_defined(_O_, _Predicates_),
+   extends(studyunit)).
 
    succeeds(predicates_defined_test) :-
        ::predicates_defined.
@@ -241,13 +262,12 @@
       object_property(_O_, declares(Pred, Props)),
       member(Scope, Props).
 
-   explain(not(predicate_defined(_O_, Pred)),
+   explain(predicates_defined_test,
       "В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w([~w,...]).",
       [_O_, Scope, Pred, Scope, Pred]) :-
           member(Pred - Scope, _Predicates_),
           \+ check(Pred, Scope).
-
-:- end_category.
+:- end_object.
 
 :- category(test_extending_c(_O_, _Parent_)).
 
