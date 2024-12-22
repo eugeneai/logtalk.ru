@@ -77,6 +77,8 @@
       ]).
 
    name(Name) :-
+      ::number(Name),!.
+   name(Name) :-
       self(Name),!.
 
    :- protected(score/2).
@@ -161,6 +163,17 @@
       print_message(error, studyunit, Message) as err(Message)
    ]).
 
+   :- public(explain/0).
+   explain:-
+      forall(::test_state(fail, Name, _),
+         (explain(Name, Msg, Arguments) ->
+           (
+              format(atom(S), Msg, Arguments),
+              err('~w!'+[A])
+           ); true)).
+
+   :- public(explain/3).
+
    run :-
       ::clear_scores,
       ::clear_test_state,
@@ -168,7 +181,8 @@
       (::has_failed_tests ->
          self(Self),
          ::name(Name),
-         err('Найдены неудавшиеся тесты для \'~w\' втест-объекте \'~w\', .'+[Self, Name]) ; true).
+         err('Найдены неудавшиеся тесты для тест-задания \'~w\' втест-объекте \'~w\', .'+[Name, Self]),
+         ::explain ; true).
 
 :- end_object.
 
