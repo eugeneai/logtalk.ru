@@ -13,6 +13,7 @@
     logtalk_load(tools(loader)),  % debugging, tracing, trace
     logtalk_load(debugger(loader)),  % debugging
     logtalk_load(lgtunit(loader)),
+    logtalk_load('studyunit', [source_data(on), debug(on)]),  % Библиотека средств тестирования
     % Загрузка файлов основной программы (например, "source.lgt"), при этом разрешаем
     % оценивать покрытие (code coverage), что требует от компилятора работать в режиме
     % поддержки отладки (debug mode) и сбора данных об исходном коде;
@@ -31,5 +32,5 @@
     % Теперь осуществляем запуск всех тестов; здесь предполагается, что
     % в файле tests.lgt определен объект "tests".
     tests::runexp,
-    tests::print(10)
+    tests::print
 )).

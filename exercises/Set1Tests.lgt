@@ -1,50 +1,4 @@
 
-:- category(explainc).
-   :- protected(explain/2).
-   :- meta_predicate(explain(0, 0)).
-   explain(Test, Expl) :-
-      (
-        call(Test) -> true;
-        (call(Expl) -> true; true)
-      ).
-   :- public(explain/0).
-   % :- uses([dbg/1]).
-   :- uses(logtalk, [
-      print_message(error, test_suite, Message) as err(Message)
-   ]).
-   explain :-
-      forall(
-          ::explain(Name, Str, Args),
-          ( format(atom(A), Str, Args),
-            err('~w: ~w'+[Name, A]) ) ).
-   :- protected(explain/3).
-   :- public(runexp/0).
-   runexp :-
-     ::run, explain.
-
-   :- private(runexp/2).
-   :- meta_predicate(runexp(0,*)).
-   runexp(Cond, TestSuite) :-
-     call(Cond), !,
-     TestSuite::runexp.
-
-   :- private(runexp1/1).
-   runexp1(Cond-Body):-!,
-     runexp(Cond,Body).
-
-   runexp1(Body):-!,
-     runexp(true,Body).
-
-   :- public(runexp/1).
-   runexp([]).
-   runexp([H|T]):-
-     runexp1(H) -> runexp(T);
-     true.
-
-
-   :- public(ok/0).
-
-:- end_category.
 
 :- object(note_lgtunit,
    extends(lgtunit)).
@@ -77,12 +31,12 @@
 
 :- object(stub_tests,
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 :- end_object.
 
 :- object(test_object(_O_),
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 
    succeeds(object_exists) :-
        current_object(_O_).
@@ -95,7 +49,7 @@
 
 :- object(test_animals(_O_),
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 
    succeeds(butsy_is_a_cat) :- _O_::cat(butsy).
    succeeds(flash_is_a_dog) :- _O_::dog(flash).
@@ -120,7 +74,7 @@
 
 :- object(test_predicates_defined(_O_, _Predicates_),
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 
    succeeds(predicates_defined_test) :-
        ::predicates_defined.
@@ -152,7 +106,7 @@
 
 :- object(test_extending(_O_, _Parent_),
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 
    ok :-
       extends_object(_O_, _Parent_).
@@ -168,7 +122,7 @@
 
 :- object(test_animals_inference(_O_),
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 
    succeeds(x_is_a_cat_and_animal) :- _O_::cat(X), _O_::animal(X).
    succeeds(x_is_a_dog_and_animal) :- _O_::dog(X), _O_::animal(X).
@@ -187,7 +141,7 @@
 
 :- object(test_animals_call(_O_, _Animals_),
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 
    :- use_module(lists, [member/2]).
 
@@ -246,7 +200,7 @@
 
 :- object(test_owners(_O_),
    extends(lgtunit),
-   imports(explainc)).
+   imports(explain_c)).
 
    :- use_module(lists, [list_to_set/2, subtract/3]).
    succeeds(kate_owns_all_pets) :- ok(kate, [butsy, flash]).
@@ -278,8 +232,10 @@
 :- end_object.
 
 :- object(tests,
-   extends(note_lgtunit),
-   imports([explainc])).
+   extends(studyunit),
+   imports([explain_c])).
+
+   count(10).
 
    succeeds(1-first_has_cat_and_dog_correct) :-
        Predicates = [dog/1 - public, cat/1 - public],

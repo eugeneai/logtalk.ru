@@ -52,23 +52,29 @@
         version is 24:12:22,
         autor is 'Evgeny Cherkashin',
         date is 2024-12-22,
-        comment is 'A student test case unit test framework',
+        comment is 'A student test case unit test framework'
       ]).
 
+   :- public(number/1).
+   :- mode(number(?integer), one).
+   :- info(number/1, [
+        comment is "Defines test number in study test case set. ",
+        argnames is ['Number']
+      ]).
 
    :- public(count/1).
    :- mode(count(?integer), one).
-   :- info(count/3,[
+   :- info(count/1, [
         comment is "Number of test study cases, used in printing resulting info.",
-        arguments is ['Number']
+        argnames is ['Number']
       ]).
 
 
    :- protected(score/2).
-   :- mode(score(?integer, ?integer), zero_or_more)
+   :- mode(score(?integer, ?integer), zero_or_more).
    :- info(score/2, [
         comment is "Set score for study case Number for Value from {0, 1}. If unset means 0",
-        arguments is ['Number', 'Value']
+        argnames is ['Number', 'Value']
       ]).
 
    score(Num, V) :-
@@ -77,11 +83,11 @@
 
    :- dynamic(score_/2).
    :- protected(clear_scores/0).
-   :- mode(clear_scores, one)
+   :- mode(clear_scores, one).
    :- info(clear_scores/0, [
         comment is "Clear score data to 0 (unset)",
-        arguments is []
-      ])
+        argnames is []
+      ]).
    clear_scores:-
        retractall(score_(_,_)).
 
@@ -89,7 +95,7 @@
    :- mode(print(+integer), one).
    :- info(print/1, [
         comment is "Print scores as 1's and 0's colored.",
-        arguments is ['NumberOfTests']
+        argnames is ['NumberOfTests']
       ]).
    print(MaxNum) :-
        nl,
@@ -104,11 +110,11 @@
           (score_(V, 1) -> write('\e[1;32m1\e[0m'); write('\e[1;31m0\e[0m'))),
        nl.
 
-   :- public(print).
+   :- public(print/0).
    :- mode(print, zero_or_one).
    :- info(print/0, [
         comment is "Print scores as 1's and 0's colored.",
-        arguments is []
+        argnames is []
       ]).
    print :-
       ::count(N),!,
