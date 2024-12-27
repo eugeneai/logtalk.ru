@@ -9,21 +9,24 @@
     % Загрузка библитоек, требуемых приложению; например,
     %%% logtalk_load(basic_types(loader)),
     % Загрузка библиотеки тестирования
-    % logtalk_load(lgtunit(loader)),
-	logtalk_load(basic_types(loader)),
-	logtalk_load(os(loader)),
-	logtalk_load(arbitrary(loader)),
-	% define a flag to allow the logtalk_tester script to pass the
-	% option to suppress the test file and directory path prefix
-	create_logtalk_flag(suppress_path_prefix, '', [type(atom), keep(true)]),
-	logtalk_load([
-                  lgtunit(lgtunit),
-                  %lgtunit(lgtunit_messages),
-                  'study_messages'],
-         [optimize(on)]),
     logtalk_load(tutor(loader)),
     logtalk_load(tools(loader)),  % debugging, tracing, trace
     logtalk_load(debugger(loader)),  % debugging
+    % logtalk_load(lgtunit(loader)),
+%	logtalk_load(basic_types(loader)),
+%	logtalk_load(os(loader)),
+%	logtalk_load(arbitrary(loader)),
+	logtalk_load(options(loader)),
+	% define a flag to allow the logtalk_tester script to pass the
+	% option to suppress the test file and directory path prefix
+	create_logtalk_flag(suppress_path_prefix, '', [type(atom), keep(true)]),
+	logtalk_load([%library(lists),
+                  'testlib/testing'
+                  %lgtunit(lgtunit_messages),
+                  %'study_messages'
+                  ],
+         [optimize(on)]),
+    % logtalk_load('study_messages', [source_data(on), debug(on)]),
     logtalk_load('studyunit', [source_data(on), debug(on)]),  % Библиотека средств тестирования
     % Загрузка файлов основной программы (например, "source.lgt"), при этом разрешаем
     % оценивать покрытие (code coverage), что требует от компилятора работать в режиме
@@ -39,7 +42,7 @@
     % где изложены разные рекомендации по отладке); тесты следует загружать после
     % исходного кода тестируемых программ, это решает проблемы с предупреждениями,
     % например, "отсутствие объекта", на который ссылается тест.
-    logtalk_load('Set1Tests', [hook(lgtunit)]),
+    logtalk_load('Set1Tests'),
     % Теперь осуществляем запуск всех тестов; здесь предполагается, что
     % в файле tests.lgt определен объект "tests".
     tests::run,

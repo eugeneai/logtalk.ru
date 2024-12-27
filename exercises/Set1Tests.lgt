@@ -32,13 +32,13 @@
 :- object(test_problem_1(_O_),
    extends(studyunit)).
 
-   succeeds(basic_object_definition) :-
-       debugger::trace,
-       test_object(_O_)::run.
+   test(basic_object_definition, true,
+       [],
+       test_object(_O_)::ok).
 
    test(basic_predicates_defined, true,
-       [condition(\+ current_object(_O_))]) :-
-       test_predicates_defined(_O_, [dog/1 - public, cat/1 - public])::run.
+       [condition(\+ current_object(_O_))],
+       test_predicates_defined(_O_, [dog/1 - public, cat/1 - public])::ok).
 
    % test_animals...
        % Predicates = [dog/1 - public, cat/1 - public],
@@ -200,10 +200,10 @@
 :- object(tests,
    extends(studyunit)).
 
-   count(10).
+   % count(10).
 
-   succeeds(1-first_has_cat_and_dog_correct) :-
-       test_problem_1(first)::run.
+   test(1-first_has_cat_and_dog_correct, true, [],
+       test_problem_1(first)::ok).
        % Predicates = [dog/1 - public, cat/1 - public],
        % ::runexp([
        %     test_object(first)
