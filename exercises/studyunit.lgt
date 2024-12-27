@@ -214,18 +214,18 @@
    % Default explain
    % explain(Test, 'Тест \'~w\' не сработал.', [Test]).
 
-   run :-
-      ::clear_scores,
-      ::clear_test_state,
-      ^^run,
-      (::has_failed_tests ->
-         % debugger::trace,
-         self(Self),
-         ::name(Name),
-         ::explain,
-         err('Найдены неудавшиеся тесты для тест-задания \'~w\' в тест-объекте \'~w\', .'+[Name, Self]),
-         ::score(0)
-         ; ::score(1)).
+   % run :-
+   %    ::clear_scores,
+   %    ::clear_test_state,
+   %    ^^run,
+   %    (::has_failed_tests ->
+   %       % debugger::trace,
+   %       self(Self),
+   %       ::name(Name),
+   %       ::explain,
+   %       err('Найдены неудавшиеся тесты для тест-задания \'~w\' в тест-объекте \'~w\', .'+[Name, Self]),
+   %       ::score(0)
+   %       ; ::score(1)).
 
 :- end_object.
 
