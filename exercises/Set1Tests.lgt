@@ -32,6 +32,15 @@
 :- object(test_problem_1(_O_),
    extends(studyunit)).
 
+   succeeds(basic_object_definition) :-
+       debugger::trace,
+       test_object(_O_)::run.
+
+   test(basic_predicates_defined, true,
+       [condition(\+ current_object(_O_))]) :-
+       test_predicates_defined(_O_, [dog/1 - public, cat/1 - public])::run.
+
+   % test_animals...
        % Predicates = [dog/1 - public, cat/1 - public],
        % ::runexp([
        %     test_object(first)

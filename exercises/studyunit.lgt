@@ -46,7 +46,7 @@
 % :- end_category.
 
 :- object(studyunit,
-   extends(lgtunit)).
+   extends(basicunit)).
 
    :- info([
         version is 24:12:22,
@@ -193,6 +193,10 @@
    has_failed_tests :-
       test_state(fail, _, _).
 
+   :-public(ok/0).
+   ok :-
+      \+ ::has_failed_tests.
+
    :- uses(logtalk, [
       print_message(error, studyunit, Message) as err(Message)
    ]).
@@ -219,7 +223,7 @@
          self(Self),
          ::name(Name),
          ::explain,
-         err('Найдены неудавшиеся тесты для тест-задания \'~w\' втест-объекте \'~w\', .'+[Name, Self]),
+         err('Найдены неудавшиеся тесты для тест-задания \'~w\' в тест-объекте \'~w\', .'+[Name, Self]),
          ::score(0)
          ; ::score(1)).
 
@@ -234,6 +238,7 @@
    extends(studyunit)).
 
    succeeds(object_exists) :-
+       debugger::trace,
        current_object(_O_).
 
    explain(object_exists,
@@ -245,8 +250,9 @@
 :- object(test_predicates_defined(_O_, _Predicates_),
    extends(studyunit)).
 
-   succeeds(predicates_defined_test) :-
-       ::predicates_defined.
+   test(predicates_defined_test, true,
+       [condition(current_object(_O_))]) :-
+          ::predicates_defined.
 
    :- use_module(library(lists), [member/2]).
    :- public(predicates_defined/0).
