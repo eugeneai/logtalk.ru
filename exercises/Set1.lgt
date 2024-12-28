@@ -49,11 +49,11 @@
 % реализуется оператором ::/1.
 
 :- object(second,
-      extends(first)).
-   :- public(animal/1).
+     extends(first)).
+     :- public(animal/1).
 
-   animal(X) :- ::dog(X).
-   animal(X) :- ::cat(X).
+     animal(X) :- ::dog(X).
+     animal(X) :- ::cat(X).
 
 :- end_object.
 

@@ -86,13 +86,13 @@
 
 :- end_object.
 
-:- object(test_extending_c(_O_, _Parent_),
+:- object(test_extending(_O_, _Parent_),
    extends(studyunit)).
 
    test(object_exstends_object, true,
        [ condition((current_object(_O_), current_object(_Parent_))),
          explain(
-          ::error("Надо сделать так, чтобы объект '~w' был унаследован от '~w'.\n:- object(~w, extends(~w))" +
+          ::error("Надо сделать так, чтобы объект '~w' был унаследован от '~w'.\n:- object(~w, extends(~w))." +
           [_O_,_Parent_,_O_,_Parent_]))],
        extends_object(_O_, _Parent_)).
 
