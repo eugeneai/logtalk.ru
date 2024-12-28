@@ -25,7 +25,7 @@
                   %lgtunit(lgtunit_messages),
                   %'study_messages'
                   ],
-         [optimize(on)]),
+         [source_data(on), debug(on)]),
     % logtalk_load('study_messages', [source_data(on), debug(on)]),
     logtalk_load('studyunit', [source_data(on), debug(on)]),  % Библиотека средств тестирования
     % Загрузка файлов основной программы (например, "source.lgt"), при этом разрешаем

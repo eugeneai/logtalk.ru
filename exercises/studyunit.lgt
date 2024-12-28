@@ -68,25 +68,18 @@
 :- object(test_predicates_defined(_O_, _Predicates_),
    extends(studyunit)).
 
-   test(predicate_defined(Pred), true,
-       [condition(current_object(_O_)),
-        explain(
-         ::error("В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w([~w,...])." + [_O_, Scope, Pred, Scope, Pred])
-        )
-       ], ( ::predicate_defined(Pred) ) ).
+   test(predicate_defined(Pred),
+       all(::mem(Pred - Scope, _Predicates_)),
+       [
+         condition(current_object(_O_)),
+         each_explain(
+           ::error("В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w(~w)." + [_O_, Scope, Pred, Scope, Pred])),
+         explain(
+           ::error("В объекте '~w' надо сделать необходимые декларации предикатов" + [_O_]))
+       ], ( ::check(Pred, Scope) ) ).
 
    :- use_module(library(lists), [member/2]).
-   :- public(predicate_defined/1).
-   predicate_defined(Pred) :-
-      member(Pred - Scope, _Predicates_),
-      debugger::trace,
-      check(Pred, Scope).
-
-   check([]).
-   check([Pred - Scope|T]) :-
-      check(Pred, Scope), !,
-      check(T).
-
+   :- protected(check/2).
    check(Pred, Scope) :-
       object_property(_O_, declares(Pred, Props)),
       member(Scope, Props).
