@@ -31,12 +31,10 @@
 % к вашим животным.
 
 :- object(first).
-%      % :- public([dog/1,cat/1]).
-%      :- public([dog/1]).
-%      :- public([cat/1]).
+     :- public([dog/1,cat/1]).
 
-%      cat(butsy).
-%      dog(flash).
+     cat(butsy).
+     dog(flash).
 
 :- end_object.
 

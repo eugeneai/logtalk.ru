@@ -40,6 +40,11 @@
        [condition(\+ current_object(_O_))],
        test_predicates_defined(_O_, [dog/1 - public, cat/1 - public])::ok).
 
+   test(facts_on_animals_defined, true,
+       [condition(success(basic_predicates_defined)),
+        explain(::error("Не все факты о животных заданы правильно в объекте '~w'"+[_O_]))],
+        test_animals(_O_)::ok).
+
    % test_animals...
        % Predicates = [dog/1 - public, cat/1 - public],
        % ::runexp([
@@ -53,39 +58,31 @@
 :- object(test_animals(_O_),
    extends(studyunit)).
 
-   succeeds(butsy_is_a_cat) :- _O_::cat(butsy).
-   succeeds(flash_is_a_dog) :- _O_::dog(flash).
-   explain(flash_is_not_a_dog,
-       "В объекте '~w' должна быть задана собака (dog/1) 'flash'",
-       [_O_]):-
-           \+ _O_::dog(flash).
-   explain(butsy_is_not_a_cat,
-       "В объекте '~w' должна быть задана кошка (cat/1) 'butsy'",
-       [_O_]):-
-           \+ _O_::dog(flash).
+   test(flash_is_a_dog, true,
+       [ explain(::error("В объекте '~w' должна быть задана собака (dog/1) 'flash'" +
+         [_O_]))
+       ],
+       _O_::dog(flash)).
 
-   explain(not_a_cat,
-       "В объекте '~w' нет ни одной кошки (cat/1)",
-       [_O_]):- \+ _O_::cat(_).
+   test(butsy_is_a_cat, true,
+       [ explain(::error("В объекте '~w' должна быть задана кошка (cat/1) 'butsy'" +
+         [_O_]))
+       ],
+       _O_::cat(butsy)).
 
-   explain(not_a_dog,
-       "В объекте '~w' нет ни одной собаки (dog/1)",
-       [_O_]):- \+ _O_::dog(_).
+   test(unknown_dog(Name), fail,
+       [ % condition(failure(flash_is_a_dog)),
+         explain(::error("В объекте '~w' найдена неизвестная собака (dog/1) '~w'" +
+         [_O_, Name]))
+       ],
+       (_O_::dog(Name), Name \= flash)).
 
-:- end_object.
-
-:- object(test_extending(_O_, _Parent_),
-   extends(studyunit)).
-
-   ok :-
-      extends_object(_O_, _Parent_).
-
-   succeeds(object_exstends_object) :-
-      ok.
-
-   explain(object_estends_object(_O_,_Parent_),
-      "Надо сделать так, чтобы объект '~w' был унаследован от '~w'.\n:- object(~w, extends(~w))",
-      [_O_,_Parent_,_O_,_Parent_]) :- \+ ok.
+   test(unknown_cat(Name), fail,
+       [ % condition(failure(flash_is_a_dog)),
+         explain(::error("В объекте '~w' найдена неизвестная кошка (cat/1) '~w'" +
+         [_O_, Name]))
+       ],
+       (_O_::cat(Name), Name \= butsy)).
 
 :- end_object.
 

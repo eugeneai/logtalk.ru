@@ -86,16 +86,14 @@
 
 :- end_object.
 
-:- category(test_extending_c(_O_, _Parent_)).
+:- object(test_extending_c(_O_, _Parent_),
+   extends(studyunit)).
 
-   ok :-
-      extends_object(_O_, _Parent_).
+   test(object_exstends_object, true,
+       [ condition((current_object(_O_), current_object(_Parent_))),
+         explain(
+          ::error("Надо сделать так, чтобы объект '~w' был унаследован от '~w'.\n:- object(~w, extends(~w))" +
+          [_O_,_Parent_,_O_,_Parent_]))],
+       extends_object(_O_, _Parent_)).
 
-   succeeds(object_exstends_object) :-
-      ok.
-
-   explain(not(object_extends_object(_O_,_Parent_)),
-      "Надо сделать так, чтобы объект '~w' был унаследован от '~w'.\n:- object(~w, extends(~w))",
-      [_O_,_Parent_,_O_,_Parent_]) :- \+ ok.
-
-:- end_category.
+:- end_object.
