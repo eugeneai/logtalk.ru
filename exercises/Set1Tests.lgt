@@ -78,6 +78,20 @@
 
 :- end_object.
 
+
+:- object(test_problem_3(_O_),
+   extends(studyunit)).
+
+   test(basic_object_definition, true,
+       [],
+       test_object(_O_)::ok).
+
+   test(basic_predicates_defined, true,
+       [condition(success(basic_object_definition))],
+       test_predicates_defined(_O_, [dog/1 - protected, cat/1 - protected])::ok).
+
+:- end_object.
+
 :- object(test_animals_call(_O_, _Animals_),
    extends(studyunit)).
 
@@ -104,22 +118,6 @@
 
 :- end_object.
 
-:- object(test_animals_call_fifth(_O_, _Animals_),
-   extends(test_animals_call(_O_, _Animals_))).
-
-   :- use_module(lists, [member/2]).
-   explain(is_horse_is_animal(Animal),
-      "В объекте '~w' не известно, что '~w' - это животное. \nПроверьте наличие деклараций horse/1 в объекте '~w'\nРавило 'лошади тоже животные' есть ли?",
-      [_O_, Animal, _O_]) :-
-          member(Animal, _Animals_),
-          \+ _O_::animal(Animal).
-
-   explain(lack_of_inheritance(X),
-      "Вероятно забыт в объекте '~w' вызов унаследованного из объекта 'fourth' animal/1 при помощи оператора ^^/1.\nПричина: в 'fourth' известно, что '~w' - животное, а в '~w' - нет!",
-      [_O_, X, _O_]) :-
-        fourth::animal(X), \+ _O_::animal(X).
-
-:- end_object.
 
 :- object(test_pet_call(_O_, _Animals_),
    extends(test_animals_call(_O_, _Animals_))).
@@ -180,18 +178,9 @@
        [condition(success(1-first_has_cat_and_dog_correct))],
        test_problem_2(second, first)::ok).
 
-   % succeeds(2-second_has_animal_defined) :-
-   %     Predicates = [animal/1 - public],
-   %     ::runexp([
-   %         test_object(second)
-   %       , current_object(second) - test_extending(second, first)
-   %       , (test_extending(second, first)::ok) -
-   %            test_predicates_defined(second, Predicates)
-   %       , (test_predicates_defined(second, Predicates)::predicates_defined) -
-   %            test_animals_inference(second)
-   %       , (test_animals_inference(second)::ok) - stub_tests
-   %       , (::score(2, 1)) - stub_tests
-   %     ]).
+   test(3-third_has_cat_and_dog_protected, true,
+       [],
+       test_problem_3(third)::ok).
 
    % succeeds(3-third_has_cat_and_dog_protected) :-
    %     Predicates = [dog/1 - protected, cat/1 - protected],

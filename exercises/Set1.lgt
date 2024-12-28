@@ -66,8 +66,8 @@
 :- object(third).
    :- protected([dog/1,cat/1]).
 
-   cat(butsy).
-   dog(flash).
+%    cat(butsy).
+%    dog(flash).
 
 :- end_object.
 
