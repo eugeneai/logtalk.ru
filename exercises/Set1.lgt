@@ -30,13 +30,13 @@
 % чтобы система тестирования могла получить доступ к
 % к вашим животным.
 
-:- object(first).
-     :- public([dog/1,cat/1]).
+% :- object(first).
+%      :- public([dog/1,cat/1]).
 
-     cat(butsy).
-     dog(flash).
+%      cat(butsy).
+%      dog(flash).
 
-:- end_object.
+% :- end_object.
 
 
 % -----------------------------------------------------
@@ -66,8 +66,8 @@
 :- object(third).
    :- protected([dog/1,cat/1]).
 
-%    cat(butsy).
-%    dog(flash).
+   cat(butsy).
+   dog(flash).
 
 :- end_object.
 
@@ -79,10 +79,10 @@
 % унаследованным dog/1 и cat/1.
 
 :- object(fourth,
-      extends(third)).
-   :- public(animal/1).
+     extends(third)).
+     :- public(animal/1).
 
-   animal(X) :- ::dog(X).
+   animal(X) :- dog(X).
    animal(X) :- ::cat(X).
 
 :- end_object.

@@ -54,8 +54,28 @@
 
 :- end_object.
 
-:- object(test_object(_O_),
+:- object(test_predicates_defined(_Name_,_O_, _Predicates_),
    extends(studyunit)).
+
+   test_name(_Name_).
+
+
+:- end_object.
+
+:- object(test_extending(_O_, _Parent_),
+   extends(studyunit)).
+
+   test(object_exstends_object, true,
+       [ condition((current_object(_O_), current_object(_Parent_))),
+         explain(
+          ::error("Надо сделать так, чтобы объект '~w' был унаследован от '~w'.\n:- object(~w, extends(~w))." +
+          [_O_,_Parent_,_O_,_Parent_]))],
+       extends_object(_O_, _Parent_)).
+
+:- end_object.
+
+:- category(object_exists_c(_O_),
+   implements(testing_p)).
 
    test(object_exists, true,
        [explain(::error("Вы не создали объект:\n:- create_object(~w,...).\n % . . . \n:- end_object." +
@@ -63,10 +83,13 @@
        ( current_object(_O_) )
    ).
 
-:- end_object.
+:- end_category.
 
-:- object(test_predicates_defined(_O_, _Predicates_),
-   extends(studyunit)).
+:- category(object_exists_and_predicates_c(
+     _O_, _Predicates_),
+   extends(object_exists_c(_O_))).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
 
    test(predicate_defined(Pred),
        all(::mem(Pred - Scope, _Predicates_)),
@@ -84,16 +107,9 @@
       object_property(_O_, declares(Pred, Props)),
       member(Scope, Props).
 
-:- end_object.
+:- end_category.
 
-:- object(test_extending(_O_, _Parent_),
-   extends(studyunit)).
+:- category(object_inherits(_O_, _Parent_),
+   implements(testing_p)).
 
-   test(object_exstends_object, true,
-       [ condition((current_object(_O_), current_object(_Parent_))),
-         explain(
-          ::error("Надо сделать так, чтобы объект '~w' был унаследован от '~w'.\n:- object(~w, extends(~w))." +
-          [_O_,_Parent_,_O_,_Parent_]))],
-       extends_object(_O_, _Parent_)).
-
-:- end_object.
+:- end_category.

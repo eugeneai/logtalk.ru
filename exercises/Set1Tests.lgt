@@ -1,24 +1,30 @@
 
 
 :- object(test_problem_1(_O_),
-   extends(studyunit)).
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(
+     _O_, [dog/1 - public, cat/1 - public]))).
 
-   test(basic_object_definition, true,
-       [],
-       test_object(_O_)::ok).
+   test_name("Задача 1").
 
-   test(basic_predicates_defined, true,
-       [condition(\+ current_object(_O_))],
-       test_predicates_defined(_O_, [dog/1 - public, cat/1 - public])::ok).
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(fake_test, true, [
+     explain(::error('Test should fail'))
+   ], (fail)).
 
    test(facts_on_animals_defined, true,
        [condition(success(basic_predicates_defined)),
         explain(::error("Не все факты о животных заданы правильно в объекте '~w'"+[_O_]))],
-        test_animals(_O_)::ok).
+        ( ::test_name(Name),
+          debugger::trace,
+          test_animals(Name, _O_)::ok)).
 :- end_object.
 
-:- object(test_animals(_O_),
+:- object(test_animals(_Name_, _O_),
    extends(studyunit)).
+
+   test_name(_Name_).
 
    test(flash_is_a_dog, true,
        [ explain(::error("В объекте '~w' должна быть задана собака (dog/1) 'flash'" +
@@ -49,46 +55,65 @@
 :- end_object.
 
 :- object(test_problem_2(_O_, _first_),
-   extends(studyunit)).
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(_O_, [animal/1 - public]))).
 
-   test(basic_object_definition, true,
-       [],
-       test_object(_O_)::ok).
+   test_name('Задача 2').
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
 
    test(first_extends_second, true,
         [condition(success(basic_object_definition))],
         test_extending(_O_, _first_)::ok).
 
-   test(basic_predicates_defined, true,
-       [condition(success(first_extends_second))],
-       test_predicates_defined(_O_, [animal/1 - public])::ok).
-
    test(x_is_a_cat_and_an_animal, true,
        [condition(success(basic_predicates_defined)),
         explain(::error("В объекте '~w' надо задать, что каждая кошка (cat/1) - это животное (animal/1)." +
         [_O_]))],
-       (_O_::cat(X), _O_::animal(X))).
+       (::cat(X), _O_::animal(X))).
 
    test(x_is_a_dog_and_an_animal, true,
        [condition(success(basic_predicates_defined)),
         explain(::error("В объекте '~w' надо задать, что каждая собака (cat/1) - это животное (animal/1)." +
 
         [_O_]))],
-       (_O_::dog(X), _O_::animal(X))).
+       (::dog(X), _O_::animal(X))).
+
+   :- protected([dog/1, cat/1]).
+   cat(X) :- _O_::cat(X).
+   dog(X) :- _O_::dog(X).
 
 :- end_object.
 
 
 :- object(test_problem_3(_O_),
-   extends(studyunit)).
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(_O_, [dog/1 - protected, cat/1 - protected]))).
 
-   test(basic_object_definition, true,
-       [],
-       test_object(_O_)::ok).
+   test_name('Задача 3').
 
-   test(basic_predicates_defined, true,
-       [condition(success(basic_object_definition))],
-       test_predicates_defined(_O_, [dog/1 - protected, cat/1 - protected])::ok).
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(flash_is_a_dog, true,
+       [ explain(::error("В объекте '~w' должна быть задана собака (dog/1) 'flash'" +
+         [_O_]))
+       ],
+       _O_<<dog(flash)).
+
+   test(butsy_is_a_cat, true,
+       [ explain(::error("В объекте '~w' должна быть задана кошка (cat/1) 'butsy'" +
+         [_O_]))
+       ],
+       _O_<<cat(butsy)).
+
+:- end_object.
+
+:- object(test_problem_4(_O_, _third_),
+   extends(test_problem_2(_O_, _third_))).
+
+   :- protected([dog/1, cat/1]).
+   cat(X) :- _third_<<cat(X).
+   dog(X) :- _third_<<dog(X).
 
 :- end_object.
 
@@ -170,28 +195,25 @@
    extends(studyunit)).
 
    % count(10).
+   test_name('Практическая работа 1').
 
    test(1-first_has_cat_and_dog_correct, true, [],
        test_problem_1(first)::ok).
 
-   test(2-second_has_animal_defined, true,
-       [condition(success(1-first_has_cat_and_dog_correct))],
-       test_problem_2(second, first)::ok).
+   % test(2-second_has_animal_defined, true,
+   %     [condition(success(1-first_has_cat_and_dog_correct))],
+   %     test_problem_2(second, first)::ok).
 
-   test(3-third_has_cat_and_dog_protected, true,
-       [],
-       test_problem_3(third)::ok).
+   % test(3-third_has_cat_and_dog_protected, true,
+   %     [],
+   %     test_problem_3(third)::ok).
 
-   % succeeds(3-third_has_cat_and_dog_protected) :-
-   %     Predicates = [dog/1 - protected, cat/1 - protected],
-   %     O = third,
-   %     ::runexp([
-   %         test_object(O)
-   %       , current_object(O)-test_predicates_defined(O, Predicates)
-   %       % , (test_predicates_defined(O, Predicates)::predicates_defined) - test_animals1(third_test)
-   %       , (test_predicates_defined(O, Predicates)::predicates_defined) - stub_tests
-   %       , (::score(3, 1)) - stub_tests
-   %     ]).
+   % test(4-fourth_has_animal_defined, true,
+   %     [condition(success(3-third_has_cat_and_dog_protected))],
+   %     test_problem_4(fourth, third)::ok).
+
+
+% -----------------------------------------
 
    % succeeds(4-fourth_has_animal_defined) :-
    %     Predicates = [animal/1 - public],
