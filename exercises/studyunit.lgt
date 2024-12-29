@@ -38,9 +38,9 @@
    print :-
       ::test_name(TaskName),!,
       (
-        ::has_failed -> ::error("Задача '~w' не решена. " - [TaskName]);
-        ::has_skipped-> ::error("Часть тестов задачи '~w' пропущено." - [TaskName]);
-        ::info("Задача '' решена! " - [TaskName])
+        ::has_failed -> ::error("Задача '~w' не решена.\n" - [TaskName]);
+        ::has_skipped-> ::error("Часть тестов задачи '~w' пропущено.\n" - [TaskName]);
+        ::info("Задача '~w' решена!\n" - [TaskName])
       ),
       ::info("Тестирование закончено.\n").
       % ::count(N),!,
@@ -54,14 +54,6 @@
    :- uses(logtalk, [
       print_message(error, studyunit, Message) as err(Message)
    ]).
-
-:- end_object.
-
-:- object(test_predicates_defined(_Name_,_O_, _Predicates_),
-   extends(studyunit)).
-
-   test_name(_Name_).
-
 
 :- end_object.
 
@@ -80,7 +72,7 @@
 :- category(object_exists_c(_O_),
    implements(testing_p)).
 
-   test(object_exists, true,
+   test(basic_object_exists, true,
        [explain(::error("Вы не создали объект:\n:- create_object(~w,...).\n % . . . \n:- end_object." +
         [_O_]))],
        ( current_object(_O_) )
@@ -94,12 +86,13 @@
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
-   test(predicate_defined(Pred),
+   test(basic_predicates_defined,
        all(::mem(Pred - Scope, _Predicates_)),
        [
-         condition(success(object_exists)),
+         condition(success(basic_object_exists)),
          each_explain(
            ::error("В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w(~w)." + [_O_, Scope, Pred, Scope, Pred])),
+         each_task_name(predicate_defined(Pred)),
          explain(
            ::error("В объекте '~w' надо сделать необходимые декларации предикатов" + [_O_]))
        ], ( ::check(Pred, Scope) ) ).

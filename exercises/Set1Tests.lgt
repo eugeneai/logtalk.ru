@@ -9,16 +9,11 @@
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
-   test(fake_test, true, [
-     explain(::error('Test should fail'+[]))
-   ], (fail)).
-
    test(facts_on_animals_defined, true,
        [condition(success(basic_predicates_defined)),
         explain(::error("Не все факты о животных заданы правильно в объекте '~w'"+[_O_]))],
         ( ::test_name(Name),
-          debugger::trace,
-          test_animals(Name, _O_)::ok)).
+          test_animals(Name, _O_)::ok )).
 :- end_object.
 
 :- object(test_animals(_Name_, _O_),
@@ -67,7 +62,7 @@
         test_extending(_O_, _first_)::ok).
 
    test(x_is_a_cat_and_an_animal, true,
-       [condition(success(basic_predicates_defined)),
+       [condition(success(basic_predicates_defined1)),
         explain(::error("В объекте '~w' надо задать, что каждая кошка (cat/1) - это животное (animal/1)." +
         [_O_]))],
        (::cat(X), _O_::animal(X))).
