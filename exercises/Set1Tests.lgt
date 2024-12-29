@@ -58,18 +58,18 @@
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
    test(first_extends_second, true,
-        [condition(success(basic_object_definition))],
+        [condition(success(basic_object_exists))],
         test_extending(_O_, _first_)::ok).
 
    test(x_is_a_cat_and_an_animal, true,
-       [condition(success(basic_predicates_defined1)),
+       [condition(success(basic_predicates_defined)),
         explain(::error("В объекте '~w' надо задать, что каждая кошка (cat/1) - это животное (animal/1)." +
         [_O_]))],
        (::cat(X), _O_::animal(X))).
 
    test(x_is_a_dog_and_an_animal, true,
        [condition(success(basic_predicates_defined)),
-        explain(::error("В объекте '~w' надо задать, что каждая собака (cat/1) - это животное (animal/1)." +
+        explain(::error("В объекте '~w' надо задать, что каждая собака (dog/1) - это животное (animal/1)." +
 
         [_O_]))],
        (::dog(X), _O_::animal(X))).
@@ -89,24 +89,58 @@
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
-   test(flash_is_a_dog, true,
-       [ explain(::error("В объекте '~w' должна быть задана собака (dog/1) 'flash'" +
-         [_O_]))
-       ],
-       _O_<<dog(flash)).
-
    test(butsy_is_a_cat, true,
-       [ explain(::error("В объекте '~w' должна быть задана кошка (cat/1) 'butsy'" +
+       [ condition(success(predicate_defined(cat/1))),
+         explain(::error("В объекте '~w' должна быть задана кошка (cat/1) 'butsy'" +
          [_O_]))
        ],
-       _O_<<cat(butsy)).
+       catch(
+         _O_<<cat(butsy),
+         error(existence_error(procedure, cat/1), _),
+         fail )).
+
+   test(flash_is_a_dog, true,
+       [ condition(success(predicate_defined(dog/1))),
+         explain(::error("В объекте '~w' должна быть задана собака (dog/1) 'flash'" +
+         [_O_]))
+       ],
+       catch(
+         _O_<<dog(flash),
+         error(existence_error(procedure, dog/1), _),
+         fail )).
 
 :- end_object.
 
 :- object(test_problem_4(_O_, _third_),
-   extends(test_problem_2(_O_, _third_))).
+     extends(studyunit),
+     imports(object_exists_and_predicates_c(_O_, [animal/1 - public]))).
 
-   :- protected([dog/1, cat/1]).
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(fourth_extends_third, true,
+        [condition(success(basic_object_exists))],
+        test_extending(_O_, _third_)::ok).
+
+   test(x_is_a_cat_and_an_animal, true,
+       [condition(success(basic_predicates_defined)),
+        explain(::error("В объекте '~w' надо задать, что каждая кошка (cat/1) - это животное (animal/1), используя ::/1." +
+        [_O_]))],
+       (::cat(X),
+         catch(_O_::animal(X),
+            error(existence_error(procedure, _), _),
+            fail))).
+
+   test(x_is_a_dog_and_an_animal, true,
+       [condition(success(basic_predicates_defined)),
+        explain(::error("В объекте '~w' надо задать, что каждая собака (dog/1) - это животное (animal/1), используя ::/1." +
+
+        [_O_]))],
+       (::dog(X),
+         catch(_O_::animal(X),
+               error(existence_error(procedure, _), _),
+               fail))).
+
+   :- protected([cat/1, dog/1]).
    cat(X) :- _third_<<cat(X).
    dog(X) :- _third_<<dog(X).
 
@@ -192,20 +226,20 @@
    % count(10).
    test_name('Практическая работа 1').
 
-   test(1-first_has_cat_and_dog_correct, true, [],
-       test_problem_1(first)::ok).
+   % test(1-first_has_cat_and_dog_correct, true, [],
+   %     test_problem_1(first)::ok).
 
    % test(2-second_has_animal_defined, true,
    %     [condition(success(1-first_has_cat_and_dog_correct))],
    %     test_problem_2(second, first)::ok).
 
-   % test(3-third_has_cat_and_dog_protected, true,
-   %     [],
-   %     test_problem_3(third)::ok).
+   test(3-third_has_cat_and_dog_protected, true,
+       [],
+       test_problem_3(third)::ok).
 
-   % test(4-fourth_has_animal_defined, true,
-   %     [condition(success(3-third_has_cat_and_dog_protected))],
-   %     test_problem_4(fourth, third)::ok).
+   test(4-fourth_has_animal_defined, true,
+       [condition(success(3-third_has_cat_and_dog_protected))],
+       test_problem_4(fourth, third)::ok).
 
 
 % -----------------------------------------
