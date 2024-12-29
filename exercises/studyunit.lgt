@@ -36,10 +36,13 @@
         argnames is []
       ]).
    print :-
-      (::has_failed -> format("Task failed. ");
-       ::has_skipped-> format("Task partially done. ");
-       format("Task done. ")),
-      format("Tests ended.\n").
+      ::test_name(TaskName),!,
+      (
+        ::has_failed -> ::error("Задача '~w' не решена. " - [TaskName]);
+        ::has_skipped-> ::error("Часть тестов задачи '~w' пропущено." - [TaskName]);
+        ::info("Задача '' решена! " - [TaskName])
+      ),
+      ::info("Тестирование закончено.\n").
       % ::count(N),!,
       % ::print(N).
 
@@ -94,7 +97,7 @@
    test(predicate_defined(Pred),
        all(::mem(Pred - Scope, _Predicates_)),
        [
-         condition(current_object(_O_)),
+         condition(success(object_exists)),
          each_explain(
            ::error("В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w(~w)." + [_O_, Scope, Pred, Scope, Pred])),
          explain(

@@ -10,7 +10,7 @@
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
    test(fake_test, true, [
-     explain(::error('Test should fail'))
+     explain(::error('Test should fail'+[]))
    ], (fail)).
 
    test(facts_on_animals_defined, true,
