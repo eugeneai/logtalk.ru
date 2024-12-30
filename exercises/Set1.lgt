@@ -102,15 +102,16 @@
    extends(fourth)).
    :- protected(horse/1).
 
-%     horse(star).
-%     horse(iron).
-%     animal(X):- ^^animal(X).
-%     animal(X):- ::horse(X).
+   horse(star).
+   horse(iron).
+   animal(X):- ^^animal(X).
+   animal(X):- ::horse(X).
 
    :- public(pet/1).
 
-%     pet(X):- ::dog(X).
-%     pet(X):- ::cat(X).
+   pet(X):- ::dog(X).
+   pet(X):- ::cat(X).
+   % pet(X):- ::horse(X).
 :- end_object.
 
 % -----------------------------------------------------
@@ -125,7 +126,11 @@
     :- public(owner/2).
 
     owner(kate, X):- ::pet(X).
+%    owner(kate, X):- ::animal(X). %
+%    owner(bob, X):- ::horse(X).  %
     owner(bob, star):- ::horse(star).
+%    owner(ann, X):- ::pet(X). %
+%    owner(ann, kate).  %
 :- end_object.
 
 % -----------------------------------------------------

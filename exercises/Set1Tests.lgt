@@ -174,36 +174,150 @@
        ],
        (_O_<<horse(Horse))).
 
+   test(butsy_is_a_pet, true,
+       [condition(success(basic_predicates_defined)),
+        explain(::error("В объекте '~w' надо задать, что каждая кошка (cat/1) - это домашнее животное (pet/1), используя ::/1." +
+        [_O_]))],
+       (catch(_O_::pet(butsy),
+            error(existence_error(procedure, _), _),
+            fail))).
+
+   test(flash_is_a_pet, true,
+       [condition(success(basic_predicates_defined)),
+        explain(::error("В объекте '~w' надо задать, что каждая собака (dog/1) - это домашнее животное (pet/1), используя ::/1." +
+
+        [_O_]))],
+       (
+         catch(_O_::pet(flash),
+               error(existence_error(procedure, _), _),
+               fail))).
+
+   test(not_a_horse_i_a_pet, fail,
+       [condition(success(horses_facts_are_defined)),
+        explain(::error("Где такое в постановке задачи указано, что лошади были б домашними животными? (смотрите pet/1 внимательно в объекте '~w').\nВы можете не согласиться с утвержением, что лошади не являются домашними животными, мы тоже не согласны. Но задание - есть звдвние. Сделаем согласно заданию!" +
+        [_O_]))],
+       ( _O_<<horse(Horse),
+         catch(
+               _O_::pet(Horse),
+               error(existence_error(procedure, _), _),
+               fail),!)).
+
+   test(horses_are_animals,
+       all(::mem(Horse, [star, iron])),
+       [condition(success(predicate_defined(horse/1))),
+        each_task_name(horse_is_a_animal(Horse)),
+        explain(::error("В объекте '~w' не известно, что лошади (horse/1) - это животные (animal/1)! Используйте ::horse(..). " + [_O_]))
+       ],
+       (_O_<<horse(Horse),
+        catch(
+               _O_::animal(Horse),
+               error(existence_error(procedure, _), _),
+               fail),!)).
+
+   test(animals_inheritance,
+       all(::mem(Pet, [flash, butsy])),
+       [condition(success(basic_predicates_defined)),
+        each_task_name(is_an_animal(Pet)),
+        each_explain(::error("В объекте '~w' не известно, что '~w' - это животные (animal/1)! Вероятно забыто обращение к унсладованному определению animal/1. Создайте правило, связывающее обновленное правило с унаследованным из '~w'. Подсказака: используйте в теле правила ^^animal(..). " + [_O_, Pet, _Fourth_]))
+       ],
+       (catch(
+          _O_::animal(Pet),
+          error(existence_error(procedure, _), _),
+          fail),!)).
+
 :- end_object.
 
-:- object(test_owners(_O_),
-   extends(studyunit)).
 
-   :- use_module(lists, [list_to_set/2, subtract/3]).
-   succeeds(kate_owns_all_pets) :- ok(kate, [butsy, flash]).
-   succeeds(bob_owns_star) :- ok(bob, [star]).
+:- object(test_problem_6(_O_, _Fifth_),
+     extends(studyunit),
+     imports(object_exists_and_predicates_c(_O_, [owner/2 - public]))).
 
-   :- protected(ok/2).
-   ok(kate, Animals):-
-      findall(X, (_O_::pet(X), _O_::owner(kate, X)), L),
-      list_to_set(L, S1),
-      list_to_set(Animals, S2),
-      subtract(S2, S1, []).
+   test_name('Задача 6').
+   test_type(problem).
 
-   ok(bob, [X]):-
-      _O_::owner(bob, X).
+   test(A,B,C,D) :- ^^test(A,B,C,D).
 
-   ok:-
-      ok(kate, [butsy, flash]),
-      ok(bob, [star]).
+   test(sixth_extends_fifth, true,
+        [condition(success(basic_object_exists))],
+        test_extending(_O_, _Fifth_)::ok).
 
-   explain(kate_must_own(Animal),
-      "В объекте '~w' Kate (kate) должна владеть '~w'. Задано ли правило, что kate владеет всеми домашними животными? ",[_O_, Animal]) :-
-      _O_::pet(Animal), \+ _O_::owner(kate, Animal).
+   test(horse_owned_by_bob,
+       all(::mem(Horse, [star])),
+       [condition(success(predicate_defined(owner/2))),
+        each_task_name(bob_owns_horse(Horse)),
+        each_explain(::error("В объекте '~w' не известно, что лошадь (horse/1) '~w' принадлежит Бобу (bob). Не забываем про посылку сообщений при помощи ::! (::horse(..))." + [_O_, Horse]))
+       ],
+       (
+        catch(
+          _O_::owner(bob, Horse),
+          error(existence_error(procedure, _), _),
+          fail),!)).
 
-   explain(bob_owns_star(star),
-      "В объекте '~w' Bob (bob) должен владеть '~w'. Задано ли правило, что bob владеет лошадью 'star'? ",
-      [_O_, star]) :- \+ _O_::owner(bob, star).
+   test(horse_not_owned_by_bob,
+       none(::mem(Horse, [iron])),
+       [condition(success(predicate_defined(owner/2))),
+        each_task_name(bob_doesnt_own_horse(Horse)),
+        each_explain(::error("Откуда вы взяли, что Боб (bob) владеет '~w' (в объекте '~w'), в задании такого нет, ;-) ! Не забываем, что в заголовке правил использование констант - это обычное дело, например, owner(ann,X) :- ..." + [Horse, _O_]))
+       ],
+       (
+        catch(
+          _O_::owner(bob, Horse),
+          error(existence_error(procedure, _), _),
+          fail),!)).
+
+   test(ann_owns_some,
+       none(::mem(Animal, [iron, star, butsy, flash])),
+       [condition(success(predicate_defined(owner/2))),
+        each_task_name(ann_doesnt_own(Animal)),
+        each_explain(::error("Откуда взялась Аня (ann), и что она владеет '~w' (в объекте '~w'), в задании такого нет, ;-) ! Вероятно имеет место преступный копипаст из одной из подсказок тестов!" + [Animal, _O_]))
+       ],
+       (
+        catch(
+          _O_::owner(ann, Animal),
+          error(existence_error(procedure, _), _),
+          fail),!)).
+
+   test(kate_owns_pets,
+       all(::mem(Animal, [butsy, flash])),
+       [condition(success(predicate_defined(owner/2))),
+        each_task_name(kate_owns_pets(Animal)),
+        each_explain(::error("Катя (kate) должна влыдеть '~w' (залается в объекте '~w'), однако такого не наблюдаю!" +
+        [Animal, _O_]))
+       ],
+       (
+        catch(
+          _O_::owner(kate, Animal),
+          error(existence_error(procedure, _), _),
+          fail),!)).
+
+   test(kate_doesnt_own_some,
+       none(::mem(Animal, [star, iron])),
+       [condition(success(predicate_defined(owner/2))),
+        each_task_name(kate_owns_pets(Animal)),
+        each_explain(::error("Катя (kate) не владеет '~w' (залается в объекте '~w')! Слишком много ответственности на Кате! Проверьте определение правил с заголовком owner(kete, ...) :- ... !" +
+        [Animal, _O_]))
+       ],
+       (
+        catch(
+          _O_::owner(kate, Animal),
+          error(existence_error(procedure, _), _),
+          fail),!)).
+
+   test(humans_own_humans,
+       none(
+           (
+             Humans = [kate, bob, ann], !,
+             ::mem(Human1, Humans), ::mem(Human2, Humans))),
+       [condition(success(predicate_defined(owner/2))),
+        each_task_name(human_owns_human(Human1, Human2)),
+        each_explain(::error("Привет! Докатились до того, что люди владеют людьми! Откуда взялась утвержение, что '~w' (человек в данном контексте) владеет '~w' (тоже человек) в объекте '~w'? Рабовладение далеко в прошлом!" +
+        [Human1, Human2, _O_]))
+       ],
+       (
+        catch(
+          _O_::owner(Human1, Human2),
+          error(existence_error(procedure, _), _),
+          fail),!)).
 
 
 :- end_object.
@@ -233,6 +347,10 @@
    test(5-fifth_has_animal_defined_and_horses, true,
        [condition(success(4-fourth_has_animal_defined))],
        test_problem_5(fifth, fourth)::ok).
+
+   test(6-fifth_has_animal_defined_and_horses, true,
+       [condition(success(5-fifth_has_animal_defined_and_horses))],
+       test_problem_6(sixth, fifth)::ok).
 
 % -----------------------------------------
 
