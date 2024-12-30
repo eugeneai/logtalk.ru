@@ -99,18 +99,18 @@
 % оператором ^^/1.
 
 :- object(fifth,
-    extends(fourth)).
-    :- protected(horse/1).
+   extends(fourth)).
+   :- protected(horse/1).
 
-    horse(star).
-    horse(iron).
-    animal(X):- ^^animal(X).
-    animal(X):- ::horse(X).
+%     horse(star).
+%     horse(iron).
+%     animal(X):- ^^animal(X).
+%     animal(X):- ::horse(X).
 
-    :- public(pet/1).
+   :- public(pet/1).
 
-    pet(X):- ::dog(X).
-    pet(X):- ::cat(X).
+%     pet(X):- ::dog(X).
+%     pet(X):- ::cat(X).
 :- end_object.
 
 % -----------------------------------------------------

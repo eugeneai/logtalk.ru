@@ -152,6 +152,29 @@
 
 :- end_object.
 
+:- object(test_problem_5(_O_, _Fourth_),
+     extends(studyunit),
+     imports(object_exists_and_predicates_c(_O_, [horse/1 - protected, pet/1 - public]))).
+
+   test_name('Задача 5').
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(fifth_extends_fourth, true,
+        [condition(success(basic_object_exists))],
+        test_extending(_O_, _Fourth_)::ok).
+
+   test(horses_facts_are_defined,
+       all(::mem(Horse, [star, iron])),
+       [condition(success(predicate_defined(horse/1))),
+        each_explain(::error("В объекте '~w' надо задать факт существования лошади '~w' (horse/1)." + [_O_, Horse])),
+        each_task_name(horse_fact_defined(Horse)),
+        explain(::error("Не все лошади заданы в объекте '~w'" + [_O_]))
+       ],
+       (_O_<<horse(Horse))).
+
+:- end_object.
 
 :- object(test_owners(_O_),
    extends(studyunit)).
@@ -207,22 +230,11 @@
        [condition(success(3-third_has_cat_and_dog_protected))],
        test_problem_4(fourth, third)::ok).
 
+   test(5-fifth_has_animal_defined_and_horses, true,
+       [condition(success(4-fourth_has_animal_defined))],
+       test_problem_5(fifth, fourth)::ok).
 
 % -----------------------------------------
-
-   % succeeds(4-fourth_has_animal_defined) :-
-   %     Predicates = [animal/1 - public],
-   %     O = fourth,
-   %     ::runexp([
-   %         test_object(O)
-   %       , current_object(O) - test_extending(O, third)
-   %       , (test_extending(O, third)::ok) -
-   %            test_predicates_defined(O, Predicates)
-   %       , (test_predicates_defined(O, Predicates)::predicates_defined) -
-   %            test_animals_call(O, [butsy, flash])
-   %       , (test_animals_call(O, [butsy, flash])::ok) - stub_tests
-   %       , (::score(4, 1)) - stub_tests
-   %     ]).
 
    % succeeds(5-fifth_has_animal_defined_and_horses) :-
    %     Predicates = [horse/1 - protected, pet/1 - public],
