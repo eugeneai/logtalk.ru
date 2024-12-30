@@ -146,47 +146,6 @@
 
 :- end_object.
 
-:- object(test_animals_call(_O_, _Animals_),
-   extends(studyunit)).
-
-   :- use_module(lists, [member/2]).
-
-   :- protected(test_prop/1).
-   test_prop(Animal) :- _O_::animal(Animal).
-
-   :- protected(check_list/1).
-   check_list([]).
-   check_list([H|T]):-
-      ::test_prop(H), !,
-      check_list(T).
-
-   succeeds(all_objects_have_property) :- ok.
-   ok:-
-      check_list(_Animals_).
-
-   explain(is_animal(Animal),
-      "В объекте '~w' не известно, что '~w' - это животное. \nПроверьте наличие деклараций dog/1, cat/1  в объекте 'third'\nПроверьте наличие правила animal/1 в объекте 'fourth'.",
-      [_O_, Animal]) :-
-          member(Animal, _Animals_),
-          \+ _O_::animal(Animal).
-
-:- end_object.
-
-
-:- object(test_pet_call(_O_, _Animals_),
-   extends(test_animals_call(_O_, _Animals_))).
-
-   :- use_module(lists, [member/2]).
-   explain(is_pet(Animal),
-      "В объекте '~w' не известно, что '~w' - это домашнее животное (pet/1). \nПроверьте наличие деклараци правила pet/1 в объекте '~w'",
-      [_O_, Animal, _O_]) :-
-          member(Animal, _Animals_),
-          \+ _O_::pet(Animal).
-
-   test_prop(Animal) :- _O_::pet(Animal).
-
-:- end_object.
-
 
 :- object(test_owners(_O_),
    extends(studyunit)).
@@ -226,12 +185,12 @@
    % count(10).
    test_name('Практическая работа 1').
 
-   % test(1-first_has_cat_and_dog_correct, true, [],
-   %     test_problem_1(first)::ok).
+   test(1-first_has_cat_and_dog_correct, true, [],
+       test_problem_1(first)::ok).
 
-   % test(2-second_has_animal_defined, true,
-   %     [condition(success(1-first_has_cat_and_dog_correct))],
-   %     test_problem_2(second, first)::ok).
+   test(2-second_has_animal_defined, true,
+       [condition(success(1-first_has_cat_and_dog_correct))],
+       test_problem_2(second, first)::ok).
 
    test(3-third_has_cat_and_dog_protected, true,
        [],
