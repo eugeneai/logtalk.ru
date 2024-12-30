@@ -472,6 +472,71 @@
 
 :- end_object.
 
+:- object(test_problem_9(_Taylor_),
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(
+     _Taylor_, [fact/2 - private, sqr/2 - private, exp/3 - public]))).
+
+   test_name("Задача 9").
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(exp_3_can_run, true,
+        [condition(success(basic_predicates_defined)),
+        explain(::error("При выполнении запроса ~w::exp/3 возникла проблема." + [_Taylor_]))],
+        catch(
+           _Taylor_::exp(0, 10, _),
+           Except,
+           (
+              ::error("Произошла исключение при пробном запуске exp/3: ~q." + Except),
+              fail,!
+           )
+        )
+   ).
+
+   test(exp_of_0_is_0,
+     all(between(0, 20, Number)),
+     [
+       each_test_name(exp_of_o_at(Number, Value)),
+       each_condition(success(exp_3_can_run)),
+       explain(
+          (
+             _Taylor_::exp(0, 10, Value),
+             ::error("Объект '~w' с методом exp/3 при сообщении ~w::exp(0, N, Value). Value сильно отличается от 1.0. Например для 0, 10, ~w." +
+             [_Taylor_, _Taylor_, Value])
+          )
+       )
+     ],
+     (
+       _Taylor_::exp(0, Number, Value),
+       abs(Value-1.0) < 0.0001
+     )
+   ).
+
+   test(exp_of_1_converges_to_e_on_number,
+     all(between(1, 20, Number)),
+     [
+       each_test_name(exp_of_1_at(Number, Value)),
+       each_condition(success(exp_3_can_run)),
+       explain(
+          (
+             _Taylor_::exp(0, 10, Value),
+             ::error("Объект '~w' с методом exp/3 при сообщении ~w::exp(1, N, Value). Value сильно отличается от 1.0. Например для 1, 10, ~w." +
+             [_Taylor_, _Taylor_, Value])
+          )
+       )
+     ],
+     (
+       E = 2.7182818284590452353602874713527,
+       _Taylor_::exp(1, Number, Value1),
+       N1 is Number + 1,
+       _Taylor_::exp(1, N1, Value2),
+       abs(E - Value1) >= abs(E - Value2)
+     )
+   ).
+
+:- end_object.
 
 :- object(tests,
    extends(studyunit)).
@@ -510,5 +575,9 @@
    test(8-animals_speaking, true,
        [],
        test_problem_8(cat_object, dog_object)::ok).
+
+   test(9-taylor_sequence, true,
+       [],
+       test_problem_9(taylor)::ok).
 
 :- end_object.
