@@ -6,6 +6,7 @@
      _O_, [dog/1 - public, cat/1 - public]))).
 
    test_name("Задача 1").
+   test_type(problem).
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
@@ -54,6 +55,7 @@
    imports(object_exists_and_predicates_c(_O_, [animal/1 - public]))).
 
    test_name('Задача 2').
+   test_type(problem).
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
@@ -86,6 +88,7 @@
    imports(object_exists_and_predicates_c(_O_, [dog/1 - protected, cat/1 - protected]))).
 
    test_name('Задача 3').
+   test_type(problem).
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
@@ -114,6 +117,9 @@
 :- object(test_problem_4(_O_, _third_),
      extends(studyunit),
      imports(object_exists_and_predicates_c(_O_, [animal/1 - public]))).
+
+   test_name('Задача 4').
+   test_type(problem).
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
@@ -182,7 +188,8 @@
 :- object(tests,
    extends(studyunit)).
 
-   % count(10).
+   test_type(problem_set).
+
    test_name('Практическая работа 1').
 
    test(1-first_has_cat_and_dog_correct, true, [],

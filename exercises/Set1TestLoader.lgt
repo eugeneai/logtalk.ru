@@ -45,6 +45,5 @@
     logtalk_load('Set1Tests', [context_switching_calls(allow), source_data(on),debug(on)]),
     % Теперь осуществляем запуск всех тестов; здесь предполагается, что
     % в файле tests.lgt определен объект "tests".
-    tests::run,
-    tests::print
+    tests::run
 )).

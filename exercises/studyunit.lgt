@@ -41,10 +41,20 @@
         ::has_failed -> ::error("Задача '~w' не решена.\n" - [TaskName]);
         ::has_skipped-> ::error("Часть тестов задачи '~w' пропущено.\n" - [TaskName]);
         ::info("Задача '~w' решена!\n" - [TaskName])
-      ),
-      ::info("Тестирование закончено.\n").
+      ).
 
-   :-public(ok/0).
+   :- protected(test_type/1).
+   test_type(test).  % or test_type(problem)
+
+   run :-
+      ^^run,
+      (::test_type(problem) -> ::print;
+       ::test_type(problem_set) ->
+          ::print,
+          ::info("Тестирование закончено.\n")
+          ; true).
+
+   :- public(ok/0).
    ok :-
       ::run,
       ::all_succeeded.
