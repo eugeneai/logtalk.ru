@@ -580,6 +580,49 @@
 
 :- end_object.
 
+
+:- object(test_problem_11(_DL_, _NDL_),
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(
+     _DL_, [check/1 - public, password/1 - protected]))).
+
+   test_name("Задача 11").
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(check_door_lock_passwords_in_door_lock,
+      all(_DL_<<password(P)),
+      [
+         each_test_name(dl_password_checked(P)),
+         condition(success(basic_predicates_defined)),
+         each_explain(::error("Пароль '~w' не проверяется ~w::check/1. Заданы ли пароли? Реализован ли check/1 в ~w?" +
+          [P, _DL_, _DL_]))
+      ],
+      (
+       _NDL_::check(P))).
+
+   test(check_door_lock_passwords_in_my_door_lock,
+      all(_DL_<<password(P)),
+      [
+         each_test_name(ndl_password_checked(P)),
+         condition(success(check_door_lock_passwords_in_door_lock)),
+         explain(::error("Пароль '~w' не проверяется ~w::check/1. Заданы ли пароли? Вызваны ли в ~w унаследованные правила password/1? Реализован ли check/1 в ~w?" +
+          [P, _NDL_, _NDL_, _DL_]))
+      ],
+      (
+       _NDL_::check(P))).
+
+   test(check_my_door_lock_passwords_door_lock, true,
+      [
+         condition(success(basic_predicates_defined)),
+         explain(::error("В объекте '~w' не заданы новые пароли. Задайте пару новых паролей." +
+          [_NDL_]))
+      ],
+      (_NDL_<<password(P), \+ _DL_::check(P))).
+
+:- end_object.
+
 :- object(tests,
    extends(studyunit)).
 
@@ -625,5 +668,9 @@
    test(10-evluator, true,
        [],
        test_problem_10(evaluator)::ok).
+
+   test(11-door_lock_test, true,
+       [],
+       test_problem_11(door_lock, my_door_lock)::ok).
 
 :- end_object.

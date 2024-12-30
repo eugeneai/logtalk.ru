@@ -324,6 +324,10 @@
 % Примечание: тип данных строк паролей - символы, например
 % 'password', 'award_ed', '42', т.е. символы в одинарных
 % кавычках.
+% Тесть будет выполнен, если все пароли в door_lock будут
+% доступны в my_door_lock. В my_door_lock должны быть пароли,
+% не входящие в door_lock. Все пароли проверяются
+% my_door_lock::check/1.
 
 :- object(door_lock).
    % ....
@@ -339,6 +343,6 @@
 
    password('my-password').
    password('mudmervidzar').
-   % password(X) :- ^^password(X).
+   password(X) :- ^^password(X).
 
 :- end_object.
