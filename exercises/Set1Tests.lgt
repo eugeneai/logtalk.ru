@@ -318,7 +318,63 @@
           _O_::owner(Human1, Human2),
           error(existence_error(procedure, _), _),
           fail),!)).
+:- end_object.
 
+:- object(test_problem_7(_O_, _World_),
+     extends(studyunit),
+     imports(object_exists_and_predicates_c(_O_, [print/1 - public]))).
+
+   test_name('Задача 7').
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+
+   test(printing_owners_and_pets,
+       all(::mem(Owner-Animal, [kate-flash, kate-butsy, bob-star])),
+       [condition(success(predicate_defined(print/1))),
+        each_task_name(owner_animal_printed(Owner-Animal)),
+        each_explain(::error("Вывод сообщения ~w::print(~w) не включает строку '~w:~w'!" +
+        [_O_, _World_, Owner, Animal]))
+       ],
+       (
+         catch(
+          (
+             with_output_to(
+               string(Out),
+               _O_::print(_World_)
+             )
+             ,
+             format(atom(SubString), "~w:~w", [Owner, Animal]),
+             ::output_substring(Out, SubString)
+          ),
+          error(existence_error(procedure, _), _),
+         fail), !)).
+
+   % :- use_module(library(lists), [length/2]).
+
+   test(printing_rows, true,
+       [condition(success(printing_owners_and_pets)),
+        explain(::error("Вывод сообщения ~w::print(~w) надо разбить на три строки! Подсказка: escape-симвод перевода строки - '\\n' ." +
+        [_O_, _World_]))
+       ],
+       (
+         catch(
+          (
+             with_output_to(
+               string(Out),
+               _O_::print(_World_)
+             )
+             ,
+             %::info("str: ~w\n" - [Out]),
+             split_string(Out, "\n", "", L),
+             % L=[Out],
+             %::info("List: ~w\n" - [L]),
+             length(L, 4)
+          ),
+          error(existence_error(procedure, _), _),
+          % dummy,
+         fail), !)).
 
 :- end_object.
 
@@ -348,39 +404,12 @@
        [condition(success(4-fourth_has_animal_defined))],
        test_problem_5(fifth, fourth)::ok).
 
-   test(6-fifth_has_animal_defined_and_horses, true,
+   test(6-sixth_has_owners_defined, true,
        [condition(success(5-fifth_has_animal_defined_and_horses))],
        test_problem_6(sixth, fifth)::ok).
 
-% -----------------------------------------
+   test(7-table_animal_printer_prints_table, true,
+       [condition(success(6-sixth_has_owners_defined))],
+       test_problem_7(table_animal_printer, sixth)::ok).
 
-   % succeeds(5-fifth_has_animal_defined_and_horses) :-
-   %     Predicates = [horse/1 - protected, pet/1 - public],
-   %     O = fifth,
-   %     ::runexp([
-   %         test_object(O)
-   %       , current_object(O) - test_extending(O, fourth)
-   %       , (test_extending(O, fourth)::ok) -
-   %            test_predicates_defined(O, Predicates)
-   %       , (test_predicates_defined(O, Predicates)::predicates_defined) -
-   %            test_animals_call_fifth(O, [butsy, flash, star, iron])
-   %       , (test_animals_call_fifth(O, [butsy, flash, star, iron])::ok) - test_pet_call(O, [butsy, flash])
-   %       , (test_pet_call(O, [butsy, flash])::ok) - stub_tests
-   %       , (::score(5, 1)) - stub_tests
-   %     ]).
-
-   % rr:- true.
-
-   % succeeds(6-sixth_owners) :-
-   %     Predicates = [owner/2 - public],
-   %     O = sixth,
-   %     ::runexp([
-   %         test_object(O)
-   %       , (test_extending(O, fifth)::ok) -
-   %            test_predicates_defined(O, Predicates)
-   %       , (test_predicates_defined(O, Predicates)::predicates_defined) -
-   %            test_owners(O)
-   %       , (test_owners(O)::ok) - stub_tests
-   %       , (::score(6, 1)) - stub_tests
-   %     ]).
 :- end_object.
