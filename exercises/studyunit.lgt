@@ -88,6 +88,19 @@
 
 :- end_category.
 
+:- category(objects_exist_c(_Object_List_),
+   implements(testing_p)).
+
+   test(basic_object_exists,
+       all(::mem(Object, _Object_List_)),
+       [each_explain(::error("Вы не создали объект '~w':\n:- create_object(~w,...).\n % . . . \n:- end_object." +
+        [Object, Object])),
+        each_test_name(basic_object_exist(Object))],
+       ( current_object(Object) )
+   ).
+
+:- end_category.
+
 :- category(object_exists_and_predicates_c(
      _O_, _Predicates_),
    extends(object_exists_c(_O_))).
@@ -100,7 +113,7 @@
          condition(success(basic_object_exists)),
          each_explain(
            ::error("В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w(~w)." + [_O_, Scope, Pred, Scope, Pred])),
-         each_task_name(predicate_defined(Pred)),
+         each_test_name(predicate_defined(Pred)),
          explain(
            ::error("В объекте '~w' надо сделать необходимые декларации предикатов" + [_O_]))
        ], ( ::check(Pred, Scope) ) ).

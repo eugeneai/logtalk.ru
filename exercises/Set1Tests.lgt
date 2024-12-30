@@ -169,7 +169,7 @@
        all(::mem(Horse, [star, iron])),
        [condition(success(predicate_defined(horse/1))),
         each_explain(::error("В объекте '~w' надо задать факт существования лошади '~w' (horse/1)." + [_O_, Horse])),
-        each_task_name(horse_fact_defined(Horse)),
+        each_test_name(horse_fact_defined(Horse)),
         explain(::error("Не все лошади заданы в объекте '~w'" + [_O_]))
        ],
        (_O_<<horse(Horse))).
@@ -205,7 +205,7 @@
    test(horses_are_animals,
        all(::mem(Horse, [star, iron])),
        [condition(success(predicate_defined(horse/1))),
-        each_task_name(horse_is_a_animal(Horse)),
+        each_test_name(horse_is_a_animal(Horse)),
         explain(::error("В объекте '~w' не известно, что лошади (horse/1) - это животные (animal/1)! Используйте ::horse(..). " + [_O_]))
        ],
        (_O_<<horse(Horse),
@@ -217,7 +217,7 @@
    test(animals_inheritance,
        all(::mem(Pet, [flash, butsy])),
        [condition(success(basic_predicates_defined)),
-        each_task_name(is_an_animal(Pet)),
+        each_test_name(is_an_animal(Pet)),
         each_explain(::error("В объекте '~w' не известно, что '~w' - это животные (animal/1)! Вероятно забыто обращение к унсладованному определению animal/1. Создайте правило, связывающее обновленное правило с унаследованным из '~w'. Подсказака: используйте в теле правила ^^animal(..). " + [_O_, Pet, _Fourth_]))
        ],
        (catch(
@@ -244,7 +244,7 @@
    test(horse_owned_by_bob,
        all(::mem(Horse, [star])),
        [condition(success(predicate_defined(owner/2))),
-        each_task_name(bob_owns_horse(Horse)),
+        each_test_name(bob_owns_horse(Horse)),
         each_explain(::error("В объекте '~w' не известно, что лошадь (horse/1) '~w' принадлежит Бобу (bob). Не забываем про посылку сообщений при помощи ::! (::horse(..))." + [_O_, Horse]))
        ],
        (
@@ -256,7 +256,7 @@
    test(horse_not_owned_by_bob,
        none(::mem(Horse, [iron])),
        [condition(success(predicate_defined(owner/2))),
-        each_task_name(bob_doesnt_own_horse(Horse)),
+        each_test_name(bob_doesnt_own_horse(Horse)),
         each_explain(::error("Откуда вы взяли, что Боб (bob) владеет '~w' (в объекте '~w'), в задании такого нет, ;-) ! Не забываем, что в заголовке правил использование констант - это обычное дело, например, owner(ann,X) :- ..." + [Horse, _O_]))
        ],
        (
@@ -268,7 +268,7 @@
    test(ann_owns_some,
        none(::mem(Animal, [iron, star, butsy, flash])),
        [condition(success(predicate_defined(owner/2))),
-        each_task_name(ann_doesnt_own(Animal)),
+        each_test_name(ann_doesnt_own(Animal)),
         each_explain(::error("Откуда взялась Аня (ann), и что она владеет '~w' (в объекте '~w'), в задании такого нет, ;-) ! Вероятно имеет место преступный копипаст из одной из подсказок тестов!" + [Animal, _O_]))
        ],
        (
@@ -280,7 +280,7 @@
    test(kate_owns_pets,
        all(::mem(Animal, [butsy, flash])),
        [condition(success(predicate_defined(owner/2))),
-        each_task_name(kate_owns_pets(Animal)),
+        each_test_name(kate_owns_pets(Animal)),
         each_explain(::error("Катя (kate) должна влыдеть '~w' (залается в объекте '~w'), однако такого не наблюдаю!" +
         [Animal, _O_]))
        ],
@@ -293,7 +293,7 @@
    test(kate_doesnt_own_some,
        none(::mem(Animal, [star, iron])),
        [condition(success(predicate_defined(owner/2))),
-        each_task_name(kate_owns_pets(Animal)),
+        each_test_name(kate_owns_pets(Animal)),
         each_explain(::error("Катя (kate) не владеет '~w' (залается в объекте '~w')! Слишком много ответственности на Кате! Проверьте определение правил с заголовком owner(kete, ...) :- ... !" +
         [Animal, _O_]))
        ],
@@ -309,7 +309,7 @@
              Humans = [kate, bob, ann], !,
              ::mem(Human1, Humans), ::mem(Human2, Humans))),
        [condition(success(predicate_defined(owner/2))),
-        each_task_name(human_owns_human(Human1, Human2)),
+        each_test_name(human_owns_human(Human1, Human2)),
         each_explain(::error("Привет! Докатились до того, что люди владеют людьми! Откуда взялась утвержение, что '~w' (человек в данном контексте) владеет '~w' (тоже человек) в объекте '~w'? Рабовладение далеко в прошлом!" +
         [Human1, Human2, _O_]))
        ],
@@ -333,7 +333,7 @@
    test(printing_owners_and_pets,
        all(::mem(Owner-Animal, [kate-flash, kate-butsy, bob-star])),
        [condition(success(predicate_defined(print/1))),
-        each_task_name(owner_animal_printed(Owner-Animal)),
+        each_test_name(owner_animal_printed(Owner-Animal)),
         each_explain(::error("Вывод сообщения ~w::print(~w) не включает строку '~w:~w'!" +
         [_O_, _World_, Owner, Animal]))
        ],
@@ -346,7 +346,8 @@
              )
              ,
              format(atom(SubString), "~w:~w", [Owner, Animal]),
-             ::output_substring(Out, SubString)
+             ( ::output_substring(Out, SubString) -> true ;
+               ::info("Ваш объект '~w' выдал: ~q" + [_O_, Out]), fail )
           ),
           error(existence_error(procedure, _), _),
          fail), !)).
@@ -377,6 +378,100 @@
          fail), !)).
 
 :- end_object.
+
+:- object(test_problem_8(_Cat_, _Dog_),
+     extends(studyunit),
+     imports(objects_exist_c([_Cat_, _Dog_]))).
+
+   test_name('Задача 8').
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(animal_objects_define_say,
+        all(::mem(Object, [_Cat_, _Dog_])),
+        [
+          each_test_name(animal_object_define_say(Object)),
+          each_condition(success(basic_object_exist(Object))),
+          each_explain(
+            ::error("В существующем объекте '~w' не задан метод say/1, определяющий, что говорит животное!" + [Object]))
+        ],
+        (catch(
+          (
+           Object<<say(_),!
+          ),
+          error(existence_error(procedure, _), _),
+          fail
+        ),!)).
+
+   test(animals_use_really_say,
+        all(::mem(Object, [_Cat_, _Dog_])),
+        [
+          each_test_name(animal_object_use_really_say(Object)),
+          each_condition(success(animal_object_define_say(Object))),
+          each_explain(
+             ::error("Объект '~w' не может ответить на сообщение ::say_something (~w::say_something)! Во время исполнения запроса возникает исключение 'Не найден метод'. Вероятно идет речь о том, что say(Something) используется в ::say_something без ::, т.е. надо проверить посылается ли сообщение say/1. Разница между использованием в теле правила say(Something) и ::say(Something) в том, что первый вариант обращается к предикату say/1, определенному локально в объекте, а ::say(Something) посылает сообщение себе и объектам-наследниками. Чтобы объекты-наследники могли отвечать на say/1, он [say/1] должен быть декларирован как protected или public (не private)." + [Object, Object]))
+        ],
+        (catch(
+          catch(
+             with_output_to(
+                string(_),
+                Object::say_something
+             ),
+             error(permission_error(access,private_predicate,say/1), _),
+             true
+          ),
+          error(existence_error(procedure, _), context(_,_)),
+          fail
+        ),!)).
+
+   test(animals_can_say_aloud,
+        all(::mem(Object, [_Cat_, _Dog_])),
+        [
+          each_test_name(animal_object_can_say_aloud(Object)),
+          each_condition(success(animal_object_use_really_say(Object))),
+          each_explain(
+             ::error("Объект '~w' не может ответить на сообщение ::say_something (~w::say_something)! Объект '~w' пытается запросить ::say(Something) (say/1), но у '~w' нет доступа к нему (private или вообще без декларации). Надо проверить чтобы в '~w' или в унаследованных объектах был определен public или protected say/1." + [Object, Object, Object, Object, Object]))
+        ],
+        (catch(
+          (
+             with_output_to(
+                string(_),
+                Object::say_something
+             )
+          ),
+          error(permission_error(access,private_predicate,say/1), _),
+          fail
+        ),!)).
+
+   test(animals_objects_say_aloud_correctly,
+        all(::mem(Object, [_Cat_, _Dog_])),
+        [
+          each_test_name(animal_object_say_aloud(Object)),
+          each_condition(success(animal_object_can_say_aloud(Object))),
+          each_explain(
+             ::error("Объект '~w' не отвечает на сообщение ::say_something (~w::say_something) согласно заданию! Надо проверить чтобы в '~w' или в унаследованных объектах был определен public say_something, печатающий сообщение согласно заданию." + [Object, Object, Object]))
+        ],
+        (catch(
+          (
+             with_output_to(
+                string(S),
+                Object::say_something
+             ),
+             Object<<say(Said),
+             format(string(SS), "~w!!!\n",[Said]),
+             (  sub_string(S,_,_,_,SS)
+             -> true
+             ;
+                ::error("Объект '~w' сгенерировал ~q, а должно быть ~q" + [Object, S, SS]),
+                fail)
+          ),
+          error(existence_error(procedure, _), _),
+          fail
+        ),!)).
+
+:- end_object.
+
 
 :- object(tests,
    extends(studyunit)).
@@ -411,5 +506,9 @@
    test(7-table_animal_printer_prints_table, true,
        [condition(success(6-sixth_has_owners_defined))],
        test_problem_7(table_animal_printer, sixth)::ok).
+
+   test(8-animals_speaking, true,
+       [],
+       test_problem_8(cat_object, dog_object)::ok).
 
 :- end_object.

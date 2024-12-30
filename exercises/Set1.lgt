@@ -179,7 +179,7 @@
 % печатать сразу после слов "!!!" и переводить строку (!).
 % Примечание: при реализации можно создавать дополнительные
 % объекты (или категории), использовать наследование
-% (и/или композицию), можно использовать объекты-протоколы.
+% (и/или композицию), можно использовать протоколы.
 %
 % Пример использования:
 % ?- dog_object::say_something.
@@ -189,12 +189,14 @@
 :- object(animal_object).
    :- public(say_something/0).
    say_something:-
+%        say(Something),   %
         ::say(Something),
         format('~w!!!\n',[Something]).
 :- end_object.
 
 :- protocol(say_p).
-   :- private(say/1).
+%   :- private(say/1).   %
+   :- protected(say/1).
 :- end_protocol.
 
 :- object(dog_object,
