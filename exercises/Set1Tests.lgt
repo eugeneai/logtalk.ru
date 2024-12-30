@@ -538,6 +538,48 @@
 
 :- end_object.
 
+:- object(test_problem_10(_O_),
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(
+     _O_, [eval/2 - public]))).
+
+   test_name("Задача 10").
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(evaluator_works_well,
+       all((L=[f,t], ::mem(A, L), ::mem(B,L), ::mem(C,L))),
+       [condition(success(basic_predicates_defined)),
+        explain(::error("Некоторые выражения вычислены неправильно!"+[])),
+        each_test_name(evaluated(Exp, [A, B, C]))
+       ],
+       (
+          % consider a tautology, which is t for each set of inputs. Axiom as well.
+          % (𝐴 → (𝐵 → 𝐶)) → ((𝐴 → 𝐵) → (𝐴 → 𝐶))
+          ::formula(A, B, C, Exp),
+          _O_::eval(Exp, t)
+          ->
+             true
+          ;
+             ::error("Выражение (аксиома ИП) вычисляется в ~w, а должно в ~w " + [f, t]),
+             fail
+       )
+   ).
+
+   to(A, B, or(not(A), B)).
+
+   :- protected(formula/4).
+   formula(A, B, C, E) :-
+      to(B,C, BC),
+      to(A,BC, ABC),
+      to(A,C, AC),
+      to(A,B, AB),
+      to(AB, AC, ABAC),
+      to(ABC, ABAC, E),!.
+
+:- end_object.
+
 :- object(tests,
    extends(studyunit)).
 
@@ -579,5 +621,9 @@
    test(9-taylor_sequence, true,
        [],
        test_problem_9(taylor)::ok).
+
+   test(10-evluator, true,
+       [],
+       test_problem_10(evaluator)::ok).
 
 :- end_object.

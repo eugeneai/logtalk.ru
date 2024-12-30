@@ -285,21 +285,32 @@
    eval(t,t):-!.
    eval(f,f):-!.
 
-   eval(and(A, _), f):-
-       eval(A, f), !.
-   eval(and(_, B), f):-
-       eval(B, f), !.
-   eval(and(_, _), t):-!.
-
-   eval(or(A, _), t):-
-       eval(A, t), !.
-   eval(or(_, B), t):-
-       eval(B, t), !.
-   eval(or(_, _), f):-!.
-
    eval(not(A), f):-
        eval(A, t), !.
-   eval(not(_), t):-!.
+   eval(not(A), t):-
+       eval(A, f), !.
+
+   eval(and(_, f), f):- !.
+   eval(and(f, _), f):- !.
+   eval(and(A, t), A1):- !,
+       eval(A, A1).
+   eval(and(t, A), A1):- !,
+       eval(A, A1).
+   eval(and(A, B), C):- !,
+       eval(A, A1),
+       eval(B, B1),
+       eval(and(A1, B1), C).
+
+   eval(or(_, t), t):- !.
+   eval(or(t, _), t):- !.
+   eval(or(A, f), A1):- !,
+       eval(A, A1).
+   eval(or(f, A), A1):- !,
+       eval(A, A1).
+   eval(or(A, B), C):- !,
+       eval(A, A1),
+       eval(B, B1),
+       eval(or(A1, B1), C).
 
 :- end_object.
 
