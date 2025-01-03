@@ -89,8 +89,6 @@
       format('Требуется реализовать запрос \'~w\'!\n', [Name]).
 :- end_object.
 
-
-
 % -----------------------------------------------------
 % Упражнение 2: В объекте ниже надо объявить protected-
 % метод db/2 и реализовать public-метод add/2, таким
@@ -242,29 +240,30 @@
 % формата хранения настроек в локальной базе данных.
 
 :- object(setup).
-%   :- protected([option/2, option/1]).
-%   :- public([current_option/2, current_option/1]).
-%   :- protected([option_/1]).
 
-%   set_option(Name=Value) :-
-%     retractall(Name=Value),
-%     assertz(option_(Name=Value)).
-%   set_option(Name-Value) :-
-%     set_option(Name=Value).
-%   set_option(Name, Value) :-
-%     ::option(Name=Value).
+  :- protected([option/2, option/1]).
+  :- public([current_option/2, current_option/1]).
+  :- protected([option_/1]).
 
-%   current_option(Name=Value) :-
-%     option_(Name=Value).
-%   current_option(Name=Value) :-
-%     option(Name=Value).
-%   current_option(Name=Value) :-
-%     option(Name-Value).
-%   current_option(Name=Value) :-
-%     option(Name,Value).
-%   current_option(Name-Value) :-
-%     current_option(Name=Value).
-%   current_option(Name, Value).
+  set_option(Name=Value) :-
+    retractall(Name=Value),
+    assertz(option_(Name=Value)).
+  set_option(Name-Value) :-
+    set_option(Name=Value).
+  set_option(Name, Value) :-
+    ::option(Name=Value).
+
+  current_option(Name=Value) :-
+    option_(Name=Value).
+  current_option(Name=Value) :-
+    option(Name=Value).
+  current_option(Name=Value) :-
+    option(Name-Value).
+  current_option(Name=Value) :-
+    option(Name,Value).
+  current_option(Name-Value) :-
+    current_option(Name=Value).
+  current_option(Name, Value).
 
 :- end_object.
 
@@ -275,15 +274,15 @@
 :- object(my_setup,
   extends(setup)).
 
-  % option(prog_name1, program_one).
-  % option(prog_name2=program_two).
-  % option(prog_name3-program_three).
+  option(prog_name1, program_one).
+  option(prog_name2=program_two).
+  option(prog_name3-program_three).
 
 :- end_object.
 
 
 :- object(my_setup_ext).
-  % option(prog_name(program)).
+  option(prog_name(program)).
 :- end_object.
 
 % -----------------------------------------------------
@@ -400,11 +399,24 @@
      assertz(node(Name, Question, What)),
      assertz(leave(What)).
 
+  :- public(print/0).
+  :- info(print/0, [
+     comment is 'Печатает правила ЭС'
+  ]).
+
+  print :-
+    ( root(R) -> format('Начальная вершина root(~q).\n', [R]) ;
+                 format('Куда-то делась начальная вершина. А должна быть!\n') ),
+    format('Список узлов\n------------\n'),
+    forall( node(N, Q, Y),
+      format('node(~q,~q,~q).\n', [N, Q, Y]) ),
+    format('Список листовых вершин\n----------------------\n'),
+    forall( leave(Name),
+      format('leave(~q).\n',[Name]) ).
+
 % forall(expert_system<<node(N, Q, Y), format("node(~q,~q,~q).\n", [N, Q, Y])).
 
 :- end_object.
-
-
 
 
 % -----------------------------------------------------
@@ -420,6 +432,11 @@
    :- dynamic(number/1).
 
    % Правило, выполняющее вычитание.
+   rule(subtract) :-
+      number(X), number(Y), X>Y, !,
+      X1 is X-Y,
+      retract(number(X)),
+      assertz(number(X1)).
 
    rule(print) :-  % При условии, что все числа одинаковые.
       ::number(X), !,
@@ -513,6 +530,19 @@
       argnames is ['Vertex', 'Vertex']
    ]).
 
+   add(A, B) :-
+      assertz(edge(A,B)).
+
+   :- public(add/1).
+   :- mode(add(+atom)).
+   :- info(add/1, [
+      comment is "Добавляет вершину в список вершин остового дерева",
+      argnames is ['Vertex']
+   ]).
+
+   add(A) :-
+      assertz(vertex(A)).
+
    % Ваша реализация add/2.
    :- public(build/0).
    :- info(build/0, [
@@ -528,7 +558,6 @@
       ::arc(A,_,_),
       assertz(vertex(A)).
 
-
    build :-
       init,
       bt.
@@ -542,8 +571,8 @@
       ( KeyList \= []
       ->
         keysort(KeyList, [Least-(V1, V2)]),
-        assertz(edge(V1, V2)),
-        assertz(vertex(V2))
+        add(V1, V2),
+        add(V2)
       ; true ).
 
 :- end_object.
@@ -641,15 +670,21 @@
    % Т.е. надо запоминать, что было сделано: done(clause1, clause2, literal).
    % Пример:
    rule('Reduce trivial positive literal', reduce_p_literal) :-
-      clause(P), clause(C), remove(~P, C1, _), \+ done(P, C, P), !,
+      clause(P), clause(C), remove(~P, C, C1), \+ done(P, C, P), !,
       assertz(clause(C1)), assertz(done(P, C, P)).
 
    rule('Reduce trivial negative literal', reduce_not_p_literal) :-
-      clause(~P),
-      tbd('Аналогично предыдущему случаю только литерал отрицательный').
+      clause(~P), clause(C), remove(P, C, C1), \+ done(P, C, ~P), !,
+      assertz(clause(C1)), assertz(done(P, C, ~P)).
+      % tbd('Аналогично предыдущему случаю только литерал отрицательный').
 
    rule('Reduction', reduction) :-
-      tbd('Правило должно найти два дизьюнкта A | ~p | B, C | p | D и создать новый A | B | C | D. A, B, C, D могут быть пустыми').
+      clause(C1), clause(C2),
+      remove(P, C1, C1R),
+      remove(~P, C2, C2R),
+      \+ done(C1, C2, P), !,
+      assertz(clause(C1R | C2R)), assertz(done(C1, C2, P)).
+      % tbd('Правило должно найти два дизьюнкта A | ~p | B, C | p | D и создать новый A | B | C | D. A, B, C, D могут быть пустыми').
 
    % Это правило - последнее, т.е. с наименьшим приоритетом.
    rule('No contradiction', halt). % Невозможно продвинуться дальше - тупик, нет противоречия.
