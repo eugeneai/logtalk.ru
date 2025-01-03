@@ -121,8 +121,8 @@
 :- object(hp_test,
    extends(studyunit)).
 
-   % debug(6).    % Включить отладочные сообщения
-   % debug(60).
+   % debug_level(6).    % Включить отладочные сообщения
+   % debug_level(60).
 
    test_name('Harry Potter Cast test').
 
@@ -657,7 +657,7 @@
       argnames is ['Rule name', 'Action']
    ]).
 
-   rule('Find a contradiction', qed) :-
+   rule('Find a contradiction'(A, ~A), qed) :-
       clause(A), clause(~A),!.
       %tbd('Правило должно найти два дизьюнкта P и ~P, P может быть формулой.').
 
@@ -666,7 +666,7 @@
       !,
       retract(clause(A)).
 
-   rule('Remove double', remove_double) :-
+   rule('Remove double'(C, P, C1), remove_double) :-
       clause(C), remove(P, C, C1), remove(P, C1, _), !,
       retract(clause(C)), assertz(clause(C1)).
       % tbd('Удалить повторения в дизъюнкте').
@@ -679,11 +679,11 @@
    % Эти правила должны для одного набора дизъюнктов выполняться один раз
    % Т.е. надо запоминать, что было сделано: done(clause1, clause2, literal).
    % Пример:
-   rule('Reduce trivial positive literal', reduce_p_literal) :-
+   rule('Reduce trivial positive literal'(P, C, P, true, C1), reduce_p_literal) :-
       clause(P), clause(C), remove(~P, C, C1), \+ done(P, C, P), !,
       assertz(clause(C1)), assertz(done(P, C, P)).
 
-   rule('Reduce trivial negative literal', reduce_not_p_literal) :-
+   rule('Reduce trivial negative literal'(P, C, ~P, true, C1), reduce_not_p_literal) :-
       clause(~P), clause(C), remove(P, C, C1), \+ done(P, C, ~P), !,
       assertz(clause(C1)), assertz(done(P, C, ~P)).
       % tbd('Аналогично предыдущему случаю только литерал отрицательный').
@@ -733,19 +733,20 @@
       retractall(clause(_)),
       retractall(done(_,_,_)).
 
-   :- public(proof/1).
-   :- info(proof/1, [
+   :- public(proof/2).
+   :- info(proof/2, [
       comment is 'Строит доказательство. Используется в тесте',
-      argnames is ['ResultTerm']
+      argnames is ['ResultTerm','Print?']
    ]).
 
    :- use_module(library(lists), [member/2]).
 
-   proof(Result) :-
+   proof(Result, Aloud) :-
      rule(Name, R), !,
-     format('Правило:~w\n',[Name]),
+     ( Aloud == true ->
+        format('Правило:~w\n',[Name]) ; true),
      ( member(R, [qed, halt]) -> Result = R;
-      proof(Result)).
+      proof(Result, Aloud)).
 
    :- public(print/0).
    print :-
@@ -768,55 +769,48 @@
 
    test_name('Тест системы доказательства теорем в пропозициональном исчислении методом резолюции').
 
-   debug(20).
+   debug_level(0).
 
    :- public(test_formula/1).
 
-   test(prove_c_to_c, true,
+   test(prove_theorems,
+      all(::mem(Formula, [
+         c=>c,
+         (a=>b) & (b=>c) => (a=>c),
+         (p=>(q=>r))=>((p=>q)=>(p=>r)),
+         ~(((~p v q v c) & (p v q v c) & ~(q v c)))
+      ])),
       [
-        explain(::error('Формула ~q является теоремой, а ваша машина не может это доказать!' +
-        [c=>c]))
+        each_explain(::error('Формула ~q является теоремой, а ваша машина не может это доказать!' +
+        [Formula])),
+        each_test_name(theorem(Formula))
       ],
-      ip_zero_test::test_formula(
-        c=>c
-      )
+      (
+        ip_zero_test::test_formula(
+        Formula
+       ))
    ).
 
-   test(prove_c_to_c, fail,
-      [],
+   test(fail_to_prove_neg_c_to_c, fail,
+      [explain(::error('Формула ~q точно не теорема, а ваша машина ее доказывает!' +
+       [~(c=>c)]))],
       ip_zero_test::test_formula(
         ~(c=>c)
       )
    ).
 
-   test(prove_transitivity, true,
-      [],
-      ip_zero_test::test_formula(
-        (a=>b) & (b=>c) => (a=>c)
-      )
-   ).
-
-   test(prove_axiom_ip, true,
-      [],
-      ip_zero_test::test_formula(
-        (p=>(q=>r))=>((p=>q)=>(p=>r))
-      )
-   ).
-
-   test(check_general_case, true,
-      [],
-      ip_zero_test::test_formula(
-        ~(((~p v q v c) & (p v q v c) & ~(q v c)))
-      )
-   ).
-
    test_formula(F) :-
+     ::debug_level(DL),
+     (DL>0 -> Aloud = true; Aloud = false),
      ip_zero::clear_db,
-     format('Formula: ~q.\n', [F]),
+     ( Aloud == true -> format('Formula: ~q.\n', [F]); true),
      ip_zero::translate(~F),
-     ip_zero::print,
-     format("Proof:\n"),
-     ip_zero::proof(qed),
-     ip_zero::print.
+     ( Aloud == true -> ip_zero::print; true),
+     ::debug(1,"Proof:\n"-[]),
+     ip_zero::proof(qed, Aloud),
+     ::debug(1,"End of inference.\n"-[]),
+     ( Aloud == true -> ip_zero::print; true),
+     ::debug(1,"End of cycle.\n"-[]).
+
 
 :- end_object.

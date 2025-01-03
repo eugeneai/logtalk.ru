@@ -7,8 +7,6 @@
 
    test_type(problem_set).
 
-
-
    test(prover_test, true,
        [],
        (ip_zero_test::ok)).

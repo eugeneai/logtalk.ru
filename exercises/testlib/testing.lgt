@@ -230,11 +230,17 @@
 
    :- protected(debug/2).
    debug(Level,Template+List):-
-      debug_level(DLevel),
+      ::debug_level(DLevel),
       Level =< DLevel, !,
       ::fmt(debug, Template, List, String),
       format(String, []).
+   debug(Level,Template-List):-
+      ::debug_level(DLevel),
+      Level =< DLevel, !,
+      ::fmtl(debug, Template, List, String),
+      format(String, []).
    debug(_Level,_Template+_List).
+   debug(_Level,_Template-_List).
 
    :- protected(fmt/3).
    fmt(Level, Message, String) :-
