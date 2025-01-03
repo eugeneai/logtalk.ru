@@ -14,16 +14,16 @@
 % Задана инкапсулированная в объект 'hp_db' база данных:
 
 :- object(hp_db).
-   :- protected([movie/3,char/2]).
+   :- protected([movie/3, char/2]).
    :- dynamic([movie/3, char/2]).
-   movie('Philosopher's Stone', fs, 2001).
-   movie('Chamber of Secrets', cos, 2002).
-   movie('Prisoner of Azkaban', poa, 2004).
-   movie('Goblet of Fire', gof, 2005).
-   movie('Order of the Phoenix', ootf, 2007).
-   movie('Half-Blood Prince', hbp, 2009).
-   movie('Deathly Hallows – Part 1', dhp1, 2010).
-   movie('Deathly Hallows – Part 2', dhp2,2011).
+   % movie('Philosopher\'s Stone', fs, 2001).
+   % movie('Chamber of Secrets', cos, 2002).
+   % movie('Prisoner of Azkaban', poa, 2004).
+   % movie('Goblet of Fire', gof, 2005).
+   % movie('Order of the Phoenix', ootf, 2007).
+   % movie('Half-Blood Prince', hbp, 2009).
+   % movie('Deathly Hallows – Part 1', dhp1, 2010).
+   % movie('Deathly Hallows – Part 2', dhp2, 2011).
 
    char('Katie Bell',       [fs, cos,            hbp, dhp1, dhp2]).
    char('Vincent Crabble',  [fs, cos, pos, gof, ootf, hbp]).
@@ -32,7 +32,7 @@
    char('Vernon Dursley',   [fs, cos, pos,      ootf,      dhp1]).
    char('March Dursley',             [pos]).
    char('Petunia Dursley',  [fs, cos, pos,      ootf,      dhp1, dhp2]).
-   char('Argus Filch',      [fs, cos, pos, gof  ootf, hbp,       dhp2]).
+   char('Argus Filch',      [fs, cos, pos, gof, ootf, hbp,       dhp2]).
    char('Hermione Granger', [fs, cos, pos, gof, ootf, hbp, dhp1, dhp2]).
    char('Harry Potter',     [fs, cos, pos, gof, ootf, hbp, dhp1, dhp2]).
    char('Rolanda Hooch',    [fs]).
@@ -50,7 +50,7 @@
       argnames is ['Название запроса', 'Ответ']
    ]).
 
-   :- user_module(library(lists), [member/2, length/1]).
+   :- use_module(library(lists), [member/2, length/2]).
 
    query('Movie with Susan Bones', [Name]) :-
       ::char('Susan Bones', Series),
@@ -181,8 +181,8 @@
   calc(N, V) :-
     N1 is N-1,
     N2 is N-2,
-    ::calc(N1, V1),
-    ::calc(N2, V2),
+    calc(N1, V1),
+    calc(N2, V2),
     V is V1+V2.
 
 :- end_object.
@@ -244,9 +244,10 @@
   :- protected([option/2, option/1]).
   :- public([current_option/2, current_option/1]).
   :- protected([option_/1]).
+  :- dynamic([option_/1]).
 
   set_option(Name=Value) :-
-    retractall(Name=Value),
+    retractall(option_(Name=Value)),
     assertz(option_(Name=Value)).
   set_option(Name-Value) :-
     set_option(Name=Value).
@@ -440,7 +441,7 @@
 
    rule(print) :-  % При условии, что все числа одинаковые.
       ::number(X), !,
-      format('Наибольший общий делитель: ~w\n.' ~ [X]).
+      format('Наибольший общий делитель: ~w\n.', [X]).
 
    :- public(run/0).
    run :-
@@ -472,11 +473,11 @@
 % Подсказка - полезные предикаты: встроенные findall/3,
 % setof/3, bagof/3, keysort/2.
 
-:- object(graph)
+:- object(graph).
    % Множество ребер
    :- private(edge/3).
    % :- dynamic(edge/3).
-   :- mode(edge(?symbol, ?symbol, ?integer)).
+   :- mode(edge(?atom, ?atom, ?atom), zero_or_more).
    :- info(edge/3, [
       comment is 'Ребро графа с заданной стоимостью',
       argnames is ['Vertex', 'Vertex', 'Cost']
@@ -498,7 +499,7 @@
    edge(d, e, 15).
 
    :- public(arc/3).
-   :- mode(arc(?atom, ?atom, ?number)).
+   :- mode(arc(?atom, ?atom, ?number), zero_or_more).
    :- info(arc/3, [
       comment is "Public-интерфейс к дугам графа",
       argnames is ['Vertex', 'Vertex', 'Cost']
@@ -517,14 +518,14 @@
 
    :- protected(edge/2).
    :- dynamic(edge/2).
-   :- mode(edge(+atom, +atom)).
+   :- mode(edge(+atom, +atom), zero_or_more).
    :- info(edge/2, [
       comment is "Ребро остового дерева. Редро соответствует graph::arc/3.",
       argnames is ['Vertex', 'Vertex']
    ]).
 
    :- public(add/2).
-   :- mode(add(+atom, +atom)).
+   :- mode(add(+atom, +atom), one).
    :- info(add/2, [
       comment is "Добавляет ребро в дерево",
       argnames is ['Vertex', 'Vertex']
@@ -534,7 +535,7 @@
       assertz(edge(A,B)).
 
    :- public(add/1).
-   :- mode(add(+atom)).
+   :- mode(add(+atom), one).
    :- info(add/1, [
       comment is "Добавляет вершину в список вершин остового дерева",
       argnames is ['Vertex']
@@ -551,7 +552,7 @@
 
    % Ваша реализация build/0. Можно добавлять свои предикаты,
    % динамические факты и т.д.
-   :- private()
+   :- private(vertex/1).
    :- dynamic(vertex/1).
 
    init :-
@@ -570,10 +571,15 @@
          ), KeyList),
       ( KeyList \= []
       ->
-        keysort(KeyList, [Least-(V1, V2)]),
+        keysort(KeyList, [_Least-(V1, V2)]),
         add(V1, V2),
         add(V2)
       ; true ).
+
+   :- public(clear_db/0).
+   clear_db:-
+      retractall(vertex(_)),
+      retractall(edge(_,_)).
 
 :- end_object.
 
@@ -587,13 +593,20 @@
 % несколько правил реализованы как примеры и т.п.
 % Надо реализовать оставшиеся правила, так, чтобы сработал тест.
 
+:- op(100, fy, ~ ).
+:- op(110, xfy, & ).
+:- op(120, xfy, v ).
+:- op(130, xfy, => ).
+:- op(140, xfx, <=> ).
+
+
 :- object(ip_zero).
    :- public(translate/1).
-   :- mode(translate(+expression))
+   :- mode(translate(+expression), one).
    :- info(translate/1, [
       comment is 'Выполняет редукцию формул (дизъюнктов) в канонический вид',
       argnames is ['Formula']
-   ])
+   ]).
 
    translate(F & G) :- !,
       translate(F),
@@ -604,34 +617,28 @@
       translate(Red).
 
    translate(Clause) :- % Дальнейшая трансформация невозможна.
-      assertz(Clause).
+      assertz(clause(Clause)).
 
    :- protected(clause/1). % Дизъюнкт
    :- dynamic(clause/1).
 
-   :- op(100, fy, ~).
-   :- op(110, xfy, &).
-   :- op(120, xfy, |).
-   :- op(130, xfy, =>).
-   :- op(140, xfy, <=>).
-
    :- protected(tr/2).
 
    tr(~(~X), X) :-! .
-   tr(X=>Y, ~X | Y) :- @.
+   tr(X=>Y, ~X v Y) :- !.
    tr(X<=>Y, (X=>Y) & (Y=>X)) :- !.
-   tr(~(X | Y), ~X & ~Y) :- !.
-   tr(~(X & Y), ~X | ~Y) :- !.
-   tr(X & Y | Z, (X | Z) & (Y | Z)) :-!.
-   tr(X | Y & Z, (X | Y) & (X | Z)) :-!.
-   tr(X | Y, X1 | Y) :- tr(X, X1), !.
-   tr(X | Y, X | Y1) :- tr(Y, Y1), !.
+   tr(~(X v Y), ~X & ~Y) :- !.
+   tr(~(X & Y), ~X v ~Y) :- !.
+   tr(X & Y v Z, (X v Z) & (Y v Z)) :-!.
+   tr(X v Y & Z, (X v Y) & (X v Z)) :-!.
+   tr(X v Y, X1 v Y) :- tr(X, X1), !.
+   tr(X v Y, X v Y1) :- tr(Y, Y1), !.
    tr(~X, ~X1) :- tr(X, X1).
 
    :- public(list/0).  % Список дизъюнктов (clause/1).
    list :-
      forall(clause(C),
-       format('~w', [C])).
+       format('~w\n', [C])).
 
    :- public(proof/0).
    proof :-
@@ -641,25 +648,28 @@
         format('Нет противоречия, исходная формула не является теоремой'), true;
       Action == qed ->
         format('Найдено противоречие!\n'), true ;
-      proof.)
+      proof).
 
    :- protected(rule/2).
-   :- mode(rule(-atom, -atom)).
+   :- mode(rule(-atom, -atom), one).
    :- info(rule/2, [
-      comment is 'Правила, реализующие метод резолюции.'
+      comment is 'Правила, реализующие метод резолюции.',
       argnames is ['Rule name', 'Action']
    ]).
 
    rule('Find a contradiction', qed) :-
-      tbd('Правило должно найти два дизьюнкта P и ~P, P может быть формулой.').
+      clause(A), clause(~A),!.
+      %tbd('Правило должно найти два дизьюнкта P и ~P, P может быть формулой.').
 
    rule('Remove trivially true clause', tuth_remove) :-
-      clause(A), has(P, A), has(~P, A), % пример правила.
+      clause(A), remove(P, A, _), remove(~P, A, _), % пример правила.
       !,
-      retract(A).
+      retract(clause(A)).
 
    rule('Remove double', remove_double) :-
-      tbd('Удалить повторения в дизъюнкте').
+      clause(C), remove(P, C, C1), remove(P, C1, _), !,
+      retract(clause(C)), assertz(clause(C1)).
+      % tbd('Удалить повторения в дизъюнкте').
 
    % Можно удалять повторения дизъюнктов.
    % rule('Remove copy of a clause', remove_clause_copy) :-
@@ -678,38 +688,38 @@
       assertz(clause(C1)), assertz(done(P, C, ~P)).
       % tbd('Аналогично предыдущему случаю только литерал отрицательный').
 
-   rule('Reduction', reduction) :-
+   rule('Reduction'(C1, C2, P, C1R v C2R), reduction) :-
       clause(C1), clause(C2),
       remove(P, C1, C1R),
       remove(~P, C2, C2R),
       \+ done(C1, C2, P), !,
-      assertz(clause(C1R | C2R)), assertz(done(C1, C2, P)).
+      assertz(clause(C1R v C2R)), assertz(done(C1, C2, P)).
       % tbd('Правило должно найти два дизьюнкта A | ~p | B, C | p | D и создать новый A | B | C | D. A, B, C, D могут быть пустыми').
 
    % Это правило - последнее, т.е. с наименьшим приоритетом.
    rule('No contradiction', halt). % Невозможно продвинуться дальше - тупик, нет противоречия.
 
    :- protected(remove/3).
-   :- mode(remove(+expression, +expression, +expression)).
+   :- mode(remove(+expression, +expression, +expression), zero_or_one).
    :- info(remove/3, [
       comment is 'Удалить из дизьюнкта литеру/подформулу',
       argnames is ['Litral', 'Clause', 'Clause']
    ]).
 
-   remove(X, X | Y, Y).
-   remove(X, Y | X, Y).
-   remove(X, Y | Z, Y | Z1) :-
+   remove(X, X v Y, Y).
+   remove(X, Y v X, Y).
+   remove(X, Y v Z, Y v Z1) :-
       remove(X, Z, Z1).
-   remove(X, Y | Z, Y1 | Z1) :-
+   remove(X, Y v Z, Y1 v Z) :-
       remove(X, Y, Y1).
 
    :- protected(done/3).
    :- dynamic(done/3).
-   :- mode(done(?expression, ?expression, ?expression)).
+   :- mode(done(?expression, ?expression, ?expression), zero_or_more).
    :- info(done/3, [
       comment is 'Информация об использованных резольвентах',
       argnames is ['Clause', 'Clause', 'Literal']
-   ])
+   ]).
 
    tbd(Message) :-
       format('~w\n', [Message]).
@@ -720,21 +730,30 @@
    ]).
 
    clear_db:-
-      retractall(_).
+      retractall(clause(_)),
+      retractall(done(_,_,_)).
 
    :- public(proof/1).
    :- info(proof/1, [
-      comment is 'Строит доказательство. Используется в тесте'
+      comment is 'Строит доказательство. Используется в тесте',
       argnames is ['ResultTerm']
    ]).
 
+   :- use_module(library(lists), [member/2]).
+
    proof(Result) :-
-     rule(_, Action), !,
-     (Action == halt ->
-        format('Нет противоречия, исходная формула не является теоремой'), true;
-      Action == qed ->
-        format('Найдено противоречие!\n'), true ;
-      proof.)
+     rule(Name, R), !,
+     format('Правило:~w\n',[Name]),
+     ( member(R, [qed, halt]) -> Result = R;
+      proof(Result)).
+
+   :- public(print/0).
+   print :-
+     forall(clause(C),
+       format('clause(~p).\n', [C])),
+     forall(done(C1, C2, R),
+       format('done(~p, ~p, ~p).\n', [C1, C2, R])).
+
 
 :- end_object.
 
@@ -748,25 +767,56 @@
    extends(studyunit)).
 
    test_name('Тест системы доказательства теорем в пропозициональном исчислении методом резолюции').
-   % debug(20).
+
+   debug(20).
+
+   :- public(test_formula/1).
 
    test(prove_c_to_c, true,
-      [],
-      test_formula(
+      [
+        explain(::error('Формула ~q является теоремой, а ваша машина не может это доказать!' +
+        [c=>c]))
+      ],
+      ip_zero_test::test_formula(
         c=>c
+      )
+   ).
+
+   test(prove_c_to_c, fail,
+      [],
+      ip_zero_test::test_formula(
+        ~(c=>c)
       )
    ).
 
    test(prove_transitivity, true,
       [],
-      test_formula(
+      ip_zero_test::test_formula(
         (a=>b) & (b=>c) => (a=>c)
+      )
+   ).
+
+   test(prove_axiom_ip, true,
+      [],
+      ip_zero_test::test_formula(
+        (p=>(q=>r))=>((p=>q)=>(p=>r))
+      )
+   ).
+
+   test(check_general_case, true,
+      [],
+      ip_zero_test::test_formula(
+        ~(((~p v q v c) & (p v q v c) & ~(q v c)))
       )
    ).
 
    test_formula(F) :-
      ip_zero::clear_db,
-     ip_zero::translate(F),
-     ip_zero::proof(qed).
+     format('Formula: ~q.\n', [F]),
+     ip_zero::translate(~F),
+     ip_zero::print,
+     format("Proof:\n"),
+     ip_zero::proof(qed),
+     ip_zero::print.
 
 :- end_object.

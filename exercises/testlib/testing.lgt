@@ -37,11 +37,11 @@
    run :-
        ::clear_results,
        ::test_name(TestName),
-       ::debug(5+'Начало выполнения набора тестов \'~w\'' + [TestName]),
+       ::debug(5,'Начало выполнения набора тестов \'~w\'' + [TestName]),
        forall(::test(Name, Outcome, Options, Goal),
            process_env(Name, Outcome, Options, Goal)
        ),
-       ::debug(5+'Завершение набора тестов \'~w\'' + [TestName]).
+       ::debug(5,'Завершение набора тестов \'~w\'' + [TestName]).
 
 
    :- protected(process_env/4).
@@ -51,7 +51,7 @@
 
    process_env(Name, Outcome, Options, Goal) :-
       self(Self),
-      ( ::debug(10+'Начало теста \'~w\'' + [Name]),
+      ( ::debug(10,'Начало теста \'~w\'' + [Name]),
            (^^option(trace(start), Options) -> ::info('debug\n'), debugger::trace ; true),
         options_before(Options, Name)
         ->
@@ -68,7 +68,7 @@
             ;
               true),
            options_after(Options, Result), !,
-           ::debug(10+'Результат теста \'~w\': ~w' + [Name, Result])
+           ::debug(10,'Результат теста \'~w\': ~w' + [Name, Result])
         ;
            ::info('Тест \'~w\' пропущен' + [Name]),
            assertz(test_result(Self, Name, skipped))
@@ -228,13 +228,13 @@
       ::fmt(info, Message, String),
       format(String, []).
 
-   :- protected(debug/1).
-   debug(Level+Template+List):-
+   :- protected(debug/2).
+   debug(Level,Template+List):-
       debug_level(DLevel),
       Level =< DLevel, !,
       ::fmt(debug, Template, List, String),
       format(String, []).
-   debug(_Level+_Template+_List).
+   debug(_Level,_Template+_List).
 
    :- protected(fmt/3).
    fmt(Level, Message, String) :-
