@@ -3,12 +3,12 @@
 % чтобы проверить, правильно ли вы выпонили задание,
 % запускайте
 %
-% swilgt -l Set1TestLoader.lgt -g halt
+% swilgt -l Set1TestsLoader.lgt -g halt
 %
 % Также можно после проверки задания перейти в командную
 % строку Logtalk (top-level) и позадавать запросы.
 %
-% swilgt -l Set1TestLoader.lgt
+% swilgt -l Set1TestsLoader.lgt
 %
 % Данный набор тестов содержит задачи по темам
 %
@@ -155,7 +155,7 @@
 %
 % Для этого надо запустить тестирование без флага -q halt:
 %
-% swilgt -l Set1TestLoader.lgt
+% swilgt -l Set1TestsLoader.lgt
 %
 
 :- object(table_animal_printer).

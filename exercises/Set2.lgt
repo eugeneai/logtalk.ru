@@ -5,7 +5,7 @@
 
 % Запуск тестирования:
 %
-% swilgt -l Set2TestLoader.lgt -g halt
+% swilgt -l Set2TestsLoader.lgt -g halt
 %
 
 % -----------------------------------------------------
@@ -16,14 +16,15 @@
 :- object(hp_db).
    :- protected([movie/3, char/2]).
    :- dynamic([movie/3, char/2]).
-   % movie('Philosopher\'s Stone', fs, 2001).
-   % movie('Chamber of Secrets', cos, 2002).
-   % movie('Prisoner of Azkaban', poa, 2004).
-   % movie('Goblet of Fire', gof, 2005).
-   % movie('Order of the Phoenix', ootf, 2007).
-   % movie('Half-Blood Prince', hbp, 2009).
-   % movie('Deathly Hallows – Part 1', dhp1, 2010).
-   % movie('Deathly Hallows – Part 2', dhp2, 2011).
+
+   movie('Philosopher\'s Stone', fs, 2001).
+   movie('Chamber of Secrets', cos, 2002).
+   movie('Prisoner of Azkaban', poa, 2004).
+   movie('Goblet of Fire', gof, 2005).
+   movie('Order of the Phoenix', ootf, 2007).
+   movie('Half-Blood Prince', hbp, 2009).
+   movie('Deathly Hallows – Part 1', dhp1, 2010).
+   movie('Deathly Hallows – Part 2', dhp2, 2011).
 
    char('Katie Bell',       [fs, cos,            hbp, dhp1, dhp2]).
    char('Vincent Crabble',  [fs, cos, pos, gof, ootf, hbp]).
@@ -36,7 +37,8 @@
    char('Hermione Granger', [fs, cos, pos, gof, ootf, hbp, dhp1, dhp2]).
    char('Harry Potter',     [fs, cos, pos, gof, ootf, hbp, dhp1, dhp2]).
    char('Rolanda Hooch',    [fs]).
-   char('Ernie Prang',                [pos]).
+   char('Ernie Prang',               [pos]).
+
 :- end_object.
 
 % Необходимо реализовать следующие запросы (public-предикат):
