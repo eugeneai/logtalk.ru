@@ -1,4 +1,4 @@
-
+% TODO: Chack presence of done predicates to help user.
 
 :- object(test_problem_2(_O_),
    extends(studyunit),

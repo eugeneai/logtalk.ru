@@ -52,32 +52,46 @@
       argnames is ['Название запроса', 'Ответ']
    ]).
 
-   :- use_module(library(lists), [member/2, length/2]).
+   :- use_module(library(lists), [member/2]).
 
-   query('Movie with Susan Bones', [Name]) :-
+   query('Movie with Susan Bones', [MovieName]) :-
       ::char('Susan Bones', Series),
       member(Movie, Series),
-      ::movie(Name, Movie).
+      ::movie(MovieName, Movie, _).
 
-   query('Movie without Bones', [Name]) :-
+   query('Movie without Susan Bones', [MovieName]) :-
+      % debugger::trace,
       ::char('Susan Bones', Series),
-      ::movie(Name, Movie),
+      ::movie(MovieName, Movie, _),
       \+ member(Movie, Series).
 
    % В окончательных вариантах реализации запросов строку
    % to_be_done(....). надо убрать.
 
-   query('Character having common movie', [Char1, Char2]):-
-      to_be_done('Персонажи, появляющиеся в одних и тех же фильмах').
+   query('Character having common series', [Char1, Char2]):-
+      ::char(Char1, Movies),
+      ::char(Char2, Movies),
+      Char1 \= Char2.
+      % to_be_done('Персонажи, появляющиеся в одних и тех же фильмах').
 
-   query('Movie having a character', [Movie, Char]):-
-      to_be_done('В Фильме присутствует Персонаж').
+   query('Movie having a character', [MovieName, Char]):-
+      ::char(Char, Movies),
+      member(Movie, Movies),
+      ::movie(MovieName, Movie, _).
+      % to_be_done('В Фильме присутствует Персонаж').
 
-   query('Character having only one Movie', [Char, Movie]) :-
-      to_be_done('Персонаж, присутствующий только в одном фильме').
+   query('Character appearing only in one Movie', [Char, MovieName]) :-
+      ::char(Char, [Movie]),
+      ::movie(MovieName, Movie, _).
+      %to_be_done('Персонаж, присутствующий только в одном фильме').
 
-   query('Character filmed in a Movie without Dudley Dursley', [Char, Movie]) :-
-      to_be_done('Персонаж Фильма, в котором не появлдяется Dudley Dursley').
+   query('Character filmed in a Movie without Dudley Dursley', [Char, MovieName]) :-
+      ::char('Dudley Dursley', MoviesD),
+      ::char(Char, MoviesC),
+      member(M, MoviesC),
+      \+ member(M, MoviesD),
+      ::movie(MovieName, M, _).
+      %to_be_done('Персонаж Фильма, в котором не появлдяется Dudley Dursley').
 
 
    % Вспомогательный метод для вывода/отладки запросов
@@ -157,7 +171,39 @@
 :- end_object.
 
 % -----------------------------------------------------
-% Упражнение 3:
+% Упражнение 3: Частотный словарь.
+% Разработать объект freq_dict, подсчитывающий количество
+% слов, с тремя public-методами:
+% add/1 - получает слово (например, car) и добавляет его
+% в частотный словарь, т.е., увеличивает на 1 количество
+% слов 'car' в словаре.
+% list(Word, Number) - показвыает какое количество соответствует
+% слову Word.
+% print/0 - печатает словарь на экран.
+% Порядок следования слов в базе данных не важно, как
+% не важно и как вы хранить будете данные о словах.
+
+:- object(freq_dict).
+   :- public([add/1, list/2, print/0]).
+
+   :- private(word/2).
+   :- dynamic(word/2).
+
+   add(X):-
+      retract(word(X, N)), !,
+      N1 is N+1,
+      assertz(word(X, N1)).
+   add(X):-
+      assertz(word(X, 1)).
+
+   list(W, N):-
+      word(W, N).
+
+   print:-
+      forall(::list(W,N),
+        format('~w - ~q\n', [W, N])).
+
+:- end_object.
 
 
 % -----------------------------------------------------
@@ -258,15 +304,10 @@
 
   current_option(Name=Value) :-
     option_(Name=Value).
-  current_option(Name=Value) :-
-    option(Name=Value).
-  current_option(Name=Value) :-
-    option(Name-Value).
-  current_option(Name=Value) :-
-    option(Name,Value).
   current_option(Name-Value) :-
-    current_option(Name=Value).
-  current_option(Name, Value).
+    option_(Name=Value).
+  current_option(Name,Value) :-
+    option_(Name=Value).
 
 :- end_object.
 
@@ -287,6 +328,11 @@
 :- object(my_setup_ext).
   option(prog_name(program)).
 :- end_object.
+
+% -----------------------------------------------------
+% Упражнение 10:
+
+
 
 % -----------------------------------------------------
 % Упражнение 7: Сейчас разработаем программу - самообучающуюся
@@ -421,7 +467,6 @@
 
 :- end_object.
 
-
 % -----------------------------------------------------
 % Упражнение 8: Программирование при помощи типовых
 % конфигураций. Задача вычисления набольшего общего делителя.
@@ -455,7 +500,7 @@
 :- end_object.
 
 % -----------------------------------------------------
-% Упражнение 9: Построение остового дерева минимальной
+% Упражнение 10: Построение остового дерева минимальной
 % стоимости. Алгоритм Прима.
 %   На вход алгоритма подаётся связный неориентированный
 % граф. Для каждого ребра задаётся его стоимость.
@@ -582,237 +627,5 @@
    clear_db:-
       retractall(vertex(_)),
       retractall(edge(_,_)).
-
-:- end_object.
-
-% -----------------------------------------------------
-% Упражнение 10: Разработать программу-прувер для
-% пропозиционального исчисления. Источник: И.Братко
-% Язык программирования Prolog для искусственного интеллекта.
-% http://lib.ysu.am/open_books/125049.pdf стр. 530 вам в помощь.
-% В объекте реализована машина вывода на типовых конфигурациях,
-% есть предикаты для обнаружения элемента в дизъюнкте,
-% несколько правил реализованы как примеры и т.п.
-% Надо реализовать оставшиеся правила, так, чтобы сработал тест.
-
-:- op(100, fy, ~ ).
-:- op(110, xfy, & ).
-:- op(120, xfy, v ).
-:- op(130, xfy, => ).
-:- op(140, xfx, <=> ).
-
-
-:- object(ip_zero).
-   :- public(translate/1).
-   :- mode(translate(+expression), one).
-   :- info(translate/1, [
-      comment is 'Выполняет редукцию формул (дизъюнктов) в канонический вид',
-      argnames is ['Formula']
-   ]).
-
-   translate(F & G) :- !,
-      translate(F),
-      translate(G).
-
-   translate(Expr) :-
-      tr(Expr, Red), !, % Шаг редукции успешен
-      translate(Red).
-
-   translate(Clause) :- % Дальнейшая трансформация невозможна.
-      assertz(clause(Clause)).
-
-   :- protected(clause/1). % Дизъюнкт
-   :- dynamic(clause/1).
-
-   :- protected(tr/2).
-
-   tr(~(~X), X) :-! .
-   tr(X=>Y, ~X v Y) :- !.
-   tr(X<=>Y, (X=>Y) & (Y=>X)) :- !.
-   tr(~(X v Y), ~X & ~Y) :- !.
-   tr(~(X & Y), ~X v ~Y) :- !.
-   tr(X & Y v Z, (X v Z) & (Y v Z)) :-!.
-   tr(X v Y & Z, (X v Y) & (X v Z)) :-!.
-   tr(X v Y, X1 v Y) :- tr(X, X1), !.
-   tr(X v Y, X v Y1) :- tr(Y, Y1), !.
-   tr(~X, ~X1) :- tr(X, X1).
-
-   :- public(list/0).  % Список дизъюнктов (clause/1).
-   list :-
-     forall(clause(C),
-       format('~w\n', [C])).
-
-   :- public(proof/0).
-   proof :-
-     rule(Name, Action), !,
-     format('Используем правило \'~w\'.\n', [Name]),
-     (Action == halt ->
-        format('Нет противоречия, исходная формула не является теоремой'), true;
-      Action == qed ->
-        format('Найдено противоречие!\n'), true ;
-      proof).
-
-   :- protected(rule/2).
-   :- mode(rule(-atom, -atom), one).
-   :- info(rule/2, [
-      comment is 'Правила, реализующие метод резолюции.',
-      argnames is ['Rule name', 'Action']
-   ]).
-
-   rule('Find a contradiction'(A, ~A), qed) :-
-      clause(A), clause(~A),!.
-      %tbd('Правило должно найти два дизьюнкта P и ~P, P может быть формулой.').
-
-   rule('Remove trivially true clause', tuth_remove) :-
-      clause(A), remove(P, A, _), remove(~P, A, _), % пример правила.
-      !,
-      retract(clause(A)).
-
-   rule('Remove double'(C, P, C1), remove_double) :-
-      clause(C), remove(P, C, C1), remove(P, C1, _), !,
-      retract(clause(C)), assertz(clause(C1)).
-      % tbd('Удалить повторения в дизъюнкте').
-
-   % Можно удалять повторения дизъюнктов.
-   % rule('Remove copy of a clause', remove_clause_copy) :-
-   %    tbd('Удалить абсолютную копию дизъюнкта').
-
-   % *Собственно механизм построения доказательства*
-   % Эти правила должны для одного набора дизъюнктов выполняться один раз
-   % Т.е. надо запоминать, что было сделано: done(clause1, clause2, literal).
-   % Пример:
-   rule('Reduce trivial positive literal'(P, C, P, true, C1), reduce_p_literal) :-
-      clause(P), clause(C), remove(~P, C, C1), \+ done(P, C, P), !,
-      assertz(clause(C1)), assertz(done(P, C, P)).
-
-   rule('Reduce trivial negative literal'(P, C, ~P, true, C1), reduce_not_p_literal) :-
-      clause(~P), clause(C), remove(P, C, C1), \+ done(P, C, ~P), !,
-      assertz(clause(C1)), assertz(done(P, C, ~P)).
-      % tbd('Аналогично предыдущему случаю только литерал отрицательный').
-
-   rule('Reduction'(C1, C2, P, C1R v C2R), reduction) :-
-      clause(C1), clause(C2),
-      remove(P, C1, C1R),
-      remove(~P, C2, C2R),
-      \+ done(C1, C2, P), !,
-      assertz(clause(C1R v C2R)), assertz(done(C1, C2, P)).
-      % tbd('Правило должно найти два дизьюнкта A | ~p | B, C | p | D и создать новый A | B | C | D. A, B, C, D могут быть пустыми').
-
-   % Это правило - последнее, т.е. с наименьшим приоритетом.
-   rule('No contradiction', halt). % Невозможно продвинуться дальше - тупик, нет противоречия.
-
-   :- protected(remove/3).
-   :- mode(remove(+expression, +expression, +expression), zero_or_one).
-   :- info(remove/3, [
-      comment is 'Удалить из дизьюнкта литеру/подформулу',
-      argnames is ['Litral', 'Clause', 'Clause']
-   ]).
-
-   remove(X, X v Y, Y).
-   remove(X, Y v X, Y).
-   remove(X, Y v Z, Y v Z1) :-
-      remove(X, Z, Z1).
-   remove(X, Y v Z, Y1 v Z) :-
-      remove(X, Y, Y1).
-
-   :- protected(done/3).
-   :- dynamic(done/3).
-   :- mode(done(?expression, ?expression, ?expression), zero_or_more).
-   :- info(done/3, [
-      comment is 'Информация об использованных резольвентах',
-      argnames is ['Clause', 'Clause', 'Literal']
-   ]).
-
-   tbd(Message) :-
-      format('~w\n', [Message]).
-
-   :- public(clear_db/0).
-   :- info(clear_db/0, [
-      comment is 'Удаляет содержимое БД объекта. Нужен для теста.'
-   ]).
-
-   clear_db:-
-      retractall(clause(_)),
-      retractall(done(_,_,_)).
-
-   :- public(proof/2).
-   :- info(proof/2, [
-      comment is 'Строит доказательство. Используется в тесте',
-      argnames is ['ResultTerm','Print?']
-   ]).
-
-   :- use_module(library(lists), [member/2]).
-
-   proof(Result, Aloud) :-
-     rule(Name, R), !,
-     ( Aloud == true ->
-        format('Правило:~w\n',[Name]) ; true),
-     ( member(R, [qed, halt]) -> Result = R;
-      proof(Result, Aloud)).
-
-   :- public(print/0).
-   print :-
-     forall(clause(C),
-       format('clause(~p).\n', [C])),
-     forall(done(C1, C2, R),
-       format('done(~p, ~p, ~p).\n', [C1, C2, R])).
-
-
-:- end_object.
-
-
-% объект-тест.
-%
-% ?- ip_zero_test::run.
-%
-
-:- object(ip_zero_test,
-   extends(studyunit)).
-
-   test_name('Тест системы доказательства теорем в пропозициональном исчислении методом резолюции').
-
-   debug_level(0).
-
-   :- public(test_formula/1).
-
-   test(prove_theorems,
-      all(::mem(Formula, [
-         c=>c,
-         (a=>b) & (b=>c) => (a=>c),
-         (p=>(q=>r))=>((p=>q)=>(p=>r)),
-         ~(((~p v q v c) & (p v q v c) & ~(q v c)))
-      ])),
-      [
-        each_explain(::error('Формула ~q является теоремой, а ваша машина не может это доказать!' +
-        [Formula])),
-        each_test_name(theorem(Formula))
-      ],
-      (
-        ip_zero_test::test_formula(
-        Formula
-       ))
-   ).
-
-   test(fail_to_prove_neg_c_to_c, fail,
-      [explain(::error('Формула ~q точно не теорема, а ваша машина ее доказывает!' +
-       [~(c=>c)]))],
-      ip_zero_test::test_formula(
-        ~(c=>c)
-      )
-   ).
-
-   test_formula(F) :-
-     ::debug_level(DL),
-     (DL>0 -> Aloud = true; Aloud = false),
-     ip_zero::clear_db,
-     ( Aloud == true -> format('Formula: ~q.\n', [F]); true),
-     ip_zero::translate(~F),
-     ( Aloud == true -> ip_zero::print; true),
-     ::debug(1,"Proof:\n"-[]),
-     ip_zero::proof(qed, Aloud),
-     ::debug(1,"End of inference.\n"-[]),
-     ( Aloud == true -> ip_zero::print; true),
-     ::debug(1,"End of cycle.\n"-[]).
-
 
 :- end_object.
