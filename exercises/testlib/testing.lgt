@@ -322,6 +322,15 @@
       mem(C,A).
    mem(A,A).
 
+   :- protected(checkall/2).
+   :- meta_predicate(checkall(0,0)).
+   checkall(Test, Goal):-
+      call(Test),
+      (call(Goal) -> fail;
+       true),
+       !, fail.
+   checkall(_,_).
+
    :- protected(output_substring/2).
    output_substring(Out, SubString) :-
       check_string(Out),

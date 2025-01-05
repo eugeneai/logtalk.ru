@@ -12,6 +12,7 @@
    ))).
 
    test_name('Задача 1').
+   test_type(problem).
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
@@ -24,7 +25,8 @@
       [test_formula/1 - public]
    ))).
 
-   test_name('Задача запуска теста').
+   test_name('Задача 2, запуск теста').
+   test_type(problem).
 
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
@@ -44,6 +46,7 @@
    extends(studyunit)).
 
    test_name('Задача 3. Правила преобразования.').
+   test_type(problem).
 
    test(rule_test,
        all((
@@ -75,6 +78,7 @@
    extends(studyunit)).
 
    test_name('Задача 4. Правила преобразования во фразы.').
+   test_type(problem).
 
    test(translation_test,
       all((
@@ -111,6 +115,9 @@
 :- object(test_machine,
    extends([ip_zero, studyunit])).
 
+   test_name('Задача тестирования машины вывода на образцах').
+   test_type(problem).
+
    :- protected(number/1).
    :- dynamic(number/1).
    number(10).
@@ -136,6 +143,9 @@
 
 :- object(test_ex_7,
    extends([ip_zero, studyunit])).
+
+   test_name('Задача тестирования правил, реализующих ЛВ').
+   test_type(problem).
 
    test(test_rules,
       all((::mem(q(Name, Descr, Answer),
@@ -203,9 +213,10 @@
 
 :- object(tests,
    extends(studyunit)).
-   debug(60).
-   test_name('Практическая работа 12. Система доказательства теорем.').
 
+   debug_level(60).
+
+   test_name('Практическая работа 12. Система доказательства теорем.').
    test_type(problem_set).
 
    test(check_operators,

@@ -2,6 +2,9 @@
 :- object(hp_queries,
    extends(studyunit)).
 
+   test_name('Задача 1').
+   test_type(problem).
+
    :- public(query/2).
    query(Name-fail, AnswerList) :-
       \+ hp_query::query(Name, AnswerList), !, fail.
@@ -60,10 +63,104 @@
 
 :- end_object.
 
+:- object(test_hp_db_mod(_O_),
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(_O_,
+     [
+       cast/2 - [protected, dynamic],
+       add/2 - [public],
+       remove/2 - [public]
+     ]))).
+
+   test_name('Задача 2').
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(test_user_test, true,
+       [condition(success(basic_predicates_defined))],
+       ((hp_test::ok))).
+
+:- end_object.
+
+:- object(test_freq_dict(_O_),
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(_O_,
+     [
+       add/1 - [public],
+       list/2 - [public],
+       print/0 - [public]
+     ]))).
+
+   test_name('Задача 3, частотный словарь').
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(add_words,
+      all(::mem(Word-Number, [
+        alaska-10,
+        california-31,
+        alrosa-3
+      ])),
+      [condition(success(basic_predicates_defined)),
+       each_test_name(add_word(Word, Number)),
+       each_explain(
+         ::error('Невозможно выполнить добавление (~w:add(~q)) слова ~q. Вероятно забыли реализовать add/2.' +
+        [_O_, Word, Word]))],
+      ((
+        ::checkall(
+          between(1,Number, _),
+          _O_::add(Word))
+      ))).
+
+   test(check_words_in_dictionary,
+      all(::mem(Word-Number, [
+        alaska-10,
+        california-31,
+        alrosa-3
+      ])),
+      [condition(success(add_words)),
+       each_test_name(check_word(Word, Number)),
+       each_explain(
+         ::error('Проверка словаря (~w:list(~q,~q)) для слова ~q неуспешна. Проверьте реализацию list/2, add/2, вашу систему хранения словаря и т.п.' +
+        [_O_, Word, Number, Word]))],
+      ((
+        _O_::list(Word, Number)
+      ))).
+
+   test(check_printing,
+      all(::mem(Word-Number, [
+        alaska-10,
+        california-31,
+        alrosa-3
+      ])),
+      [condition(success(add_words)),
+       each_test_name(check_word(Word, Number)),
+       each_explain(
+         ::error('Мы полагаем, что вывод словаря ~q строится на построении строк, где сначала выводится слово, а потом число... но не можем удоставериться в этом!? Как-то нестандартно реализован print/0, реализован ли вообще?' +
+        [_O_]))],
+      ((
+        with_output_to(string(Out),
+        _O_::print),
+        ::check_output(Out, Word, Number)
+      ))).
+
+   :- protected(check_output/3).
+   check_output(O, Word, Number) :-
+      format(string(N), '~w', Number),
+      % format(O),
+      sub_string(O, BW, LW, _, Word),
+      sub_string(O, BN,_, _, N),
+      BW + LW =< BN.
+
+:- end_object.
+
 
 :- object(tests,
    extends(studyunit)).
-   debug(20).
+   % debug_level(60).
+
    test_name('Тестовый набор по теме 2, динамические предикаты.').
 
    test_type(problem_set).
@@ -72,5 +169,13 @@
       [explain(::error('Не все запросы запрограммированы правильно!\nИспользуйте ?- hp_query::query(<название запроса>) для отладки запроса.' +
       []))],
       (hp_queries::ok)).
+
+   test(hp_cast_database, true,
+      [],
+      ((test_hp_db_mod(harry_potter_movie)::ok))).
+
+   test(freq_dict_test, true,
+      [],
+      ((test_freq_dict(freq_dict)::ok))).
 
 :- end_object.

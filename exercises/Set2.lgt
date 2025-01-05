@@ -107,8 +107,9 @@
 
 % -----------------------------------------------------
 % Упражнение 2: В объекте ниже надо объявить protected-
-% метод db/2 и реализовать public-метод add/2, таким
-% образом, чтобы сработал тест (второй объект).
+% динамический метод cast/2 и реализовать public-методы
+% add/2 и remove/2, таким образом, чтобы сработал тест
+% (второй объект).
 
 :- object(harry_potter_movie).
    :- protected(cast/2).
@@ -141,6 +142,7 @@
    % debug_level(60).
 
    test_name('Harry Potter Cast test').
+   test_type(problem).
 
    test(hermione_first_does_not_exist, fail,
       [explain(::error("Объект '~w' не должен содержать данные о '~w'" +
@@ -201,7 +203,7 @@
 
    print:-
       forall(::list(W,N),
-        format('~w - ~q\n', [W, N])).
+        format('~q - ~q\n', [W, N])).
 
 :- end_object.
 
