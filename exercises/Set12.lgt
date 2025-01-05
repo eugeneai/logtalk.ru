@@ -1,6 +1,6 @@
 % Этот набор задач, второй по списку продвинутого уровня,
 % преследует целью реализовать простую систему автоматического
-% доказательства теорем в пропозициональном исчислении.
+% доказательства теорем (АДТ) в пропозициональном исчислении.
 % Источник: И.Братко
 % Язык программирования Prolog для искусственного интеллекта.
 % http://lib.ysu.am/open_books/125049.pdf стр. 530 вам в помощь.
@@ -20,7 +20,7 @@
 %
 
 % -----------------------------------------------------
-% Упражнение 1: На первом этапе необхдоимо определить
+% Упражнение 1: На первом этапе необходимо определить
 % набор операторов (https://www.swi-prolog.org/pldoc/man?predicate=op/3):
 %   - префиксный
 %     '~' с приоритетом 100, левоассоциативный (left associative fy)
@@ -38,30 +38,39 @@
 
 
 :- object(ip_zero).
-   :- public(clear_db/0).
-   :- info(clear_db/0, [
-      comment is 'Удаляет содержимое БД объекта. Нужен для теста.'
-   ]).
 
-   :- protected(clause/1). % Дизъюнкт
-   :- dynamic(clause/1).
+% -----------------------------------------------------
+% Упражнение 2: На втором этапе необходимо реализовать
+% несколько вспомогательных предикатов. Их спецификации
+% заданы надо дополнить декларации, реализовать.
 
-   :- public(list/0).  % Список дизъюнктов (clause/1).
-   list :-
-     forall(clause(C),
-       format('~w\n', [C])).
+   :- protected(clause/1). % Дизъюнкт, должен быть динамическим
+   :- dynamic(clause/1).   %%
 
-   :- protected(done/3).
-   :- dynamic(done/3).
+   :- protected(done/3).  % Фиксирует фак выполнения резолюции
    :- mode(done(?expression, ?expression, ?expression), zero_or_more).
    :- info(done/3, [
       comment is 'Информация об использованных резольвентах',
       argnames is ['Clause', 'Clause', 'Literal']
    ]).
 
+   :- dynamic(done/3).    % должен быть динамическим.
+
+   :- public(clear_db/0).
+   :- info(clear_db/0, [
+      comment is 'Удаляет содержимое БД объекта. Нужен для теста.'
+   ]).
+
+   % Реализуйте clear_db таким образом, чтобы он вычищал все
+   % факты clause/1, done/3.
    clear_db:-
       retractall(clause(_)),
       retractall(done(_,_,_)).
+
+% -----------------------------------------------------
+% Упражнение 3: Теперь самое интересное - необходимо
+% реализовать преобразование формул пропозициональной
+% логики предикатов в дизъюнкты.
 
    :- public(translate/1).
    :- mode(translate(+expression), one).
@@ -70,127 +79,188 @@
       argnames is ['Formula']
    ]).
 
-%    translate(F & G) :- !,
-%       translate(F),
-%       translate(G).
+% Первый предикат решает три задачи:
 
-%    translate(Expr) :-
-%       tr(Expr, Red), !, % Шаг редукции успешен
-%       translate(Red).
+% 1. Конъюнкция формул A & B преобразуется параллельно для A и B.
+   translate(F & G) :- !,
+      translate(F),
+      translate(G).
+% 2. Другие формулы - делаем с ними следующее:
+% Пробуем выполнить шаг редукции tr/2, если удалось, то выполняем
+% преобразование (translate) для результата.
+   translate(Expr) :-
+      tr(Expr, Red), !, % Шаг редукции успешен
+      translate(Red).
 
-%    translate(Clause) :- % Дальнейшая трансформация невозможна.
-%       assertz(clause(Clause)).
+% Если не удалось выполнить преобразование tr/2, то аргумент
+% добавляем в спосок дизъюнктов clause/1.
+   translate(Clause) :- % Дальнейшая трансформация невозможна.
+      assertz(clause(Clause)).
 
-%    :- protected(tr/2).
+% -----------------------------------------------------
+% Упражнение 4: На данном этапе необходимо определить
+% процедуру редукции формул языка, близкого к языку
+% представления формул исчисления предикатов.
 
-%    tr(~(~X), X) :-! .
-%    tr(X=>Y, ~X v Y) :- !.
-%    tr(X<=>Y, (X=>Y) & (Y=>X)) :- !.
-%    tr(~(X v Y), ~X & ~Y) :- !.
-%    tr(~(X & Y), ~X v ~Y) :- !.
-%    tr(X & Y v Z, (X v Z) & (Y v Z)) :-!.
-%    tr(X v Y & Z, (X v Y) & (X v Z)) :-!.
-%    tr(X v Y, X1 v Y) :- tr(X, X1), !.
-%    tr(X v Y, X v Y1) :- tr(Y, Y1), !.
-%    tr(~X, ~X1) :- tr(X, X1).
+   :- protected(tr/2).  % Шаг редукции.
+% Задача tr/2 - преобразовать формулу к каноническому виду -
+% конъюнкции дизъюнкций, где дизъюнкция состоит из только
+% литералов, т.е. атомов вид p и ~p. Преобразование должно быть
+% реализовано детерминировано (с использованием отсечения).
 
-%    :- public(proof/0).
-%    proof :-
-%      rule(Name, Action), !,
-%      format('Используем правило \'~w\'.\n', [Name]),
-%      (Action == halt ->
-%         format('Нет противоречия, исходная формула не является теоремой'), true;
-%       Action == qed ->
-%         format('Найдено противоречие!\n'), true ;
-%       proof).
+% Правила следующие:
+% 1. Избавление от двойного отрицания.
+% 2. Эквивалентные преобразования:
+%    импликация в дизъюнкцию
+%    эквиваленцию в конъюнкция импликаций
+% 3. ДВА правила Де Моргана - цель "утопить отрицание".
+% 4. ДВА правила дистрибутивной конъюнкции (правая и левая).
+% 5. ДВА правила редукции правой и левой подформулы в дизъюнкции.
+% 6. Правило редукции подформулы отрицания.
+% Итого должно быть 10 правил редукции.
 
-%    :- protected(rule/2).
-%    :- mode(rule(-atom, -atom), one).
-%    :- info(rule/2, [
-%       comment is 'Правила, реализующие метод резолюции.',
-%       argnames is ['Rule name', 'Action']
-%    ]).
+   tr(~(~X), X) :-! .
+   tr(X=>Y, ~X v Y) :- !.
+   tr(X<=>Y, (X=>Y) & (Y=>X)) :- !.
+   tr(~(X v Y), ~X & ~Y) :- !.
+   tr(~(X & Y), ~X v ~Y) :- !.
+   tr(X & Y v Z, (X v Z) & (Y v Z)) :-!.
+   tr(X v Y & Z, (X v Y) & (X v Z)) :-!.
+   tr(X v Y, X1 v Y) :- tr(X, X1), !.
+   tr(X v Y, X v Y1) :- tr(Y, Y1), !.
+   tr(~X, ~X1) :- tr(X, X1).
 
-%    rule('Find a contradiction'(A, ~A), qed) :-
-%       clause(A), clause(~A),!.
-%       %tbd('Правило должно найти два дизьюнкта P и ~P, P может быть формулой.').
+% -----------------------------------------------------
+% Упражнение 5: Следующий этап проектирования прувера
+% собственно реализация системы автоматичекского доказательства
+% теорем (логический вывод). Реализоывываться он будет
+% на основе программирования в типовых конфигурациях
+% (pattern-directed programming).
+%   Сначала запрограммируем машину - цикл запуска правил,
+% который останавливается двумя командами, qed (что и
+% трабовалось доказать) и halt (остановка в случае
+% невозможности доказать формулу).
 
-%    rule('Remove trivially true clause', tuth_remove) :-
-%       clause(A), remove(P, A, _), remove(~P, A, _), % пример правила.
-%       !,
-%       retract(clause(A)).
+   :- public(proof/0).
+   proof :-
+     rule(Name, Action), !,
+     format('Используем правило \'~w\'.\n', [Name]),
+     (Action == halt ->
+        format('Нет противоречия, исходная формула не является теоремой'), true;
+      Action == qed ->
+        format('Найдено противоречие!\n'), true ;
+      proof).
 
-%    rule('Remove double'(C, P, C1), remove_double) :-
-%       clause(C), remove(P, C, C1), remove(P, C1, _), !,
-%       retract(clause(C)), assertz(clause(C1)).
-%       % tbd('Удалить повторения в дизъюнкте').
+% -----------------------------------------------------
+% Упражнение 6: Надо сформулировать процедуру удаления
+% литерала из дизъюнкта.
 
-%    % Можно удалять повторения дизъюнктов.
-%    % rule('Remove copy of a clause', remove_clause_copy) :-
-%    %    tbd('Удалить абсолютную копию дизъюнкта').
+   :- protected(remove/3).
+   :- mode(remove(+expression, +expression, +expression), zero_or_one).
+   :- info(remove/3, [
+      comment is 'Удалить из дизьюнкта литеру/подформулу',
+      argnames is ['Litral', 'Clause', 'Clause']
+   ]).
 
-%    % *Собственно механизм построения доказательства*
-%    % Эти правила должны для одного набора дизъюнктов выполняться один раз
-%    % Т.е. надо запоминать, что было сделано: done(clause1, clause2, literal).
-%    % Пример:
-%    rule('Reduce trivial positive literal'(P, C, P, true, C1), reduce_p_literal) :-
-%       clause(P), clause(C), remove(~P, C, C1), \+ done(P, C, P), !,
-%       assertz(clause(C1)), assertz(done(P, C, P)).
+   remove(X, X v Y, Y).
+   remove(X, Y v X, Y).
+   remove(X, Y v Z, Y v Z1) :-
+      remove(X, Z, Z1).
+   remove(X, Y v Z, Y1 v Z) :-
+      remove(X, Y, Y1).
 
-%    rule('Reduce trivial negative literal'(P, C, ~P, true, C1), reduce_not_p_literal) :-
-%       clause(~P), clause(C), remove(P, C, C1), \+ done(P, C, ~P), !,
-%       assertz(clause(C1)), assertz(done(P, C, ~P)).
-%       % tbd('Аналогично предыдущему случаю только литерал отрицательный').
+% -----------------------------------------------------
+% Упражнение 7: Проектирование правил, выполняющих
+% изменение формул и резолюцию дизъюнктов.
 
-%    rule('Reduction'(C1, C2, P, C1R v C2R), reduction) :-
-%       clause(C1), clause(C2),
-%       remove(P, C1, C1R),
-%       remove(~P, C2, C2R),
-%       \+ done(C1, C2, P), !,
-%       assertz(clause(C1R v C2R)), assertz(done(C1, C2, P)).
-%       % tbd('Правило должно найти два дизьюнкта A | ~p | B, C | p | D и создать новый A | B | C | D. A, B, C, D могут быть пустыми').
 
-%    % Это правило - последнее, т.е. с наименьшим приоритетом.
-%    rule('No contradiction', halt). % Невозможно продвинуться дальше - тупик, нет противоречия.
+   :- protected(rule/2).
+   :- mode(rule(-atom, -atom), one).
+   :- info(rule/2, [
+      comment is 'Правила, реализующие метод резолюции.',
+      argnames is ['Rule name', 'Action']
+   ]).
 
-%    :- protected(remove/3).
-%    :- mode(remove(+expression, +expression, +expression), zero_or_one).
-%    :- info(remove/3, [
-%       comment is 'Удалить из дизьюнкта литеру/подформулу',
-%       argnames is ['Litral', 'Clause', 'Clause']
-%    ]).
 
-%    remove(X, X v Y, Y).
-%    remove(X, Y v X, Y).
-%    remove(X, Y v Z, Y v Z1) :-
-%       remove(X, Z, Z1).
-%    remove(X, Y v Z, Y1 v Z) :-
-%       remove(X, Y, Y1).
+% Правило 'Распознавание противоречия' - среди набора дизъюнктов
+% есть формулы P и ~P.
 
-%    tbd(Message) :-
-%       format('~w\n', [Message]).
+   rule('Find a contradiction'(A, ~A), qed) :-
+      clause(A), clause(~A),!.
 
-%    :- public(proof/2).
-%    :- info(proof/2, [
-%       comment is 'Строит доказательство. Используется в тесте',
-%       argnames is ['ResultTerm','Print?']
-%    ]).
+% Правило 'Удаление истинного дизъюмкта' - дизъюнкт, содержащий
+% P и ~P.
+   rule('Remove trivially true clause', tuth_remove) :-
+      clause(A), remove(P, A, _), remove(~P, A, _), % пример правила.
+      !,
+      retract(clause(A)).
 
-%    :- use_module(library(lists), [member/2]).
+% Правило удаления дублей в дизъюнкте.
+   rule('Remove double'(C, P, C1), remove_double) :-
+      clause(C), remove(P, C, C1), remove(P, C1, _), !,
+      retract(clause(C)), assertz(clause(C1)).
 
-%    proof(Result, Aloud) :-
-%      rule(Name, R), !,
-%      ( Aloud == true ->
-%         format('Правило:~w\n',[Name]) ; true),
-%      ( member(R, [qed, halt]) -> Result = R;
-%       proof(Result, Aloud)).
+% Правило удаления одинаковых дизъюнктов.
+   % rule('Remove copy of a clause', remove_clause_copy) :-
+   %    tbd('Удалить абсолютную копию дизъюнкта').
 
-%    :- public(print/0).
-%    print :-
-%      forall(clause(C),
-%        format('clause(~p).\n', [C])),
-%      forall(done(C1, C2, R),
-%        format('done(~p, ~p, ~p).\n', [C1, C2, R])).
+% Следующие правила реализуют метод резолюции. Важно - каждая резолюция должна
+% выполняться один раз, чтоб не порождать дубли. Для этого будем использовать
+% метод done/3, который будет задавать факт выполнения резолюции двух дизъюнктов
+% с использованием конкретного литерала.
+
+% Правило резолюции дизъюнкта-литерала и другого дизъюнкта. Надо проверить наличие
+% противоположной литеры в дизъюнкте, удалить литеру в дизъюнкте и добавить результат
+% (дизъюнкт к списку дизъюнктов).
+   rule('Reduce trivial positive literal'(P, C, P, true, C1), reduce_p_literal) :-
+      clause(P), clause(C), remove(~P, C, C1), \+ done(P, C, P), !,
+      assertz(clause(C1)), assertz(done(P, C, P)).
+
+% Правило резолюции дизъюнкта-литерала (отрицательного) и другого дизъюнкта.
+% Надо проверить наличие противоположной литеры в дизъюнкте, удалить литеру
+% в дизъюнкте и добавить результат (дизъюнкт к списку дизъюнктов).
+   rule('Reduce trivial negative literal'(P, C, ~P, true, C1), reduce_not_p_literal) :-
+      clause(~P), clause(C), remove(P, C, C1), \+ done(P, C, ~P), !,
+      assertz(clause(C1)), assertz(done(P, C, ~P)).
+
+% Правило резолюции, общий случай, двух дизъюнктов. В одном надо найти положительную,
+% а в другом отрицательную литеры. Удалить их из своих дизъюнктов, из остатков
+% сформировать новый дизъюнкт.
+   rule('Reduction'(C1, C2, P, C1R v C2R), reduction) :-
+      clause(C1), clause(C2),
+      remove(P, C1, C1R),
+      remove(~P, C2, C2R),
+      \+ done(C1, C2, P), !,
+      assertz(clause(C1R v C2R)), assertz(done(C1, C2, P)).
+
+% Последнее правило, имеющее наименьший приоритет, останавливает процесс
+% поиска вывода.
+
+   rule('No contradiction', halt). % Невозможно продвинуться дальше - тупик, нет противоречия.
+
+
+% Public-метод для тестирования систем АДТ.
+   :- public(proof/2).
+   :- info(proof/2, [
+      comment is 'Строит доказательство. Используется в тесте',
+      argnames is ['ResultTerm','Print?']
+   ]).
+
+   :- use_module(library(lists), [member/2]).
+
+   proof(Result, Aloud) :-
+     rule(Name, R), !,
+     ( Aloud == true ->
+        format('Правило:~w\n',[Name]) ; true),
+     ( member(R, [qed, halt]) -> Result = R;
+      proof(Result, Aloud)).
+
+   :- public(print/0).
+   print :-
+     forall(clause(C),
+       format('clause(~p).\n', [C])),
+     forall(done(C1, C2, R),
+       format('done(~p, ~p, ~p).\n', [C1, C2, R])).
 
 
 :- end_object.
@@ -241,14 +311,14 @@
      ::debug_level(DL),
      (DL>0 -> Aloud = true; Aloud = false),
      ip_zero::clear_db,
-     ( Aloud == true -> format('Formula: ~q.\n', [F]); true),
+     ( Aloud == true -> format('Формула: ~q.\n', [F]); true),
      ip_zero::translate(~F),
      ( Aloud == true -> ip_zero::print; true),
-     ::debug(1,"Proof:\n"-[]),
+     ::debug(1,"Доказательство:\n"-[]),
      ip_zero::proof(qed, Aloud),
-     ::debug(1,"End of inference.\n"-[]),
+     ::debug(1,"Конец вывода.\n"-[]),
      ( Aloud == true -> ip_zero::print; true),
-     ::debug(1,"End of cycle.\n"-[]).
+     ::debug(1,"Конец теста.\n"-[]).
 
 
 :- end_object.

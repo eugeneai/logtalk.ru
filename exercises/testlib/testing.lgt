@@ -316,7 +316,11 @@
    :- protected(mem/2).
    :- use_module(library(lists), [member/2]).
 
-   mem(A,B) :- member(A,B).
+   mem(_,[]):-!, fail.
+   mem(C,[X|T]) :- !,
+      member(A,[X|T]),
+      mem(C,A).
+   mem(A,A).
 
    :- protected(output_substring/2).
    output_substring(Out, SubString) :-

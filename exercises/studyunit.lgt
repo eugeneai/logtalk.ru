@@ -108,11 +108,12 @@
    test(A,B,C,D) :- ^^test(A,B,C,D).
 
    test(basic_predicates_defined,
-       all(::mem(Pred - Scope, _Predicates_)),
+       all((::mem(Pred - Scopes, _Predicates_), ::mem(Scope, Scopes))),
        [
          condition(success(basic_object_exists)),
          each_explain(
-           ::error("В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w(~w)." + [_O_, Scope, Pred, Scope, Pred])),
+           ::error("В объекте '~w' надо задекларировать '~w' предикат '~w'\n  :- ~w(~w)." +
+              [_O_, Scope, Pred, Scope, Pred])),
          each_test_name(predicate_defined(Pred)),
          explain(
            ::error("В объекте '~w' надо сделать необходимые декларации предикатов" + [_O_]))
