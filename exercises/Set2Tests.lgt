@@ -156,6 +156,57 @@
 
 :- end_object.
 
+:- object(test_fib(_O_, _Predicates_),
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(_O_, _Predicates_))).
+
+   test_name('Задача 4a, Фибоначчи'(_O_)).
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   test(generation_of_fibs,
+      all((::mem(N-V, [
+           1-1,
+           2-1,
+           3-2,
+           4-3,
+           5-5,
+           6-8,
+           11-89
+         ]))),
+       [each_test_name(gen_fib_number(N,V)),
+          each_explain(::error('Вычисление чисел Фибоначчи некорректно, должно быть, например, ~w::calc(~q,~q)!' +
+          [_O_, N,V])),
+          condition(success(basic_predicates_defined))
+       ],
+       ((_O_::calc(N, V)))
+     ).
+
+:- end_object.
+
+:- object(test_fib_cache(_O_),
+   extends(studyunit)).
+
+   test_name('Задача 4b, Фибоначчи, проверка БД кэша.'(_O_)).
+   test_type(problem).
+
+   test(generation_of_fibs,
+      all((::mem(N-V, [
+           3-2,
+           4-3,
+           5-5,
+           6-8,
+           11-89
+         ]))),
+       [each_test_name(gen_fib_number(N,V)),
+          each_explain(::error('Не обнаруживается наличие кэша БД ~w<<cache(~q,~q)!' +
+          [_O_, N,V]))
+       ],
+       ((_O_<<cache(N, V)))
+     ).
+
+:- end_object.
 
 :- object(tests,
    extends(studyunit)).
@@ -177,5 +228,21 @@
    test(freq_dict_test, true,
       [],
       ((test_freq_dict(freq_dict)::ok))).
+
+   test(fibonacci_correct, true,
+      [],
+      (test_fib(fibonacci, [calc/2 - public])::ok)).
+
+   test(fibonacci_cached_correct, true,
+      [condition(success(fibonacci_correct))],
+      (test_fib(fibonacci_cached, [cache/2-[protected, dynamic]])::ok)).
+
+   test(fibonacci_cache_exists, true,
+      [condition(success(fibonacci_cached_correct))],
+      (test_fib_cache(fibonacci_cached)::ok)).
+
+   % Problem 6, Skipped.
+
+
 
 :- end_object.
