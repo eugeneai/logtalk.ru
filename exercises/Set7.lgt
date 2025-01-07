@@ -96,9 +96,9 @@
    df(ctg(E), -(csc(E)^2)).
    df(sec(E), sec(E)*tg(E)).
    df(cosec(E), -(cosec(E)*ctg(E))).
-   df(arcsin(E), 1/sqrt(1-E^2)).
-   df(arccos(E), -1/sqrt(1-E^2)).
-   df(arctg(E), 1/sqrt(1+E^2)).
+   df(asin(E), 1/sqrt(1-E^2)).
+   df(acos(E), -1/sqrt(1-E^2)).
+   df(atan(E), 1/sqrt(1+E^2)).
    df(arcctg(E), -1/sqrt(1+E^2)).
 
 :- end_category.
@@ -154,8 +154,8 @@
    r(A/(-1*B), -1*(A/B)).
 
    r(cos(E)^2-sin(E)^2, cos(2*E)) :- !. % оставить.
-   r(sin(E)/cos(E), arctg(E)) :- !. % оставить.
-   r(cos(E)/sin(E), arcctg(E)) :- !. % оставить.
+   r(sin(E)/cos(E), atan(E)) :- !. % оставить.
+   % r(cos(E)/sin(E), atan(-E)+3.141516/2) :- !. % оставить.
    % r(A^2-B^2, (A+B)*(A-B)).
 
    % Попробовать просто вычислить выражение
@@ -273,28 +273,29 @@
    calc(Fun, IniVal, Val, Eps) :-
       ::diff(Fun, x, DFun),
       ::reduce(Fun/DFun, Formula),
-      format('Функция ~q, производная ~q, формула ~q \n.',
+      format('Функция ~q, производная ~q, формула ~q\n.',
         [Fun, DFun, Formula]),
       % debugger::trace,
       iter(Formula, IniVal, Val, Eps).
 
    iter(Formula, V, Vr, Eps) :-
       substitute(Formula, V/x, F),
-      debugger::trace,
+      % debugger::trace,
       Vn is F,
       ( abs(Vn)>Eps ->
         Vnn is V - Vn,
-        iter(Formula, Vnn, Vr, Eps) ; Vr = Vn ).
+        format('~w\n',[Vnn]),
+        iter(Formula, Vnn, Vr, Eps) ; Vr = V ).
 
    % :- private(c/3).
 
-   substitute([], []).
-   substitute([X|T], Sub, [X1|T1]) :-
+   substitute([], _, []) :-!.
+   substitute([X|T], Sub, [X1|T1]) :- !,
       substitute(X, Sub, X1),
       substitute(T, Sub, T1).
    substitute(x, X/x, X) :-!.
    substitute(F, Sub, Fs) :-
-      F =.. [O|T],
+      F =.. [O|T], !,
       substitute(T, Sub, T1),
       Fs =.. [O|T1].
    substitute(X, _, X).
@@ -309,13 +310,14 @@
    test(newton_test,
       all(::mem(c(Formula, X),[
            c(x, 0)
-         % , c(sin(x), 0)
-         % , c(cos(x), 8)
+         , c(sin(x), 0)
+         , c(cos(x), 3.1415926/2) % Зависит от начального приближения
       ])),
       [each_test_name(apply_newton_to(Formula)),
        each_explain(::error('Не удалось достичь необходимую точность!'+[]))],
       ( Eps = 0.001,
-        newton::calc(Formula, 10, X1, Eps),
+        newton::calc(Formula, 0.5, X1, Eps),
+        format('Решение уравнения ~w=0: x=~w.\n', [Formula, X1]),
         abs(X1-X)=<Eps)).
 
 :- end_object.
