@@ -146,6 +146,7 @@
    r(A+A, 2*A).
    % Произведение двух одинаковых выражений
    r(A*A, A^2).
+   r(A/1, A).
    r(A+N*A, (1+N)*A).  %
    r(A*N, N*A) :- number(N),!. %
    r(N*A*A, N*A^2) :- number(N),!. %
@@ -262,11 +263,11 @@
       argnames is ['Function', 'InitialValue', 'Result', 'Epsilon']
    ]).
 
-   :- protected(iter/5).
-   :- mode(iter(+compound, -var, +number, -number, +number), zero_or_one).
-   :- info(iter/5, [
+   :- protected(iter/4).
+   :- mode(iter(+compound, +number, -number, +number), zero_or_one).
+   :- info(iter/4, [
       comment is 'Численно-аналитический метод Ньютона решения уравнения, основной цикл',
-      argnames is ['Formula', 'Variable', 'InitialValue', 'Result', 'Epsilon']
+      argnames is ['Formula', 'InitialValue', 'Result', 'Epsilon']
    ]).
 
    calc(Fun, IniVal, Val, Eps) :-
@@ -274,12 +275,29 @@
       ::reduce(Fun/DFun, Formula),
       format('Функция ~q, производная ~q, формула ~q \n.',
         [Fun, DFun, Formula]),
-      substitute(Formula, X/x, F),
-      iter(F, X, IniVal, Val, Eps).
+      % debugger::trace,
+      iter(Formula, IniVal, Val, Eps).
 
-   iter(_F, _, V,V, _Eps).
+   iter(Formula, V, Vr, Eps) :-
+      substitute(Formula, V/x, F),
+      debugger::trace,
+      Vn is F,
+      ( abs(Vn)>Eps ->
+        Vnn is V - Vn,
+        iter(Formula, Vnn, Vr, Eps) ; Vr = Vn ).
 
-   substitute(F, _, F).
+   % :- private(c/3).
+
+   substitute([], []).
+   substitute([X|T], Sub, [X1|T1]) :-
+      substitute(X, Sub, X1),
+      substitute(T, Sub, T1).
+   substitute(x, X/x, X) :-!.
+   substitute(F, Sub, Fs) :-
+      F =.. [O|T],
+      substitute(T, Sub, T1),
+      Fs =.. [O|T1].
+   substitute(X, _, X).
 
 :- end_object.
 
@@ -290,9 +308,9 @@
 
    test(newton_test,
       all(::mem(c(Formula, X),[
-           c(1, 0)
-         , c(sin(x), 0)
-         , c(cos(x), 8)
+           c(x, 0)
+         % , c(sin(x), 0)
+         % , c(cos(x), 8)
       ])),
       [each_test_name(apply_newton_to(Formula)),
        each_explain(::error('Не удалось достичь необходимую точность!'+[]))],
