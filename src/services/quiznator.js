@@ -2,7 +2,7 @@ import axios from "axios"
 import { accessToken } from "./moocfi"
 import { flatten, getCommonElements } from "../util/arrays"
 
-const BASE_URL = "https://quiznator.mooc.fi"
+const BASE_URL = "https://logtalk.ru/quiznator"
 
 export async function fetchManyQuizDetails(quizIds) {
   const res = await axios.post(

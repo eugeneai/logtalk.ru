@@ -6,11 +6,27 @@ import { v4 as uuidv4 } from "uuid"
 import CourseSettings from "../../course-settings"
 
 const { fetch } = fetchPonyfill()
-const BASE_URL = "https://tmc.mooc.fi/api/v8"
+
+//const HELSINKI_MOOC = true
+const HELSINKI_MOOC = false
+
+var BASE_URL
+var O_AUTH_SITE
+var SITE_URL
+
+if (HELSINKI_MOOC) {
+  BASE_URL = "https://tmc.mooc.fi/api/v8"
+  O_AUTH_SITE = "https://tmc.mooc.fi" // The original oauth site
+} else {
+  SITE_URL = "https://logtalk.ru"
+  BASE_URL = SITE_URL + "/api/v8"
+  O_AUTH_SITE = SITE_URL
+}
 
 const tmcClient = new TmcClient(
   "59a09eef080463f90f8c2f29fbf63014167d13580e1de3562e57b9e6e4515182",
   "2ddf92a15a31f87c1aabb712b7cfd1b88f3465465ec475811ccce6febb1bad28",
+  O_AUTH_SITE,
 )
 
 const loginStateListeners = []
