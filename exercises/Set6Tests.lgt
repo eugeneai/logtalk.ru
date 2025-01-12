@@ -24,6 +24,13 @@
 
    test(test_ufs, true,
       [],
-      (test_halg(ucs(ssge_test))::ok)).
+      (test_halg(ucs(ssgh_test))::ok)).
 
+   test(test_astar, true,
+      [],
+      (test_halg(a_star(ssgh_test))::ok)).
+
+      test(test_astar_on_puzzle, true,
+      [],
+      (test_puzzle_solver(a_star(game8_ssgh), game8_ssgh)::ok)).
 :- end_object.

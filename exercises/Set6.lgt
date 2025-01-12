@@ -246,7 +246,7 @@
 % стратегий поиска. Понадобиться новые протоколы,
 % алгоритмы (стратегии) и данные.
 
-:- protocol(ssge_p). % Граф пространства состояний с данными
+:- protocol(ssgh_p). % Граф пространства состояний с данными
    :- public(next/3).  % расстояний между узлами.
    :- public(goal_state/1).
 :- end_protocol.
@@ -255,14 +255,20 @@
 % функций.
 
 :- protocol(heuristic_p).
-   :- public(h/2).
+   :- public(h_value/2).
+   :- mode(h_value(+list(+compound),-numeric), one).
+   :- info(h_value/2, [
+      comment is 'Значение эвристической функции, вычесленной из исходных данных, переданных в первом параметре (список)',
+      argnames is ['ListOfInputValue', 'H_Value']
+   ]).
+
 :- end_protocol.
 
 % -----------------------------------------------------
 % Упражнение 9: Зададим контрольный пример из Википедии.
 
-:- object(ssge_test,
-   implements(ssge_p)).
+:- object(ssgh_test,
+   implements([ssgh_p, heuristic_p])).
 
    :- protected(e/3).
 
@@ -281,13 +287,24 @@
 
    goal_state(g).
 
+   h_value([Node], Value) :-
+     h(Node, Value),!.
+
+   h(0, 6).
+   h(d, 4.5).
+   h(a, 4).
+   h(e, 2).
+   h(c, 4).
+   h(b, 2).
+   h(g, 0).
+
 :- end_object.
 
 % -----------------------------------------------------
 % Упражнение 10: Реализуем алгоритм UCS, Uniform Cost
 % Search, поиск с равнозначной стоимостью (поиск в ширину).
 
-:- object(ucs(_SSGE_),
+:- object(ucs(_SSGH_),
    implements(solution_p)).
 
    solution(Start, Solution) :-
@@ -298,11 +315,11 @@
                                   reverse/2]).
 
    ucs([_-[X-Y|W]|_], [X-Y|W]) :-
-     _SSGE_::goal_state(Y), !.
+     _SSGH_::goal_state(Y), !.
 
    ucs([G-[X-Y|W]|Ways], Solution) :-
      findall(GZ-[Y-Z,X-Y|W],
-        ( _SSGE_::next(Y,Z, C),
+        ( _SSGH_::next(Y,Z, C),
           \+ member(_-Z, [X-Y|W]),
           GZ is G + C
         ), L),
@@ -314,12 +331,15 @@
 
 % Тестовый объект для эвристических алгоритмов поиска
 % решающего пути.
+%
+% ?- test_halg(ucs(ssgh_test))::solution(<старт-вершина>, Solution).
+%
 
 :- object(test_halg(_Alg_),
    extends(studyunit)).
 
    test_type(problem).
-   test_name('Тест алгоритмов поиска для '(_Alg_)).
+   test_name('Тест эвристических алгоритмов поиска для '(_Alg_)).
 
    test(test_problem_solving_alg,
       all(::mem(Start-Solution,
@@ -339,5 +359,223 @@
       %   (Solution == GSolution -> true;
       %    ::info('Несовпадение результатов:\n~q (получено),\n~q должно быть\nАлгоритм:~q.' +
       %      [GSolution, Solution, _Alg_]))))).
+
+:- end_object.
+
+
+% -----------------------------------------------------
+% Упражнение 11: Реализация алгоритма A*. Алгоритм является
+% обобщением ucs. Ключ сортировки - сумма G и значение
+% эвристической функции, вычисленной по данным SSG/задачи
+
+:- object(a_star(_SSGH_),
+   implements([solution_p])).
+
+   solution(Start, Solution) :-
+     astar([0-q(0,['*'-Start])], RSol),
+     reverse(RSol,[_|Solution]).
+
+   :- use_module(library(lists), [append/3, member/2,
+                                  reverse/2]).
+
+   astar([_-q(_,[X-Y|W])|_], [X-Y|W]) :-
+     _SSGH_::goal_state(Y), !.
+
+   astar([_-q(G,[X-Y|W])|Ways], Solution) :-
+     findall(FZ-q(GZ,[Y-Z,X-Y|W]),
+        ( _SSGH_::next(Y,Z, C),
+          \+ member(_-Z, [X-Y|W]),
+          GZ is G + C,
+          _SSGH_::h_value([Z], HZ),
+          FZ is GZ + HZ
+        ), L),
+     append(L, Ways, S),
+     keysort(S, Solutions),
+     astar(Solutions, Solution).
+
+:- end_object.
+
+% Усложненный уровень раздела
+% ===========================
+
+% Используем разработанные алгоритмы для решения головоломки
+% Игра 8 (игра 15 требует намного больших ресурсов)
+
+% Будем поэтапно формулировать SSG для этой задачи.
+% -----------------------------------------------------
+% Упражнение 12: Сформулировать целевое состояние.
+% Один из вариантов представления игрового поля:
+% [ [1, 2, 3],
+%   [8, 0, 4],
+%   [7, 6, 5] ]
+
+% Другой вариант представления игрового поля:
+% [ 1, 2, 3,
+%   8, 0, 4,
+%   7, 6, 5 ]
+
+% Еще вариант представления игрового поля:
+%     1  2  3
+%   [ 1, 2, 3,           % 1
+%     8, 0, 4,           % 2
+%     7, 6, 5 ] - 2/2    % 3
+
+% Тесты вашего объекта будут независимы от структур
+% данных представления игрового поля, поэтому мы
+% не сможем детально контролировать процесс проектирования
+% программы. ;-)
+
+:- object(game8_ssgh,
+   implements([ssgh_p, heuristic_p])).
+
+   goal_state(
+      [ 1, 2, 3,
+        8, 0, 4,
+        7, 6, 5 ] - 1/1).
+
+% -----------------------------------------------------
+% Упражнение 13: Теперь надо сформулировать метод next/3,
+% очевидно, что все дуги будут одинаковой "длины".
+
+   next(Begin, End, 0) :-
+     move(Direction),
+     make_move(Direction, Begin, End).
+
+% Направления перемещения вверх, вниз, вправо влево.
+
+   move(up).
+   move(down).
+   move(left).
+   move(right).
+
+% Далее реализуем перемещение пустого поля 0 согласно
+% заданного направления.
+
+  make_move(up, List-R/C, New - R1/C) :-
+    R>0, !,
+    R1 = R-1,
+    find(R1,C, List, Num),
+    swap(Num, List, New).
+
+  make_move(down, List-R/C, New - R1/C) :-
+    R<2, !,
+    R1 = R+1,
+    find(R1,C, List, Num),
+    swap(Num, List, New).
+
+  make_move(left, List-R/C, New - R/C1) :-
+    C>0, !,
+    C1 = C-1,
+    find(R,C1, List, Num),
+    swap(Num, List, New).
+
+  make_move(right, List-R/C, New - R/C1) :-
+    C<2, !,
+    C1 = C+1,
+    find(R,C1, List, Num),
+    swap(Num, List, New).
+
+  :- use_module(library(lists), [append/3,
+                                 nth0/3,
+                                 sum_list/2]).
+
+  swap(Num, Begin, End) :-
+    append(B, [Num|T], Begin),
+    ( append(A1, [0|T1], B) ->
+        append(A1, [Num|T1], B1),
+        append(B1, [0|T1], End);
+      append(A2, [0|T2], T) ->
+        append(A2, [Num|T2], B2),
+        append(B,[0|B2], End);
+      format('Странно, других вариантов не должно быть!'), fail ).
+
+  find(R,C, List, Num) :-
+    var(Num),
+    nonvar(List),
+    nonvar(R),
+    nonvar(C), !,
+    Pos is R*3+C,
+    nth0(Pos, List, Num).
+
+  find(R,C, List, Num) :-
+    nonvar(R),
+    nonvar(C),
+    nth0(Pos, List, Num),
+    divmod(Pos, 3, R, C).  % Only SWI
+
+% -----------------------------------------------------
+% Упражнение 14: Теперь осталось сделать эвристическую
+% функцию. Значение функции - сумма манхэттеновских
+% расстояний местоположения фишек в текущей позиции до
+% их позиций в целевом состоянии.
+
+  h_value([Node-_/_], Value) :-
+    ::goal_state(Target - _/_), !,
+    findall(Diff,
+      diff(Node, Target, Diff),
+    L), !,
+    sum_list(L, Value).
+
+  diff(Curr, Target, Diff) :-
+    find(R1, C1, Target, Num),
+    Num>0,   % Не считать 0 фишкой.
+    find(R2, C2, Curr, Num),
+    Diff is abs(R1-R2)+abs(C1-C2).
+
+% -----------------------------------------------------
+% Упражнение 15: Для тестирования необходимо сделать
+% генератор начального состояния из целевого при помощи
+% перемещения 0 раз 100 в случайном направлении.
+   :- public(gen_init/2).
+   :- mode(gen_init(+integer, -compound), one_or_more).
+   :- info(gen_init/2, [
+      comment is 'Генерирует допустимое состояние',
+      argnames is ['NumberOfMovements', 'PuzzleBoard']
+     ]).
+
+   :- use_module(library(random), [random_member/2,
+                                   setrand/1]).
+
+   gen_init(0, Target) :-
+      ::goal_state(Target).
+   gen_init(N, Result) :-
+      N>0, !,
+      N1 is N-1,
+      gen_init(N1, Prev),
+      random_member(Movement, [up, down, left, right]),
+      make_move(Movement, Prev, Result).
+
+   :- public(init_rand/1).
+   :- mode(init_rand(+integer), one).
+   :- info(init_rand/1, [
+      comment is 'Устанавливает начальное значение генератора случайных чисел',
+      argnames is ['InitialValue']
+     ]).
+
+   init_rand(Value) :-
+      setrand(Value).
+
+:- end_object.
+
+% Тестовый объект для головоломки.
+%
+% ?- test_puzzle_solver(a_star(game8_ssgh), game8_ssgh)::run.
+%
+
+:- object(test_puzzle_solver(_Alg_, _SSGE_),
+   extends(studyunit)).
+
+   test_type(problem).
+   test_name('Тест решателя головоломок '(_Alg_)).
+
+   test(test_problem_solving_alg,
+      all((between(1,10, _), _SSGE_::gen_init(10, Init))),
+      [
+         each_test_name(test_puzzle_solver(_Alg_, Start)),
+         each_explain(::error('Решение не найдено для ~q.' +
+           [Init]))
+      ],
+      ((_Alg_::solution(Init, Solution),
+        ::info('Решение: ~q.\n' - [Solution])))).
 
 :- end_object.
