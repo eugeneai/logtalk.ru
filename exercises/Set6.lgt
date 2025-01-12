@@ -415,10 +415,10 @@
 %   7, 6, 5 ]
 
 % Еще вариант представления игрового поля:
-%     1  2  3
-%   [ 1, 2, 3,           % 1
-%     8, 0, 4,           % 2
-%     7, 6, 5 ] - 2/2    % 3
+%     0  1  2
+%   [ 1, 2, 3,           % 0
+%     8, 0, 4,           % 1
+%     7, 6, 5 ] - 2/2    % 2
 
 % Тесты вашего объекта будут независимы от структур
 % данных представления игрового поля, поэтому мы
@@ -428,10 +428,11 @@
 :- object(game8_ssgh,
    implements([ssgh_p, heuristic_p])).
 
-   goal_state(
+   goal_state(L - 1/1) :-  % Сначала определить, где "0",
+      L =                  % Только потом уже сравнивать списки.
       [ 1, 2, 3,
         8, 0, 4,
-        7, 6, 5 ] - 1/1).
+        7, 6, 5 ].
 
 % -----------------------------------------------------
 % Упражнение 13: Теперь надо сформулировать метод next/3,
@@ -453,25 +454,25 @@
 
   make_move(up, List-R/C, New - R1/C) :-
     R>0, !,
-    R1 = R-1,
+    R1 is R-1,
     find(R1,C, List, Num),
     swap(Num, List, New).
 
   make_move(down, List-R/C, New - R1/C) :-
     R<2, !,
-    R1 = R+1,
+    R1 is R+1,
     find(R1,C, List, Num),
     swap(Num, List, New).
 
   make_move(left, List-R/C, New - R/C1) :-
     C>0, !,
-    C1 = C-1,
+    C1 is C-1,
     find(R,C1, List, Num),
     swap(Num, List, New).
 
   make_move(right, List-R/C, New - R/C1) :-
     C<2, !,
-    C1 = C+1,
+    C1 is C+1,
     find(R,C1, List, Num),
     swap(Num, List, New).
 
@@ -483,11 +484,11 @@
     append(B, [Num|T], Begin),
     ( append(A1, [0|T1], B) ->
         append(A1, [Num|T1], B1),
-        append(B1, [0|T1], End);
+        append(B1, [0|T], End);
       append(A2, [0|T2], T) ->
         append(A2, [Num|T2], B2),
         append(B,[0|B2], End);
-      format('Странно, других вариантов не должно быть!'), fail ).
+      format('Странно, других вариантов не должно быть!\n'), fail ).
 
   find(R,C, List, Num) :-
     var(Num),
@@ -498,8 +499,6 @@
     nth0(Pos, List, Num).
 
   find(R,C, List, Num) :-
-    nonvar(R),
-    nonvar(C),
     nth0(Pos, List, Num),
     divmod(Pos, 3, R, C).  % Only SWI
 
@@ -538,12 +537,14 @@
 
    gen_init(0, Target) :-
       ::goal_state(Target).
+
    gen_init(N, Result) :-
       N>0, !,
       N1 is N-1,
       gen_init(N1, Prev),
       random_member(Movement, [up, down, left, right]),
-      make_move(Movement, Prev, Result).
+      format('~q: ', [Movement]),
+      (make_move(Movement, Prev, Result),!; Result=Prev).
 
    :- public(init_rand/1).
    :- mode(init_rand(+integer), one).
@@ -569,13 +570,17 @@
    test_name('Тест решателя головоломок '(_Alg_)).
 
    test(test_problem_solving_alg,
-      all((between(1,10, _), _SSGE_::gen_init(10, Init))),
+      all((between(1,10, _),
+         _SSGE_::gen_init(200, Start),
+         _SSGE_::h_value([Start], VS),
+         format('\nStart:~q, H:~q.\n',[Start, VS]))),
       [
          each_test_name(test_puzzle_solver(_Alg_, Start)),
          each_explain(::error('Решение не найдено для ~q.' +
-           [Init]))
+           [Start]))
       ],
-      ((_Alg_::solution(Init, Solution),
-        ::info('Решение: ~q.\n' - [Solution])))).
+      ((_Alg_::solution(Start, Solution),
+        length(Solution, SolutionL),
+        ::info('Шагов в решении: ~q.\n' - [SolutionL])))).
 
 :- end_object.
