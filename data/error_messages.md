@@ -9,7 +9,7 @@ separator_after: "Введение в программирование"
 
 Эта страница содержит информацию о наиболее распространенных сообщениях об ошибках, с которыми вы можете столкнуться при выполнении упражнений по программированию в этом курсе.
 
-<pre hidden=true>
+<pre>
 ### My printout looks identical to the example in the instructions, but my submission still fails
 
 Make sure your program doesn't print any extra whitespace, such as space characters. Notice that the default behaviour of the `print` function is to add a space between any strings separated with a comma.

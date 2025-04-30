@@ -23,7 +23,7 @@ sidebar_priority: 3000
 Если вы не можете получить учебные кредиты на курс (см. вопрос выше), вы все равно получите сертификат на прохождение курса (в будущем, пока мы их не выдаем). Пожалуйста, проконсультируйтесь в канале поддержки тедеграм.
 
 
-<pre hidden="true">
+<pre>
 If you obtain a passing grade for the course, you can get a certificate from here: https://www.mooc.fi/en/profile/completions. Just log in with your MOOC account.
 
 ### Do I need to have a University of Helsinki user account?

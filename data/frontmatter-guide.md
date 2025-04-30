@@ -1,6 +1,5 @@
 ---
 banner: false
-hidden: true
 hide_in_sidebar: true
 information_page: false
 overview: true
