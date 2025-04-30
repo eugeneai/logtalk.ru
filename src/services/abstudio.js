@@ -1,7 +1,7 @@
 import axios from "axios"
 import { accessToken } from "./moocfi"
 
-const BASE_URL = "https://ab-studio.testmycode.io"
+const BASE_URL = "https://logtalk.ru"
 
 export async function fetchAbGroup(studyId) {
   const res = await axios.get(
