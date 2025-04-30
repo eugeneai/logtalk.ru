@@ -1,50 +1,41 @@
 ---
+
 path: "/"
-title: "About this course"
-hidden: false
+title: "Курс языка объектно-ориентированного программирования Logtalk"
+hidden: fa
 information_page: true
 banner: true
 sidebar_priority: 7000
 ---
 
-**The course starts on January 15th 2024.**
 
-This is the course material page for the Introduction to Programming course (BSCS1001, 5 ECTS) and the Advanced Course in Programming (BSCS1002, 5 ECTS) from the Department of Computer Science at the University of Helsinki.
+Это страница материалов курса для введения в курс программирования на объектно-ориентированном языке программирования Logtalk основного и продвинутого уровней от кафедры информационных технологий Института математики и информатики Иркутского государственного университета.
 
-To pass either of the two courses you are expected to complete programming exercises and take part in an exam. Please see the [Grading and exams](/grading-and-exams) page for more details.
+Чтобы пройти любой из двух уровней курса, вам необходимо выполнить упражнения по программированию, а также, в случае наличия в расписании экзамена, пройти экзамен.
 
-The Introduction to Programming course consists of parts 1 through 7 in the material, and the Advanced Course in Programming consists of parts 8 through 14.
+Курс «Объектно-ориентированное логическое программирование» состоит из частей с 1 по 10 основного уровня, и 10 по 20 продвинутого.  На продвинутом уровне, в основном, представлены примеры приложения освоенных приемов программирования на Logtalk
 
-**NB:** It is **no longer possible** to directly apply for a right to study at the University of Helsinki through these courses. If you are interested in studying at the University of Helsinki, please have a look at the [admissions website](https://www.helsinki.fi/en/admissions-and-education).
+**Замечание** В настоящее время мы не можем выдавать сертификаты прохождения курса, но ваши результаты сохраняются в базе данных.  Студенты, изучающие данный курс в рамках магистерской программы "Семантические технологии и многоагентные системы", могут получить зачет/экзамен, решив 75% задач первого уровня.
 
-## Support channels on the course
+## Средства поддержки данного курса
 
-The official course support channels are available through workshop guidance on campus and Discord. The course channels in Discord are available through [this link](https://study.cs.helsinki.fi/discord/join/ohjelmoinnin_mooc).
+Официальные каналы поддержки курса доступны в телеграм @LogtalkEdu.  Также есть копия записей лекций на YouTube [по этой ссылке](https://studio.youtube.com/playlist/PLDmve33tqgosPa51g7uZ0LrmlzGiARLNG). Используйте телеграм в первую очередь для общения.  Можно также связаться с преподавателями курса по электронной почте eugeneai [at] irnok.net.
 
-Please see the [Support and assistance](/support-and-assistance) page for more details.
+## Временные рамки курса
 
-Use Discord primarily for communication. You can be in contact with the course teachers by e-mail ohjelmoinnin-mooc@helsinki.fi.
+Если предположить, что вы знакомы достаточно хорошо с языком программирования ISO Prolog, то данный курс можно пройти за один семестр.
 
-## Timetable
+## Лекции
 
-The course will be open until the end of the year 2024.
+Мы составляем записи лекций по ходу совершенствования курса, и они появляются через несколько дней после проведения очных занятий ил ВКС.
 
-## Lectures
-
-Live lectures are organized on Thursdays, starting on September 5th. 
-You can follow the lecture live via [Zoom](https://helsinki.zoom.us/j/63688020089?pwd=vKhxH2OMcOzPqcteFZHVqUiVCfdmOz.1) starting at 10.15.
-
-The lecture recordings are updated in the table below after the lecture. Until then, you can find last year's corresponding lecture in the table.
-
-Please note, that exam dates and similar information in the older recordings may not concern this year's course.
-
-<table>
+<table hidden="true">
   <thead>
     <tr>
-      <td>Part</td>
-      <td>Recording</td>
-      <td>YouTube</td>
-      <td>Slides</td>
+      <td>Част</td>
+      <td>Запись</td>
+      <td>Ссылка YouTube</td>
+      <td>Слайды</td>
     </tr>
   </thead>
   <tbody>

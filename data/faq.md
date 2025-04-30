@@ -1,6 +1,6 @@
 ---
 path: "/faq"
-title: "Frequently asked questions"
+title: "Часто задаваемые вопросы"
 hidden: false
 information_page: true
 sidebar_priority: 3000
@@ -8,34 +8,22 @@ sidebar_priority: 3000
 
 <table-of-contents></table-of-contents>
 
-### I found a mistake in the course material or in a programming exercise
+### Я нашел ошибку в материале курса или в упражнении по программированию
 
-We would be very grateful if you'd let us know through the course support channels or via email to course maintainers at ohjelmoinnin-mooc@helsinki.fi. Thank you!
+Мы будем очень благодарны, если вы сообщите нам через каналы поддержки курса или по электронной почте для тех, кто поддерживает курс на eugeneai [at] irnok.net. Спасибо!
 
-### Why doesn't TMC show all parts of the course? How can I download the next part's exercises?
+### У меня не получается зарегистрироваться, могу ли я все еще начать курс?
 
-Next part's exercises can be downloaded once you've gained 25% or more of the previous part's exercise points.
+Да, можете! Вам не нужно регистрироваться, чтобы начать, или, по сути, даже завершить курс. Вероятно система регистрации находится в состоянии отказа, она самая сложная в реализации (борьба со спамом при рассылке сообщений по подтверждению учетной записи, ненадежность сети, устаревшие сертификаты и т.п.). Вы можете послать свой e-mail в телеграм-канал поддержки и мы вас зарегистрируем.
 
-<span class="h2">Participating from educational institutions in Finland</span>
+### Я получаю официальные учебные оценки по этому курсу?
 
-<notice>The questions below are relevant mainly to participants who are enrolled in a Finnish university or other educational institution.</notice>
+В конце курса вам нужно будет выслать преподавателдю название своей учетной записи с перечнем сделанных работ, и, в случае наличия экзамена в расписании, сдать экзамен.
 
-### I don't know how to enrol, can I still start the course?
+Если вы не можете получить учебные кредиты на курс (см. вопрос выше), вы все равно получите сертификат на прохождение курса (в будущем, пока мы их не выдаем). Пожалуйста, проконсультируйтесь в канале поддержки тедеграм.
 
-Yes you can! You do not need to enrol to start, or, in fact, even to complete the course. After the course is finished, you will be emailed instructions for receiving credits for the course.
 
-### Can I receive official study credits for this course?
-
-At the end of the course you will need to take part in the course exam. If you receive a passing grade, you will be able to get study credits. See the [Grading and exams](/grading-and-exams) page for more details about grading.
-
-### Can my study credits be transferred to my home institution?
-
-If you obtain a passing grade for the course, you will receive study credits through the University of Helsinki. A transcript of your studies will likely suffice for credit transfer at your home institution, but please check this with the study counsellors at your home institution.
-
-If you are unable to receive study credits for the course (see the question above), you will still receive a certificate for completing the course. Please check with the study counsellors at your home institution if they have a process for awarding credits based on the certificate.
-
-### Where do I get the certificate?
-
+<pre hidden="true">
 If you obtain a passing grade for the course, you can get a certificate from here: https://www.mooc.fi/en/profile/completions. Just log in with your MOOC account.
 
 ### Do I need to have a University of Helsinki user account?
@@ -64,6 +52,7 @@ Introduction to Programming is a massive open online course, free of charge and 
 
 The Introduction to Programming course translates to a course worth 5 study credits at the University of Helsinki. However, course participants are not automatically University of Helsinki students, and it is possible to participate in the course in a way that will not result in study credits. If the participant so wishes, they may receive credits for this course. Participating in this course does not entitle the participant to a governmental study grant.
 
-### I'm currently receiving unemployment benefits in Finland. Can I still take this course? 
+### I'm currently receiving unemployment benefits in Finland. Can I still take this course?
 
 Please take this up with your employment services office (TE-toimisto). Unfortunately, not all employment services offices treat this course in the same way. Some offices have withdrawn benefits for simply participating in the course, even if the participant is not aiming for a right to study or official study credits. On the other hand, some offices have even recommended this course without withdrawing benefits.
+</pre>

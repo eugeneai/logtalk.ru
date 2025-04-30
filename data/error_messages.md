@@ -1,14 +1,15 @@
 ---
 path: "/error_messages"
-title: "Common error messages"
+title: "Наиболее часто возникающие ошибки"
 hidden: false
 information_page: true
 sidebar_priority: 2000
-separator_after: "Introduction to Programming"
+separator_after: "Введение в программирование"
 ---
 
-This page contains information about the most common error messages you may come across when completing the programming exercises on this course.
+Эта страница содержит информацию о наиболее распространенных сообщениях об ошибках, с которыми вы можете столкнуться при выполнении упражнений по программированию в этом курсе.
 
+<pre hidden=true>
 ### My printout looks identical to the example in the instructions, but my submission still fails
 
 Make sure your program doesn't print any extra whitespace, such as space characters. Notice that the default behaviour of the `print` function is to add a space between any strings separated with a comma.
@@ -45,7 +46,7 @@ The following code would cause this error:
 
 ### NameError: name [variable name] is not defined on line [line number]
 
-You are trying to refer to a variable or object which does not exist at that specific point in your program. It may be that the variable has not yet been assigned a value, or there is a typo in the variable name. It may also be the case that you have defined a variable inside a function, and are trying to refer to that same variable outside the function. 
+You are trying to refer to a variable or object which does not exist at that specific point in your program. It may be that the variable has not yet been assigned a value, or there is a typo in the variable name. It may also be the case that you have defined a variable inside a function, and are trying to refer to that same variable outside the function.
 
 ```python
     person = input('Please type in your name: ')
@@ -59,15 +60,17 @@ You are trying to refer to a variable or object which does not exist at that spe
 
 You may be trying to add an integer and a string together, without first converting the string into an integer value. Strings can be converted into integers with the `int()` function. A similar error message may appear if you try to perform other arithmetic operations, such as division or subtraction, on strings.
 
-It may also be the case that you are trying to create a new string by combining a string and an integer. You should first convert the integer into a string with the `str()` function. 
+It may also be the case that you are trying to create a new string by combining a string and an integer. You should first convert the integer into a string with the `str()` function.
 
 ```python
     my_age = input("Please type in your age: ")
     my_name = input("Please type in your name: ")
 
-    print(my_age//2)   # error: the variable my_age has not been converted into an integer 
+    print(my_age//2)   # error: the variable my_age has not been converted into an integer
 ```
 
 ### TypeError: cannot concatenate 'str' and 'int' objects on line [line number]
 
 See above.
+
+</pre>
