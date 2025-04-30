@@ -1,4 +1,5 @@
 ---
+hidden: true
 banner: false
 hide_in_sidebar: true
 information_page: false

@@ -1,27 +1,27 @@
 {
   "@context": "http://schema.org",
   "@type": "Course",
-  "name": "Programming MOOC 2022",
+  "name": "Объектно-ориентированное логическое программирование",
   "description": "",
   "provider": {
     "@type": "Organization",
-    "name": "MOOC.fi",
-    "sameAs": "https://mooc.fi"
+    "name": "math.isu.ru",
+    "sameAs": "https://math.isu.ru"
   },
   "publisher": {
     "@type": "Organization",
-    "name": "University of Helsinki",
-    "sameAs": "https://www.helsinki.fi/"
+    "name": "Иркутский государственный университет",
+    "sameAs": "https://isu.ru/"
   },
   "hasCourseInstance": [
     {
       "@type": "CourseInstance",
-      "name": "Programming MOOC 2022",
+      "name": "Объектно-ориентированное логическое программирование",
       "courseMode": ["MOOC", "online"],
       "location": {
         "@type": "Place",
-        "name": "Exactum, Kumpulan kampus",
-        "address": "Gustaf Hällströmin katu 2b 00560 Helsinki, Finland"
+        "name": "Институт математики и информатики",
+        "address": "Бульв. Гагарина, д. 20, г. Иркутск, Россия"
       },
       "startDate": "2022-01-10",
       "audience": {
@@ -31,8 +31,8 @@
       },
       "inLanguage": {
         "@type": "Language",
-        "name": "English",
-        "alternateName": "en"
+        "name": "Русский",
+        "alternateName": "ru"
       },
       "isAccessibleForFree": true
     }

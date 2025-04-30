@@ -2,7 +2,7 @@
 
 path: "/"
 title: "Курс языка объектно-ориентированного программирования Logtalk"
-hidden: fa
+hidden: false
 information_page: true
 banner: true
 sidebar_priority: 7000

@@ -1,20 +1,20 @@
 const courseSettings = {
-  language: "en",
-  name: "Python Programming MOOC 2024",
-  siteUrl: "https://programming-24.mooc.fi",
-  githubUrl: "https://github.com/rage/programming-24",
-  subtitle: "Python Programming MOOC",
-  slug: "programming-24",
+  language: "ru",
+  name: "Объектно-ориентированное логическое программирование",
+  siteUrl: "https://logtalk.ru",
+  githubUrl: "https://github.com/eugeneai/logtalk.ru",
+  subtitle: "Программирование на языке Logtalk",
+  slug: "loop",
   organizationName: "MOOC",
-  tmcCourse: "programming-24",
-  quizzesId: "0a8162e8-133a-4fa8-b619-4125cb92c6e0",
+  tmcCourse: "logtalk",
+  quizzesId: "0a8162e8-133a-4fa8-b619-4125cb92c6f0",
   tmcOrganization: "mooc",
   bannerPath: "banner.svg",
   showExerciseDescriptionWhenNotLoggedIn: true,
   courseVariants: [
     {
-      tmcOrganization: "hbc",
-      tmcCourse: "python-TVT24Eng"
+      tmcOrganization: "isu",
+      tmcCourse: "logtalk",
     },
     // {
     //   tmcOrganization: "hbc",
