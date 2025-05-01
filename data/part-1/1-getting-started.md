@@ -4,38 +4,53 @@ title: 'Getting started'
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name='Learning objectives'>
+<text-box variant='learningObjectives' name='Цель раздела'>
 
-After this section
+После изучения материала этого раздела Вы
 
-- You will have written and executed your first Python program
-- You will know how to use the print command
-- You will be able to use programming for arithmetic operations
+    - напишите и выполните свою первую программу на Logtalk.
+    - узнаете, как реализовывать инкапсуляцию в этом языке в виде объекта.
+    - выполним несколько запросов к методам этого объекта.
 
 </text-box>
 
-Computer programs consist of _commands_, each command instructing the computer to take some action. A computer executes these commands one by one. Among other things, commands can be used to perform calculations, compare things in the computer's memory, cause changes in how the program functions, relay messages or ask for information from the program's user.
+Основной целью создания объектов в Logtalk является инкапсуляция и повторное использование предикатов. Вместо одного общего текста, содержащего весь код, общей базы данных фактов, объекты Logtalk предоставляют отдельные пространства имен и баз данных.  Объекты позволяют делить код на части, которыми проще манипулировать. Logtalk является декларативным языком программирования и не стремится привнести какую-то новую концепцию динамического изменения состояния в парадигму логического программирования, в частности, язык Пролог.
 
-Let's begin programming by getting familiar with the `print` command, which _prints_ text. In this context, printing essentially means that the program will show some text on the screen.
+Программа на языке Logtalk в классическом смысле представляет собой логическую теорию, статичная по своей природе.  То есть, в идеале, можно представить себе набор объектов, задающих логическую модель предметной области, посылающих друг другу сообщения с целью выяснения, истинен или ложен некоторый запрос в этой теории. Однако, как мы далее убедимся, не обязательно оставаться в таком статическом мире.
 
-The following program will print the line "Hi there!":
+Давайте начнем процесс программирования, ознакомимся с командой «печати», которая _печатает_ на экран текст. В этом контексте (примере) печать по существу означает, что программа покажет какой-то текст на экране.
 
-```python
-print("Hi there!")
+```logtalk
+% File: hello.lgt
+
+:- begin_object(printing_object).
+
+   :-public(print/1).
+
+   print(Message) :-
+     format('~w\n', [Message]).
+
+:- end_object.
 ```
 
-When the program is run, it produces this:
+Чтобы запустить эту программу, надо загрузить ее при помощи ```{<название программы>}```, например, ```{hello}``` (Файл с программой называется ```hello.lgt```) и выполнить запрос. Вот пример интерактивного взаимодействия:
 
 <sample-output>
+$ swilgt
 
+?- {hello}.
+true
+
+?- printing_object::print('Hi there!').
 Hi there!
+true.
 
 </sample-output>
 
-The program will not work unless the code is written exactly as it is above. For example, trying to run the print command without the quotation marks, like so
+Программа не будет работать, если код не написан точно так, как указано выше. Например, попытка запустить команду печати без кавычек, как
 
-```python
-print(Hi there!)
+```logtalk
+::print(Hi there!)
 ```
 
 will not print out the message, but instead causes an error:
