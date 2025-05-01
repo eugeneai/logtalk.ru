@@ -23,9 +23,9 @@ hidden: false
 ```logtalk
 % File: hello.lgt
 
-:- begin_object(printing_object).
+:- object(printing_object).
 
-   :-public(print/1).
+   :- public(print/1).
 
    print(Message) :-
      format('~w\n', [Message]).
@@ -37,201 +37,200 @@ hidden: false
 
 <sample-output>
 $ swilgt
+. . . . . . . . . . .
+Welcome to SWI-Prolog (threaded, 64 bits, version 9.2.9)
+SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software.
+Please run ?- license. for legal details.
+
+For online help and background, visit https://www.swi-prolog.org
+For built-in help, use ?- help(Topic). or ?- apropos(Word).
 
 ?- {hello}.
-true
+% [ hello.lgt loaded ]
+% (0 warnings)
+true.
 
 ?- printing_object::print('Hi there!').
 Hi there!
 true.
 
+?- _
 </sample-output>
 
 Программа не будет работать, если код не написан точно так, как указано выше. Например, попытка запустить команду печати без кавычек, как
 
+
+<sample-output>
+
+?- printing_object::print(Hi there!).
+
+</sample-output>
+
+
+не распечатывает сообщение, а вместо этого вызывает ошибку:
+
+
+<sample-output>
+
+?- printing_object::print(Hi there!).
+ERROR: Syntax error: Operator expected
+ERROR: ?- printing_object::print(Hi
+ERROR: ** here **
+ERROR:  there!) .
+
+</sample-output>
+
+Если вы хотите распечатать текст, текст должен быть заключен в одинарные или двойные кавычки,
+иначе Logtalk не будет правильно интерпретировать его.
+
+Logtalk имеет очень развитую систему обработки ошибок и на этапе компиляции и на этапе исполнения программы. Будем с ней знакомиться в процессе изучения материала.
+
+## Создание объекта-инкапсуляции
+
+Основная тема в объекном-ориентированном программировании - это *инкапсуляция*.  В Logtalk она реализуется в сравнении с другими структурами проще всего.  При этом, обращаю внимание на то, что простейшие объекты не обязаны принадлежать какой-либо объектной иерархии.  Рассмотрим пример инкапсуляции некоторого набора предикатов обработки списков в одном объекте.
+
 ```logtalk
-::print(Hi there!)
+% File: list.lgt
+
+:- object(list).
+
+    :- public([
+        append/3, length/2, member/2
+    ]).
+
+    append([], List, List).
+    append([Head| Tail], List, [Head| Tail2]) :-
+        append(Tail, List, Tail2).
+
+    length(List, Length) :-
+        length(List, 0, Length).
+
+    length([], Length, Length).
+    length([_| Tail], Acc, Length) :-
+        Acc2 is Acc + 1,
+        length(Tail, Acc2, Length).
+
+    member(Element, [Element| _]).
+    member(Element, [_| List]) :-
+        member(Element, List).
+
+:- end_object.
 ```
 
-will not print out the message, but instead causes an error:
+Чем это отличается от обычной программы Prolog? Определения предикатов списка являются обычными. У нас есть две новые директивы, ```object/1-5``` (```object``` с один, двумя, ... или пятью аргументами) и ```end_object/0``` (```end_object``` без аргументов).  При помощи этих директив определяется объект ```list```, который инкапсулирует код предикатов. Можно также говорить, что эти директивы *инкапсулируют* код объекта.  В Logtalk, по умолчанию, все предикаты объектов являются приватными (```private```), поэтому необходимо прямо объявить все предикаты, которые должны быть публичными, то есть, они должны в каком-то смысле вызваться "снаружи" объекта. Это делается с помощью директивы ```public/1```.
+
+После того, как программный код объектна помещен в текстовый файл с именем ```list.lgt```, нам нужно изменить рабочий каталог Prolog на тот, который использовался для сохранения нашего файла (проконсультируйтесь со справочником компилятора Prolog). Затем, после запуска Logtalk, можно компилировать и загрузить объект с помощью встроенного предиката ```logtalk_load/1``` Logtalk:
 
 <sample-output>
 
-<pre>
-File "<stdin>", line 1
-  print(Hi there!)
-                   ^
-SyntaxError: invalid syntax
-</pre>
+| ?- logtalk_load(list).  % Нажимаем "Enter"
+
+object list loaded
+true.
 
 </sample-output>
 
-In summary, if you want to print text, the text must all be encased in quotation marks or Python will not interpret it correctly.
-
-<in-browser-programming-exercise name="Emoticon" tmcname="part01-01_emoticon" height="300px">
-
-Please write a program which prints out an emoticon: :-)
-
-</in-browser-programming-exercise>
-
-## A program of multiple commands
-
-Multiple commands written in succession will be executed in order from first to last.
-For example this program
-
-```python
-print("Welcome to Introduction to Programming!")
-print("First we will practice using the print command.")
-print("This program prints three lines of text on the screen.")
-```
-prints the following lines on the screen:
+Теперь можно позапускать запросы.
 
 <sample-output>
 
-Welcome to Introduction to Programming!
-First we will practice using the print command.
-This program prints three lines of text on the screen.
+?- list::member(X, [1, 2, 3]).
+
+X = 1; % нажимаем ";" для получения нового ответа
+X = 2;
+X = 3;
+false.
 
 </sample-output>
 
-<in-browser-programming-exercise name="Fix the code: Seven Brothers" tmcname="part01-02_seven_brothers">
-
-"Seitsemän veljestä" is one of the first novels ever written in Finnish. It is the story of seven orphaned brothers learning to make their way in the world ([read more on Wikipedia](https://en.wikipedia.org/wiki/Seitsem%C3%A4n_veljest%C3%A4)).
-
-This program is supposed to print out the names of the brothers in alphabetical order, but it's not working quite right yet. Please fix the program so that the names are printed in the correct order.
-
-
-```python
-print("Simeoni")
-print("Juhani")
-print("Eero")
-print("Lauri")
-print("Aapo")
-print("Tuomas")
-print("Timo")
-```
-
-</in-browser-programming-exercise>
-
-
-<in-browser-programming-exercise name="Row, Row, Row Your Boat" tmcname="part01-03_row_your_boat">
-
-Please write a program which prints out the following lines exactly as they are written here, punctuation and all:
+Или вот еще один вариант запроса.
 
 <sample-output>
 
-Row, row, row your boat,
-Gently down the stream.
-Merrily, merrily, merrily, merrily,
-Life is but a dream.
+?- list::length([1, 2, 3], L).
+
+L = 3 % нажата клавиша "Enter", что означает отказ
+yes   % от новых решений
 
 </sample-output>
 
-</in-browser-programming-exercise>
-
-
-## Arithmetic operations
-
-You can also put arithmetic operations inside a `print` command. Running it will then print out the result of the operation. For example, the following program
-
-```python
-print(2 + 5)
-print(3 * 3)
-print(2 + 2 * 10)
-```
-prints out these lines:
+Инфиксный оператор (::)/2 используется в Logtalk для отправки сообщений объекту, то есть вызов метода объекта с передачей требуемых параметров.  В Logtalk методами являются исключительно предикаты или операторы.  Имя сообщения должно соответствовать одному из публичных (public) методов (предикатов) объекта.  Если попытаться назвать непубличный метод, такой как вспомогательный предикат ```length/3```, будет создано исключение:
 
 <sample-output>
 
-7
-9
-22
+?- list::length([1, 2, 3], 0, L).
+
+uncaught exception:
+    error(
+        existence_error(predicate_declaration, length/3),
+        logtalk(list::length([1,2,3],0,_), ...)
+    )
 
 </sample-output>
 
-Notice the lack of quotation marks around the arithmetic operations above. Quotation marks are used to signify _strings_. In the context of programming, strings are sequences of characters. They can consist of letters, numbers and any other types of characters, such as punctuation. Strings aren't just words as we commonly understand them, but instead a single string can be as long as multiple complete sentences.
-Strings are usually printed out exactly as they are written. Thus, the following two commands produce two quite different results:
+Терм исключения описывает тип ошибки и контекст, в котором она произошла.  Из курса логики мы знаем, что *терм* (*term*) - это структура, обозначающая некоторый объект.  В данном случае терм ```error/2``` описывает исключение: ```existence_error/2``` - описание исключения, состоящее из ```predicate_decoration```, обозначающее, что имеет место противоречие с декларацией предиката ```length/3```, и ```logtalk/1-``` - источник исключения, здесь это вызов метода (сообщение) ```list::length([1,2,3],0,_)```.
 
-```python
-print(2 + 2 * 10)
-print("2 + 2 * 10")
-```
-
-This program prints out:
+На самом деле вариант исключения, приведенный выше соответствует ранней версии Logtalk, работающей совместно с интерпретатором ```gnuprolog```.  Вариант для одного из свежих версий Logtalk, надстроенный над SWI-Prolog выдаст такой вариант ошибки.  Текст выдачи ошибки окрашен в красный цвет.
 
 <sample-output>
 
-22
-2 + 2 * 10
+?- list::length([1, 2, 3], 0, L).
+!     Existence error: predicate_declaration length/3 does not exist
+!       in goal: list::length([1,2,3],0,A)
+!       with execution context:
+!         entity:            user
+!         sender:            user
+!         this:              user
+!         self:              B
+!         meta-call context: []
+!         coinduction stack: []
+!
 
 </sample-output>
 
-With the second line of code, Python does not calculate the result of the operation, but instead prints out the operation itself, as a string.
-So, strings are printed out just as they are written, without any reference to their contents.
+Здесь сообщение более информативно, в том числе показано, откуда осуществлен вызов (```sender: user```).  Остальные значения тут не так очевидны для интерпретации, разберемся с ними позже.
 
-## Commenting
+## Использование комментариев
 
-Any line beginning with the pound sign `#`, also known as a hash or a number sign, is a comment. This means that any text on that line following the `#` symbol will not in any way affect how the program functions. Python will simply ignore it.
+Любая строка, начинающаяся со знака «%», является комментарием. Любой текст в этой строке, следующий за символом %, никоим образом не повлияет на работу программы.  Logtalk и Prolog просто игнорирует этот текст до конца строки.  В вышериведенных примерах использованные комментарии показывают название файла, где сохраняется исходный код и действия пользователя при подаче команды запуска запроса и использования полученных результатов.
 
-Comments are used for explaining how a program works, to both the programmer themselves, and others reading the program code. In this program a comment explains the calculation performed in the code:
+Используя комментарии, объясним структуру объекта ```list```.
 
-```python
-print("Hours in a year:")
-# there are 365 days in a year and 24 hours in each day
-print(365*24)
+```logtalk
+% File: list.lgt
+
+:- object(list). % Начало определения объекта list
+
+    % Задание области видимости (scope) методов
+    :- public([  % список рубличных методов
+        append/3, length/2, member/2
+    ]).
+
+    % собственно реализация методов
+    append([], List, List). % что-то вроде факта.
+    % правило
+    append([Head| Tail], List, [Head| Tail2]) :-
+        append(Tail, List, Tail2).
+
+    % задание [публичного] метода length/2
+    length(List, Length) :-
+        length(List, 0, Length).
+
+    % задание [приватного] метода length/3
+    length([], Length, Length).
+    length([_| Tail], Acc, Length) :-
+        Acc2 is Acc + 1,
+        length(Tail, Acc2, Length).
+
+    % [публичный] метод member/3
+    member(Element, [Element| _]).
+    member(Element, [_| List]) :-
+        member(Element, List).
+
+:- end_object.
 ```
 
-When the program is run, the comment will not be visible to the user:
-
-<sample-output>
-
-Hours in a year:
-8760
-
-</sample-output>
-
-Short comments can also be added to the end of a line:
-
-```python
-print("Hours in a year:")
-print(365*24) # 365 days, 24 hours in each day
-```
-
-<in-browser-programming-exercise name="Minutes in a year" tmcname="part01-04_minutes_in_a_year">
-
-Please write a program which prints out the number of minutes in a year. Use Python code to perform the calculation, as in the previous code example.
-
-</in-browser-programming-exercise>
-
-<in-browser-programming-exercise name="Print some code" tmcname="part01-05_print_code">
-
-Thus far, you have probably used double quotation marks `"` to print out strings. In addition to the double quotation marks, Python also accepts single quotation marks `'`.
-
-This comes in handy if you ever want to print out the actual quotation marks themselves:
-
-```python
-
-print('"Come right back!", shouted the police officer.')
-
-```
-
-<sample-output>
-
-"Come right back!", shouted the police officer.
-
-</sample-output>
-
-Please write a program which prints out the following:
-
-<sample-output>
-
-print("Hello there!")
-
-</sample-output>
-
-
-
-</in-browser-programming-exercise>
+Напомним также, что в Prolog и Logtalk названия предикатов учитывают количество аргументов, т.е. одного имени ```member``` в общем случае только часть идентификатора ```member/3```. Аналогично, название нашего объекта ```list``` должно быть ```list/0```.
 
 
 <!--
