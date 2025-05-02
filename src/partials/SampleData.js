@@ -25,7 +25,7 @@ const Body = styled.div`
 
   em,
   strong {
-    color: red;
+    color: blue;
     font-weight: normal;
   }
 `
