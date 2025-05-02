@@ -46,12 +46,12 @@ Please run ?- license. for legal details.
 For online help and background, visit https://www.swi-prolog.org
 For built-in help, use ?- help(Topic). or ?- apropos(Word).
 
-?- {hello}.
+?- **{hello}**.
 % [ hello.lgt loaded ]
 % (0 warnings)
 true.
 
-?- printing_object::print('Hi there!').
+?- **printing_object::print('Hi there!').**
 Hi there!
 true.
 
@@ -63,7 +63,7 @@ true.
 
 <sample-output>
 
-?- printing_object::print(Hi there!).
+?- **printing_object::print(Hi there!).**
 
 </sample-output>
 
@@ -73,7 +73,7 @@ true.
 
 <sample-output>
 
-?- printing_object::print(Hi there!).
+?- **printing_object::print(Hi there!).**
 ERROR: Syntax error: Operator expected
 ERROR: ?- printing_object::print(Hi
 ERROR: ** here **
@@ -124,7 +124,7 @@ Logtalk имеет очень развитую систему обработки
 
 <sample-output>
 
-| ?- logtalk_load(list).  % Нажимаем "Enter"
+| ?- **logtalk_load(list).**
 
 object list loaded
 true.
@@ -137,9 +137,9 @@ true.
 
 ?- list::member(X, [1, 2, 3]).
 
-X = 1; % нажимаем ";" для получения нового ответа
-X = 2;
-X = 3;
+X = 1**;** % нажимаем ";" для получения нового ответа
+X = 2**;**
+X = 3**;**
 false.
 
 </sample-output>
@@ -148,7 +148,7 @@ false.
 
 <sample-output>
 
-?- list::length([1, 2, 3], L).
+?- **list::length([1, 2, 3], L).**
 
 L = 3 % нажата клавиша "Enter", что означает отказ
 yes   % от новых решений
@@ -159,7 +159,7 @@ yes   % от новых решений
 
 <sample-output>
 
-?- list::length([1, 2, 3], 0, L).
+?- **list::length([1, 2, 3], 0, L).**
 
 uncaught exception:
     error(
@@ -175,7 +175,7 @@ uncaught exception:
 
 <sample-output>
 
-?- list::length([1, 2, 3], 0, L).
+?- **list::length([1, 2, 3], 0, L).**
 !     Existence error: predicate_declaration length/3 does not exist
 !       in goal: list::length([1,2,3],0,A)
 !       with execution context:
