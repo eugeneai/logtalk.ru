@@ -176,7 +176,7 @@ uncaught exception:
 <sample-output>
 
 ?- **list::length([1, 2, 3], 0, L).**
-!     Existence error: predicate_declaration length/3 does not exist
+<b class='errLog'>!     Existence error: predicate_declaration length/3 does not exist
 !       in goal: list::length([1,2,3],0,A)
 !       with execution context:
 !         entity:            user
@@ -185,7 +185,7 @@ uncaught exception:
 !         self:              B
 !         meta-call context: []
 !         coinduction stack: []
-!
+!</b>
 
 </sample-output>
 

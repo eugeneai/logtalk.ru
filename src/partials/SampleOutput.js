@@ -28,6 +28,11 @@ const Body = styled.div`
     color: blue;
     font-weight: normal;
   }
+
+  .errLog {
+    color: red;
+    font-weight: normal;
+  }
 `
 
 const Note = styled.div`
