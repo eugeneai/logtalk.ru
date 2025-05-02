@@ -33,6 +33,11 @@ const Body = styled.div`
     color: red;
     font-weight: normal;
   }
+
+  .green {
+    color: green;
+    font-weight: normal;
+  }
 `
 
 const Note = styled.div`

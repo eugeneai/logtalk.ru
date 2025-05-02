@@ -1,6 +1,6 @@
 ---
 path: "/part-1/3-more-about-variables"
-title: "More about variables"
+title: "Пространства видимости и протоколы"
 hidden: false
 ---
 
