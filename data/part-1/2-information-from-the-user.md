@@ -22,6 +22,7 @@ _Наследование_ в объекно-ориентированных яз
 % File:family_base.lgt
 
 :- object(family_base).
+
    :- public([
       man/1,    % мужчина(<кто>)
       woman/1,  % женщина(<кто>)
@@ -122,6 +123,7 @@ true.
 % File:family_base.lgt
 
 :- object(family_base).
+
    :- public([
       man/1,    % мужчина(<кто>)
       woman/1,  % женщина(<кто>)
