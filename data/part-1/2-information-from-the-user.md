@@ -4,7 +4,7 @@ title: 'Наследование'
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name='Learning objectives'>
+<text-box variant='learningObjectives' name='Цель изучения раздела'>
 
 В этом разделе вы узнаете, как
 

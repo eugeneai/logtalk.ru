@@ -1,431 +1,223 @@
 ---
-path: "/part-1/4-arithmetic-operations"
-title: "Arithmetic operations"
+path: "/part-1/4-running-tests"
+title: "Установка Logtalk и выполнение тестовых заданий"
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name="Learning objectives">
+<text-box variant='learningObjectives' name="Цель изучения этого раздела">
 
-After this section
+Изучив материал этого раздела вы сможете
 
-- You will be able to use variables in various arithmetic operations
-- You will know how to deal with numbers in user input
-- You will know how to cast values into other fundamental data types
+- Установить интерпретатор Prolog и компилятор Logtalk
+- Загрузить с Github, отредактировать файл тестов и запустить тестовые задания
+- Сгенерировать отчет о выполнении заданий
 
 </text-box>
 
-In the previous sections you've seen examples with basic arithmetics. In the following table you can see the most common arithmetic operators in Python, with examples:
+## Установка Logtalk на персональный компьютер
 
-| Operator      | Purpose       | Example      | Result |
-|:-------------:|---------------|--------------|-------|
-| `+`           | Addition      | `2 + 4`      |`6`    |
-| `-`           | Subtraction   | `10 - 2.5`   |`7.5`  |
-| `*`           | Multiplication | `-2 * 123`  |`-246` |
-| `/`           | Division (floating point result) | `9 / 2`     | `4.5` |
-| `//`          | Division (integer result)              | `9 // 2`    | `4`   |
-| `%`           | Modulo        | `9 % 2`      |`1`    |
-| `**`          | Exponentiation | `2 ** 3`    |`8`    |
+В этом разделе представлен обзор требований и инструкции по установке Logtalk, а также описание некоторых файлов, содержащихся в дистрибутиве Logtalk. Широкая совместимость Logtalk, как с компиляторами Prolog, так и с операционными системами, как правило установка очень простая, например, запуск установщика или нескольких скриптов.  Будем предполагать, что пользователь владеет компьютером, управляемым операционной системой Windows, Linux, Mac OSX.
 
-The order of operations is familiar from mathematics: first calculate the exponents, then multiplication and division, and finally addition and subtraction. The order can be changed with parentheses.
+Лучше всего устанавливать Logtalk в системной области, таким образом, чтобы обеспечивался доступном для всех пользователей, при этом у каждого пользователя в домашнем каталоге есть локальная копия изменяемых пользователем файлов, даже если вы являетесь единственным пользователем вашего компьютера.  Такой подход к установке позволяет каждому пользователю самостоятельно настраивать Logtalk и свободно изменять установленные библиотеки и примеры программ.  Программы установки Logtalk, сценарии установки для командной строки ориентированы на простую установку, ориентирующуюся на две переменные среды, ```LOGTALKHOME``` и ```LOGTALKUSER```, указывая, соответственно, на папку, где установлен Logtalk и папку пользователя.
 
-For example this bit of code
+Приложения, разработанные пользователем, должны храниться в специальной папке, которая не должна размещаться в папке  Logtalk, созданной для пользователя в процессе установки, поскольку обновление Logtalk часто приводит к обновлению ее содержимого, соответственно, выши программы могут быть удалены без вопросов.  Желательно также копировать ваши программы в резервное хранилище, перед обновлением.  Это надо делать на всякий случай.
 
-```python
-print(2 + 3 * 3)
-print((2 + 3) * 3)
+**Замечание.** Далее рассматриваются более подробно вопросы, связанные с процессом установки.  Можно их не читать вообще, они приводятся для более глубокого ознакомления структуры дистрибутива Logtalk.  Наибольший интерес представляют насколько разделов в конце страницы, где приводятся сведения о стандарной библиотеке и ее объектах, а также информация о большом количестве примеров.
+
+## Установка в Windows
+
+## Установка в Linux/macOS
+
+## Требования к компьютеру и рабочему окружению
+
+Logtalk совместим практически с любым компьютером/операционной системой с современным компилятором языка Prolog, но для соей работы требует компилятор Prolog, поддерживающий официальные, в частности ISO, и некоторые специальные фактические стандарты.  Расширения стандарта ISO Prolog Core, необходимые Logtalk, следующие:
+
+- доступ к свойствам предикатов
+- предикаты доступа к операционной системе
+- некоторые устоявшиеся в языке стандартные предикаты, не указанные (пока) в официальном стандарте
+
+В некоторых случаях для повышения производительности Logtalk требует, чтобы компилятор Prolog поддерживал индексацию термов по первому аргументу как для статического, так и для динамического кода (большинство современных компиляторов поддерживают эту функцию).  Поскольку большинство компиляторов Prolog стремяться поддержать стандарт ISO Prolog [ISO95], поэтому рекомендуется использовать последнюю версию вашего любимого компилятора Prolog.
+
+
+## Инсталляторы Logtalk
+
+Программы установ Logtalk доступны для macOS, Linux и Microsoft Windows.  В зависимости от выбранного установщика некоторые задачи (например, настройка переменных среды или интеграция Logtalk с некоторыми компиляторами Prolog) нужно выполнять вручную.
+
+## Установка Logtalk из архива исходного кода
+
+Исходный код Logtalk доступен в архиве формата ```tar```, сжатом при помощи ```bzip2```, то есть, нпример, в файле ```lgt3xxx.tar.bz2```.  Архив надо разархивировать, используя программы разархивации, например, или набрав следующие команды в командной строке:
+
+```bash
+$ tar -jxvf lgt3xxx.tar.bz2
 ```
 
-prints out
+В результате будет создан подкаталог под названием ```lgt3xxx``` в текущем каталоге.  Почти все файлы дистрибутива Logtalk являются текстовыми файлами.  Различные операционные системы используют разные указатели концов строк (end-of-line characters) в текстах исходных кодов.  Надо, чтобы программа разархивации преобразовывала конецы строк всех текстовых файлов в соответствии с вашей операционной системой.
 
-<sample-output>
+В каталоге установки Logtalk вы найдете следующие разархивированные файлы и каталоги:
 
-11
-15
+```ACKNOWLEDGMENTS.md``` - Список авторов, участникоав проекта, спонсоров и перечень использованного стороннего открытого исходного кода
 
-</sample-output>
+```BIBLIOGRAPHY.bib``` – Библиография исследований с импользованием Logtalk в формате BibTeX
 
-## Operands, operators and data types
+```CITATION.cff``` - Информация о том, как следует цитировать в статьях и диссертациях Logtalk
 
-A calculation usually consists of *operands* and *operators*:
+```CODE_OF_CONDUCT.md``` - Кодекс поведения для участников и пользователей, публикуемых на форумах поддержки
 
-<img src="1_4_1.png">
+```CUSTOMIZE.md``` – Инструкции по настройке Logtalk конечными пользователями
 
-The data type of an operand usually determines the data type of the result: if two integers are added together, the result will also be an integer. If a floating point number is subtracted from another floating point number, the result is a floating point number. In fact, if a single one of the operands in an expression is a floating point number, the result will also be a floating point number, regardless of the other operands.
+```INSTALL.md``` – Инструкции по установке Logalk
 
-Division `/` is an exception to this rule. Its result is a floating point number, even if the operands are integers. For example `1 / 5` will result in the floating point number `0.2`.
+```LICENSE.txt``` – Пользовательская лицензия Logtalk
 
-Example:
+```NOTICE.txt``` – Уведомление об авторских правах Logalk
 
-```python
-height = 172.5
-weight = 68.55
+```QUICK_START.md``` – Инструкция по быстрому старту для тех, кто не любит читать руководства
 
-# the Body Mass Index, or BMI, is calculated by dividing body mass with the square of height
-# height is converted into metres in the formula
-bmi = weight / (height / 100) ** 2
+```README.md``` – несколько полезных фрагментов информации
 
-print(f"The BMI is {bmi}")
-```
+```RELEASE_NOTES.md``` – перечень особенностей текущей версии Logtalk
 
-This program prints out the following:
+```UPGRADING.md``` – инструкции о том, как следует обновлять программы до совместимости с текущей версией Logtalk
 
-<sample-output>
+```VERSION.txt``` – файл, содержащий текущий номер версии Logtalk (используется для проверки совместимости при обновлении Logtalk)
 
-The BMI is 23.037177063642087
+```loader-sample.lgt``` – образец файла загрузки для пользовательских приложений
 
-</sample-output>
+```settings-sample.lgt``` – образец файла для пользовательских настроек Logtalk
 
-Notice Python also has an integer division operator `//`. If the operands are integers, it will produce an integer. The result is rounded down to the nearest integer. For example this program
+```tester-sample.lgt``` – образец файла автоматизации выполнения пользовательских тестов для разрабатываемых приложений
 
-```python
-x = 3
-y = 2
+**adapters**
 
-print(f"/ operator {x/y}")
-print(f"// operator {x//y}")
-```
+```NOTES.md``` – примечания к предоставленным файлам адаптера
 
-prints out
+```template.pl``` – шаблон файла адаптера
 
-<sample-output>
+... – различные адаптеры
 
-/ operator 1.5
-// operator 1
+**coding**
 
-</sample-output>
+```NOTES.md``` – примечания к методике расцвечивания синтаксиса и файлам поддержки синтаксиса для различных текстовых редакторов, обеспечивающим раскраску синтаксиса исходного кода Logtalk
 
-## Numbers as input
+... – поддержка синтаксических файлов
 
-We have already used the `input` command to read in strings from the user. The same function can be used to read in numbers, but the string produced by the function must then be converted to a numeric data type in the program code. In the previous section we cast integers as strings with the `str` function. The same basic principle applies here, but the name of the casting function will be different.
+**contributions**
 
-A string can be converted into an integer with the function `int`. The following program asks the user for their year of birth and stores it in the variable `input_str`. The program then creates another variable `year`, which contains the year converted into an integer. After this the calculation `2021-year` is possible, using the user-supplied value.
+```NOTES.md``` – примечания к программным кодам, предоставленным пользователями
 
-```python
-input_str = input("Which year were you born? ")
-year = int(input_str)
-print(f"Your age at the end of the year 2021: {2021 - year}" )
-```
-<sample-output>
+... – файлы кодов пользователей
 
-Which year were you born? **1995**
-Your age at the end of the year 2021: 26
+**core**
 
-</sample-output>
+```NOTES.md``` – примечания о текущем состоянии компилятора и среды исполнения программ
 
-Usually you do not need to create two separate variables (like `input_str` and `year` above) to read a number value from the user. Instead, reading the input with the `input` function and converting it with the `int` function can be achieved in one go:
+... – исходные файлы ядра компилятора
 
-```python
-year = int(input("Which year were you born? "))
-print(f"Your age at the end of the year 2021: {2021 - year}" )
-```
+**docs**
 
-Similarly, a string can be converted into a floating point number with the function `float`. This programs asks the user for their height and weight, and uses these to calculate their BMI:
+```NOTES.md``` – примечания к предоставленной документации для ядра, библиотек, инструментальных и других средств
 
-```python
-height = float(input("What is your height? "))
-weight = float(input("What is your weight? "))
+```index.html``` – корневой документ для всех статей документации
 
-height = height / 100
-bmi = weight / height ** 2
+... – собственно статьи документации
 
-print(f"The BMI is {bmi}")
-```
+**examples** - Папка с конкретным примерами
 
-An example printout from the program:
+```NOTES.md``` – краткое описание примеров
 
-<sample-output>
+**bricks** - Папка с одним их примеров
 
-What is your height? **163**
-What is your weight? **74.45**
-The BMI is 28.02137829801649
+```NOTES.md``` – описание этого примера и другие примечания
 
-</sample-output>
+```SCRIPT.txt``` – разбор примера по шагам
 
-<in-browser-programming-exercise name="Times five" tmcname="part01-13_times_five">
+```loader.lgt``` – файл загрузчика для данного примера
 
-Please write a program which asks the user for a number. The program then prints out the number multiplied by five.
+... – исходный файл примера объекта ```bricks```
 
-The program should function as follows:
+... – другие примеры в папке ``examles```
 
-<sample-output>
+**integration**
 
-Please type in a number: **3**
-3 times 5 is 15
+```NOTES.md``` – заметки о скриптах интеграции Logtalk с компиляторами Prolog
 
-</sample-output>
+... – собственно скрипты интеграции Prolog
 
-</in-browser-programming-exercise>
+**library**
 
-<in-browser-programming-exercise name="Name and age" tmcname="part01-14_name_and_age">
+```NOTES.md``` – краткое описание содержания какой-либо библиотеки
 
-Please write a program which asks the user for their name and year of birth. The program then prints out a message as follows:
+```all_loader.lgt``` – файл загрузчика всех объектов библиотеки
 
-<sample-output>
+... – файлы исходного кода библиотеки
 
-What is your name? **Frances Fictitious**
-Which year were you born? **1990**
-Hi Frances Fictitious, you will be 31 years old at the end of the year 2021
+**man**
 
-</sample-output>
+... – Страницы POSIX для скритов командной строки
 
-</in-browser-programming-exercise>
+**manuals**
 
-## Using variables
+```NOTES.md``` – примечания к документации в дистрибутиве
 
-Let's have a look at a program which calculates the sum of three numbers given by the user:
+```bibliography.html``` – библиография
 
-```python
-number1 = int(input("First number: "))
-number2 = int(input("Second number: "))
-number3 = int(input("Third number: "))
+```glossary.html``` – глоссарий
 
-sum = number1 + number2 + number3
-print(f"The sum of the numbers: {sum}")
-```
+```index.html``` – домашняя страница документации
 
-An example execution of the program:
+... – статьи документации
 
-<sample-output>
+**paths**
 
-First number: **5**
-Second number: **21**
-Third number: **7**
-The sum of the numbers: 33
+```NOTES.md``` – описание того, как настроить библиотеку и примеры настройки перменной ```PATH```
 
-</sample-output>
+```paths.pl`` – библиотека по умолчанию и пример настройки ```PATH```
 
-The program uses four different variables, but two would easily suffice in this case:
+**ports**
 
-```python
-sum = 0
+```NOTES.md``` – описание включенного в дистрибутив стороннего программного обеспечения (portы)
 
-number = int(input("First number: "))
-sum = sum + number
+... – собственно portы
 
-number = int(input("Second number: "))
-sum = sum + number
+**scratch**
 
-number = int(input("Third number: "))
-sum = sum + number
+```NOTES.md``` – заметки об использовании этого каталога
 
-print(f"The sum of the numbers: {sum}")
-```
+**scripts**
 
-Now all inputs from the user are read into the one and the same variable `number`. The value of the variable `sum` is _increased_ by the value of the variable `number` each time the user inputs a new number.
+```NOTES.md``` – заметки об использовании скриптов для реализации настройки пользователя Logtalk, а также по упаковке и установке
 
-Let's take a closer look at this command:
+... – скрипты упаковки, установки и настройки
 
-```python
-sum = sum + number
-```
+**tests**
 
-Here, the value of the variable `sum` and the value of the variable `number` are added together, and the result is stored back in the variable `sum`. For example, if before the command the value of `sum` is 3 and the value of `number` is 2, after the command is executed, the value of `sum` is 5.
+```NOTES.md``` – примечания о текущем состоянии тестов модулей и подсистем компилятора
 
-Increasing the value of a variable is a very common operation. As such, there is a commonly used shorthand notation which achieves the same result as the explicit summing up above:
+... – тесты для модулей встроенных функций
 
-```python
-sum += number
-```
+**tools**
 
-This allows us to write the above program a little more concisely:
+```NOTES.md``` – примечания к предоставленным инструментам программирования
 
-```python
-sum = 0
+... – инструменты для программирования
 
-number = int(input("First number: "))
-sum += number
+Информацию об установке различных варианто компилятора Logtalk, его конфигурации, представленную более подробно, смотрите в файлах ```README.md```, ```INSTALL.md``` и ```CUSTOMIZE.md``` в дистрибутиве Logtalk.
 
-number = int(input("Second number: "))
-sum += number
+### Компилятор и среда времени исполнения
 
-number = int(input("Third number: "))
-sum += number
+Каталог ```core``` содержит исходные файлы Prolog и Logtalk компилятора, а также среду времени выполнения Logtalk. Обе подсистемы разделены по отдельным файлам или объединены в один файл, в зависимости от дистрибутива Logtalk, который вы устанавливаете.
 
-print(f"The sum of the numbers: {sum}")
-```
+### Библиотека
 
-In fact, we don't necessarily need the variable `number` at all. The inputs from the user can also be processed like this:
+Дистрибутив Logtalk включает в себя стандартную библиотеку полезных объектов, категорий и протоколов.  В файле ```NOTES.md``` находится обзор этих объектов, обязательно ознакомтесь с ними, чтоб экономить время на рутинных подзадачах.
 
-```python
-sum = 0
+### Примеры
 
-sum += int(input("First number: "))
-sum += int(input("Second number: "))
-sum += int(input("Third number: "))
+Дистрибутив Logtalk включает в себя тажк большое количество примеров программ.  Исхдоные кодв примеров находятся в подкаталоге с соответствующим названием, внутри каталога примеров.  Большинство этих примеров включают тесты и файл ```SCRIPT.txt``` с примерами запуска программ.  Некоторые примеры зависят друг от друга, а также используют объекты из стандартной библиотеки Logtalk.  В файлах ```NOTES.md``` представлена подробная информация о том, как правмильно  запускать пример.
 
-print(f"The sum of the numbers: {sum}")
-```
+### Файлы исходного кода Logalk
 
-Of course, it will depend on the context how many variables are needed. If it is required to remember each value the user inputs, it will not be possible to "reuse" the same variable to read different values from the user. Consider the following:
-
-```python
-number1 = int(input("First number: "))
-number2 = int(input("Second number: "))
-
-print(f"{number1} + {number2} = {number1+number2}")
-```
-
-<sample-output>
-
-First number: **2**
-Second number: **3**
-2 + 3 = 5
-
-</sample-output>
-
-On the other hand, the above program does not have a named variable for storing the sum of the two values.
-
-"Reusing" a variable only makes sense when there is a need to temporarily store things of a similar type and purpose, for example when summing numbers.
-
-In the following example the variable `data` is used to first store the name of the user, and then their age. This is not at all sensible.
-
-```python
-data = input("What is your name? ")
-print("Hi " + data + "!")
-
-data = int(input("What is your age? "))
-# program continues...
-```
-
-A better idea is to use separate variables, with _descriptive_ names:
-
-```python
-name = input("What is your name? ")
-print("Hi " + name + "!")
-
-age = int(input("What is your age? "))
-# program continues...
-```
-
-<in-browser-programming-exercise name="Seconds in a day" tmcname="part01-15_seconds_in_a_day">
-
-Please write a program which asks the user for a number of days. The program then prints out the number of seconds in the amount of days given.
-
-The program should function as follows:
-
-<sample-output>
-
-How many days? **1**
-Seconds in that many days: 86400
-
-</sample-output>
-
-Another example:
-
-<sample-output>
-
-How many days? **7**
-Seconds in that many days: 604800
-
-</sample-output>
-
-</in-browser-programming-exercise>
-
-
-<in-browser-programming-exercise name="Fix the code: Product" tmcname="part01-16_product">
-
-This program asks the user for three numbers. The program then prints out their product, that is, the numbers multiplied by each other. There is, however, something wrong with the program - it doesn't work quite right, as you can see if you run it. Please fix it.
-
-An example of the expected execution of the program:
-
-<sample-output>
-
-Please type in the first number: **2**
-Please type in the second number: **3**
-Please type in the third number: **5**
-The product is 30
-
-</sample-output>
-
-</in-browser-programming-exercise>
-
-<in-browser-programming-exercise name="Sum and product" tmcname="part01-17_sum_and_product">
-
-Please write a program which asks the user for two numbers. The program will then print out the sum and the product of the two numbers.
-
-The program should function as follows:
-
-<sample-output>
-
-Number 1: **3**
-Number 2: **7**
-The sum of the numbers: 10
-The product of the numbers: 21
-
-</sample-output>
-
-</in-browser-programming-exercise>
-
-
-<in-browser-programming-exercise name="Sum and mean" tmcname="part01-18_sum_and_mean">
-
-Please write a program which asks the user for four numbers. The program then prints out the sum and the mean of the numbers.
-
-The program should function as follows:
-
-<sample-output>
-
-Number 1: **2**
-Number 2: **1**
-Number 3: **6**
-Number 4: **7**
-The sum of the numbers is 16 and the mean is 4.0
-
-</sample-output>
-
-</in-browser-programming-exercise>
-
-
-
-<in-browser-programming-exercise name="Food expenditure" tmcname="part01-19_food_expenditure">
-
-Please write a program which estimates a user's typical food expenditure.
-
-The program asks the user how many times a week they eat at the student cafeteria. Then it asks for the price of a typical student lunch, and for money spent on groceries during the week.
-
-Based on this information the program calculates the user's typical food expenditure both weekly and daily.
-
-The program should function as follows:
-
-<sample-output>
-
-How many times a week do you eat at the student cafeteria? **4**
-The price of a typical student lunch? **2.5**
-How much money do you spend on groceries in a week? **28.5**
-
-Average food expenditure:
-Daily: 5.5 euros
-Weekly: 38.5 euros
-
-</sample-output>
-
-</in-browser-programming-exercise>
-
-<in-browser-programming-exercise name="Students in groups" tmcname="part01-20_students_in_groups">
-
-Please write a program which asks for the number of students on a course and the desired group size. The program will then print out the number of groups formed from the students on the course. If the division is not even, one of the groups may have fewer members than specified.
-
-If you can't get your code working as expected, it is absolutely okay to move on and come back to this exercise later. The topic of the next section is [conditional statements](/part-1/5-conditional-statements). This exercise can also be solved using a conditional construction.
-
-<sample-output>
-
-How many students on the course? **8**
-Desired group size? **4**
-Number of groups formed: 2
-
-</sample-output>
-
-<sample-output>
-
-How many students on the course? **11**
-Desired group size? **3**
-Number of groups formed: 4
-
-</sample-output>
-
-Hint: the integer division operator `//` could come in handy here.
-
-</in-browser-programming-exercise>
+Файлы исхдоного кода Logtalk представляют собой текстовые файлы, содержащие одно или несколько определений различных сущностей (объекты, категории или протоколы).  Среди этих файлов можно найти код Prolog.  Файлы Logtalk обычно используют расширение ```.lgt```.  Logtalk компилирует эти файлы в Prolog-программы, добавляя к имени файла дополнительную часть с расширением ```.pl``` (вместо ```.lgt```).
 
 <!--
 

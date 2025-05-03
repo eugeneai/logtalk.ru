@@ -1,10 +1,10 @@
 ---
 path: "/part-1/3-more-about-variables"
-title: "Пространства видимости и протоколы"
+title: "Области видимости и протоколы"
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name='Learning objectives'>
+<text-box variant='learningObjectives' name='Цель изучения раздела'>
 
 В этом разделе вы узнаете, как
 
