@@ -28,6 +28,54 @@ hidden: false
 
 ## Установка в Linux/macOS
 
+```bash
+Finish these last three steps in order to complete this upgrade:
+
+1) Ensure that the lines below are in your `~/.bashrc`.:
+
+LOGTALKHOME=/usr/lib/logtalk/share/logtalk
+LOGTALKUSER=$HOME/logtalk
+PATH=$PATH:$LOGTALKHOME/tools/lgtdoc/xml:$LOGTALKHOME/scripts:$LOGTALKHOME/integration
+MANPATH=$MANPATH:$LOGTALKHOME/man
+export LOGTALKHOME LOGTALKUSER PATH MANPATH
+-----------------------------------------------------------------------------------------------------------------
+
+
+2) run `source ~/.bashrc`
+
+3) run `logtalk_user_setup`
+
+IMPORTANT: Please remember to remove any `logtalk-backup` directories from your $HOME path if you no longer need them.
+
+:: Запуск post-transaction hooks...
+(1/1) Arming ConditionNeedsUpdate...
+eugeneai@center ~/projects/code/archlinux-modules/logtalk $ logtalk_user_setup
+
+This script copies all the Logtalk per-user files and directories to the
+user home directory. The location can be set by defining the LOGTALKUSER
+environment variable (defaults to "~/logtalk" when not defined).
+
+Created a backup of the existing "$LOGTALKUSER" directory:
+
+  /home/eugeneai/.local/logtalk-backup-2025-05-03-172712
+
+Creating a new "$LOGTALKUSER" directory:
+
+  /home/eugeneai/.local/logtalk
+
+If you are upgrading from a previous Logtalk version, check the file
+"$LOGTALKUSER/settings-sample.lgt" for updated settings suggestions.
+
+$ logtalk_user_setup
+Copying Logtalk files and directories...
+Finished copying Logtalk files and directories.
+
+You may want to customize the default compiler flags and preload developer
+tools by renaming and editing the "settings-sample.lgt" file found in the
+"$LOGTALKUSER" directory. Consult the "$LOGTALKUSER/CUSTOMIZE.md" file for
+more information.
+```
+
 ## Требования к компьютеру и рабочему окружению
 
 Logtalk совместим практически с любым компьютером/операционной системой с современным компилятором языка Prolog, но для соей работы требует компилятор Prolog, поддерживающий официальные, в частности ISO, и некоторые специальные фактические стандарты.  Расширения стандарта ISO Prolog Core, необходимые Logtalk, следующие:

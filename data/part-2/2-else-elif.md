@@ -1,18 +1,84 @@
 ---
-path: '/part-2/2-else-elif'
-title: 'More conditionals'
+path: '/part-2/2-datalog'
+title: 'Язык запросов Datalog'
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name="Learning objectives">
+<text-box variant='learningObjectives' name="Цель освоения материала">
 
-After this section
+В результате изучения этого раздела вы
 
-- You will know how to create multiple branches within conditional statements
-- You will understand the purpose of `if`, `elif` and `else` statements within a conditional statement
-- You will be able to use the modulo operation `%` in Boolean expressions
+- Получите представление об использовании Prolog в качестве языка запросов к базе данных
+- Научимся выводить результаты запросов в виде таблиц
+- Вспомним использование предикатов ```setof/3```, ```bagof/3```, ```findall/3```
+- Научитесь инсталлировать внешние пакеты SWI-Prolog и использовать модули Prolog в программах Logtalk
 
 </text-box>
+
+Согласно [Wikipedia] Datalog - это декларативный логический язык программирования, синтаксическое подмножество Prolog.  Основным отличием Datalog от Prolog является модель вывода "от фактов к запросу", а не "от запроса к фактам".  Эта разница приводит к значительно отличающемуся поведению и свойствам от Prolog.  Часто используется как язык запросов для дедуктивных баз данных.  Datalog применяется к решению проблем интеграции данных, сетей, анализа программ и многому другому.
+
+Программа Datalog состоит из фактов, которые являются утверждениями, которые считаются истинными, и правил, которые говорят, как вывести новые заключения из известных фактов.  Семантическая модель программы, ее смысл, выражается множеством всех фактов, которые можно вывести из исходных фактов и правил.  Папример для Datalog-программы
+
+```prolog
+parent(xerces, brooke).
+parent(brooke, damocles).
+
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+```
+
+семантической моделью будет следующий набор фактов.
+
+```prolog
+parent(xerces, brooke).
+parent(brooke, damocles).
+ancestor(xerces, brooke).
+ancestor(brooke, damocles).
+ancestor(xerces, damocles).
+```
+
+В Datalog также запрещены к использованию сложные термы, вроде такого: ```sister(wife(socrates))```.
+
+Здесь нас больше будут интересовать возможности Prolog и Logtalk в инкапсуляции баз данных в виде объектов.  Ввиду простоты языка в сравнении, например, с SQL, SPARQL и XPath, системы на основе Datalog в настоящее время часто используют как верхний уровень управления запросами к базам данных.  Мы построим такую систему над реляционными базами данных SQLite, заодно научимся устанавливать пакеты SQL-Prolog и использовать модкли Prolog в объектах Logtalk.
+
+Для запуска последующих примеров нам надо установить пакет ```prosqlite.pl``` https://www.swi-prolog.org/pack/file_details/prosqlite/doc/html/prosqlite.html .
+Система SQLite представляет собой мощную систему управления с "нулевой" конфигурацией, где в качестве баз данных выступают однофайловые базы данных.  Их можно создавать в однихъ системах программирования, и использовать в других.
+
+```prolog
+?- pack_install(prosqlite).
+```
+
+Эту команду надо набрать в командной строке SWI-Prolog ```sqipl``` или ```sqilgt```, а на все вопросы ответить **y** (yes).
+
+<sample-output>
+
+?- **pack_install(prosqlite).**
+
+Create directory for packages
+   (1) \* /home/eugeneai/.local/share/swi-prolog/pack
+   (2)   Cancel
+
+Your choice? **y**
+<b class="green">% Contacting server at https://www.swi-prolog.org/pack/query ... ok</b>
+Installation plan:
+  Install prosqlite at version 2.0 from https://stoics.org.uk/~nicos/sware/packs/prosqlite/prosqlite-2.0.tgz <b class="green">(downloaded 1,179 times)</b>
+Download packs? Y/n?  **y**
+<b class="green">% Downloading prosqlite ... 125,958 bytes
+% Contacting server at https://www.swi-prolog.org/pack/query ... ok</b>
+The following packs have post install scripts:
+  Build prosqlite in directory /home/eugeneai/.local/share/swi-prolog/pack/prosqlite
+Run scripts? Y/n? **y**
+<b class="green">% Building pack prosqlite in directory /home/eugeneai/.local/share/swi-prolog/pack/prosqlite
+% Found foreign libraries for architecture 'x86_64-linux'
+% Use ?- pack_rebuild(prosqlite). to rebuild from sources</b>
+true.
+
+?- use_module(library(prosqlite)).  % Тестируем загрузку модуля из библиотеки
+true.
+
+</sample-output>
+
+
 
 Let's have a look at a program which asks the user to input a number, and then prints out different messages based on whether the number is negative, positive, or equal to zero:
 
@@ -121,7 +187,7 @@ You are of age!
 
 Often there are more than two options the program should account for. For example, the result of a football match could go three ways: home wins, away wins, or there is a tie.
 
-A conditional statement can be added to with an `elif` branch. It is short for the words "else if", which means the branch will contain an alternative to the original condition. Importantly, an `elif` statement is executed only if none of the preceding branches is executed.  
+A conditional statement can be added to with an `elif` branch. It is short for the words "else if", which means the branch will contain an alternative to the original condition. Importantly, an `elif` statement is executed only if none of the preceding branches is executed.
 
 <img src="2_2_2.png">
 
