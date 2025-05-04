@@ -78,298 +78,285 @@ true.
 
 </sample-output>
 
+В приведенном примере используется директива ```use_module/1```, аргументом которой является терм ```library(prosqlite)```, обозначающий библиотеку ```prosqlite```, расположенную в специально каталоге, содержащем библиотечные файлы, - элегантный способ представления местоположения библиотек, унаследованный Logtalk у Prolog.
 
+Библиотека proSQLite поддерживает три уровня взаимодействия с базами данных SQLite.  На самом нижнем уровне взаимодействие реализуется при помощи запросов SQL.  Второй уровень позволяет запрашивать базу данных как словарь, а на верхнем уровене реализует просмотр таблиц баз данных инкасулированно в предикаты.
 
-Let's have a look at a program which asks the user to input a number, and then prints out different messages based on whether the number is negative, positive, or equal to zero:
+## Подключение к базе данных
 
-```python
-number = int(input("Please type in a number: "))
+Загрузим базу данных ```sqlite``` с этой ссыки https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip и разархивировать.  Структура базы данных здесь: https://www.sqlitetutorial.net/wp-content/uploads/2018/03/sqlite-sample-database-diagram-color.pdf .
 
-if number < 0:
-    print("The number is negative")
-
-if number >= 0:
-    print("The number is positive or zero")
+```bash
+$ unzip chinook.zip
+$ mv chinook.db chinook.sqlite
 ```
 
-This looks a bit clumsy and repetitive. We only ever want to execute one of the `if` blocks, because the input will always be either below zero, or zero or above. That is, either `number < 0` or `number >= 0` is true, but never both at the same time. So, the first conditional statement actually contains all we need here. If it is true, the number is negative. If it is false, the number equals zero or is positive.
+Попробуем подключиться к базе данных и выполнить запрос.
 
-Instead of creating a whole another conditional statement, as in the example above, it is possible to create another branch of the same conditional statement to cover all cases _where the condition was false_. This is called the `else` statement.
+<sample-output>
 
-The previous example rewritten:
+**$ swilgt**
 
-```python
-number = int(input("Please type in a number: "))
+?- **use_module(library(prosqlite)).**
+true.
 
-if number < 0:
-    print("The number is negative")
-else:
-    print("The number is positive or zero")
+?- **sqlite_connect('chinook', chinook, as_predicates(true)).**
+true.
+
+?- **forall(sqlite_current_table( chinook, Table ),
+   format('~w\n', [Table])).**
+albums
+sqlite_sequence
+artists
+customers
+employees
+genres
+invoices
+invoice_items
+media_types
+playlists
+playlist_track
+tracks
+sqlite_stat1
+true.
+
+?- **employees(Id,LastName,FirstName,Job,A,F,T,Street,
+         City,Region,Country,Code,Phone1,Phone2,Email).**
+Id = 1,
+LastName = 'Adams',
+FirstName = 'Andrew',
+Job = 'General Manager',
+A = '',
+F = '1962-02-18 00:00:00',
+T = '2002-08-14 00:00:00',
+Street = '11120 Jasper Ave NW',
+City = 'Edmonton',
+Region = 'AB',
+Country = 'Canada',
+Code = 'T5K 2N1',
+Phone1 = '+1 (780) 428-9482',
+Phone2 = '+1 (780) 428-3457',
+Email = 'andrew@chinookcorp.com' **;**
+Id = 2,
+LastName = 'Edwards',
+FirstName = 'Nancy',
+Job = 'Sales Manager',
+A = '1',
+F = '1958-12-08 00:00:00',
+T = '2002-05-01 00:00:00',
+Street = '825 8 Ave SW',
+City = 'Calgary',
+Region = 'AB',
+Country = 'Canada',
+Code = 'T2P 2T3',
+Phone1 = '+1 (403) 262-3443',
+Phone2 = '+1 (403) 262-3322',
+Email = 'nancy@chinookcorp.com' **.**
+
+</sample-output>
+
+Инкапсулируем нашу базу данных в объект ```chinook_db/0```.
+
+```logtalk
+% File: chinook_db.lgt
+
+:- object(sqlite_db).
+
+   :- protected(db_file_name/1).
+   :- public(connect/0).
+
+   :- use_module(library(prosqlite)).
+
+   connect:-
+      ::db_file_name(FileName),
+      sqlite_connect(FileName, db, as_predicates(true)).
+
+   :- public([
+         show_tables/0, show_columns/0, show_counts/0
+      ]).
+
+   show_tables :-
+      forall(
+         sqlite_current_table(db, Table),
+         format('~w\n', [Table])).
+
+   show_columns :-
+      forall(
+         sqlite_current_table(db, Table),
+         (  format('~w ===== \n', [Table]),
+            forall(sqlite_table_column(db, Table, Col),
+            format('~w ', [Col])),
+            nl
+         )).
+
+   show_counts :-
+      forall(
+         (sqlite_current_table(db, Table),
+          sqlite_table_count(db, Table, Count)),
+         format('~w:~w\n', [Table, Count])).
+
+:- end_object.
+
+
+:- object(chinook_db,
+   extends(sqlite_db)).
+
+   db_file_name('chinook').
+
+   :- initialization((
+      ::connect
+   )).
+
+:- end_object.
 ```
 
-When using an if-else construction, one and exactly one of the branches will always be executed. The following picture illustrates the structure:
+Поясним некоторые строки исходного кода файла.  Метод ```db_file_name/1``` определяет файл базы данных, к кторому требуется осуществить подключение.  Директива ```initialization/1``` играет роль конструктора объекта и содержит запрос, который выполняется как только объект загружен в оперативную память Logtalk.  В данном случае самому себе посылается сообщение ```::connect/0``` с целью немедленного подключения к базе данных.  В данный момент объект ```chinook_db/0``` представляет собой конфигурацию, надстроенную над ```sqlite_db/0```.
 
-<img src="2_2_1.png">
+Директива ```use_module/1``` импортирует **все предикаты** из библиотеки ```prosqlite``` в область видимости объекта ```sqlite_db/0```.  Импортированные предикаты не наследуются в дочерние объекты, так как имеют область видимости private.  Кроме ```use_module/1``` есть еще ```use_module/2```, где второй аргумент содержит список импортируемых предикатов, которые можно в процессе импорта переименовывать и каррировать.  Переименование позволяет решать проблему возможного наложения имен в общем пространстве (scope).
 
-NB: there can never be an else branch without an if branch before it. The if-else construction as a whole forms a single _conditional statement_.
+Инкасулируем пару таблиц (```artists``` и ```albums```) из базы данных в виде публичных методов ```artist/2``` и ```album/3``` (удобнее использовать единственное число в качестве имени метода).  Оба метода в качестве первого аргумента используют ключевое поле ```Id```, остальные аргументы соответствуют колонкам таблицы.  Реализацию доступа к строкам таблиц реализуем при помощи вспомогательного protected-матода ```collection/2```.  Метод принимает первый аргумет, название таблицы, и возвращает строку ```row/N``` из таблицы.  Тестирование библиотеки proSQLite показало, что библиотека не поддерживает одновременное отслеживание двух курсоров SQL-запросов, поэтому в ```collection/2``` мы сначала загружаем все строки в промежуточный список, затем выдаем элементы этого списка.  Такой вариант - это не совсем то, что мы хотели реализовать, но для демонстрации идеи Datalog достаточно.
 
-The following example checks whether a number given by the user is even or not. Parity can be checked with the modulo operator `%`, which produces the remainder of an integer division operation. When divided by two, if the remainder is zero, the number is even. Otherwise the number is odd.
+Изменим реализацию ```chinook_db/0``` в соответствии с требованиями выше.  В реализации используется предикат стандартной библиотеки ```library(lists)``` ```member/2```, истинный, если первый элемент является элементом списка (второй параметр).
 
-```python
-number = int(input("Please type in a number: "))
+```logtalk
+:- object(chinook_db,
+   extends(sqlite_db)).
 
-if number % 2 == 0:
-    print("The number is even")
-else:
-    print("The number is odd")
+   db_file_name('chinook').
+
+   :- initialization((
+      ::connect
+   )).
+
+   :- use_module(library(prosqlite)).
+
+   :- public(album_of_artist/2).
+
+   album_of_artist(Name, AlbumTitle) :-
+      ::artist(ArtistId, Name),
+      ::album(_, AlbumTitle, ArtistId).
+
+   :- public([
+      artist/2, album/3
+   ]).
+
+   artist(ArtistId, Name) :-
+      ::collection('artists', row(ArtistId, Name)).
+
+   album(AlbumId, Title, ArtistId) :-
+      ::collection('albums', row(AlbumId, Title, ArtistId)).
+
+   % Вспомогательные предикаты
+
+   :- protected([
+      collection/2
+   ]).
+
+   :- use_module(library(lists), [member/2]).
+
+   collection(TableName, Row):-
+      setof(R,
+        sqlite_format_query(db, 'SELECT * FROM ~w'-TableName, R),
+        Rows), !,
+      member(Row, Rows).
+
+:- end_object.
 ```
 
+Текст после комментария ```% Вспомогательные предикаты``` правильнее было б переместить в ```sqlite_db/0```, что мы потом и сделаем.  Предикат библиотеки ```library(prosqlite)``` ```sqlite_format_query/3``` подготавливает запрос, применяя параметры ```TableName``` к строке шаблону ```'SELECT * FROM ~w'```.  Предикат ```setof/3``` собирает все строки таблицы в список без повторений.
+
+В ```chinook_db/0``` теперь находятся три Datalog-метода ```artist/3```, ```album/3``` и ```album_of_artist/2```, релизованный в виде правила - запроса Datalog.
+
 <sample-output>
 
-Please type in a number: **5**
-The number is odd
+$ **swilgt chinook_db.lgt**
+<b class="green">% [ /home/eugeneai/tmp/tst/chinook_db.lgt loaded ]
+% 0 compilation warning</b>
+
+?- **forall(chinook_db::album_of_artist(Artist, Album),**
+|    **format('~w - ~w\n', [Artist, Album])).**
+AC/DC - For Those About To Rock We Salute You
+AC/DC - Let There Be Rock
+Accept - Balls to the Wall
+Accept - Restless and Wild
+Aerosmith - Big Ones
+Alanis Morissette - Jagged Little Pill
+Alice In Chains - Facelift
+Antônio Carlos Jobim - Warner 25 Anos
+Antônio Carlos Jobim - Chill: Brazil (Disc 2)
+Apocalyptica - Plays Metallica By Four Cellos
+Audioslave - Audioslave
+Audioslave - Out Of Exile
+Audioslave - Revelations
+BackBeat - BackBeat Soundtrack
+% . . . . . . . . .
 
 </sample-output>
 
-Another example with string comparison:
+Давате теперь добавим к выдаче еще один столбец с адресом группы на Wikipedia.
 
-```python
-correct = "kittycat"
-password = input("Please type in the password: ")
+```logtalk
+% File: chinook_db.lgt
 
-if password == correct:
-    print("Welcome")
-else:
-    print("No admittance")
+% . . . . . . . . . .
+
+:- object(chinook,
+   extends(chinook_db)).
+
+   :- public(artists_album/3).
+
+   artists_album(Artist, Album, URL) :-
+      ::album_of_artist(Artist, Album),
+      ::artist_url(Artist, URL).
+
+   :- protected([
+      artist_url/2
+   ]).
+
+   :- use_module(library(uri)).
+   :- use_module(library(pcre)).
+
+   artist_url(Artist, IRI) :-
+      re_replace("-", "_", Artist, Ar),
+      atom_concat('http://wikipedia.org/wiki/', Ar, URL),
+      uri_normalized_iri(URL, IRI).
+
+:- end_object.
 ```
 
-With two different inputs this should print out:
+Для синтеза гипотетичексого URL группы пришлось использовать две вспомогательные библиотеки. Первая, ```library(pcre)``` содержит предикаты для манипулирования строками и атомами при помощи регулярных выражений, представленных близко к стандарту языка Perl.  Вторая библиотека манипулирует атомами в предположении, ято они URL-ы (адреса в интернете).
+
+Наследуя ```chinook_db/0``` в новый объект ```chinook/0```, мы уходим от привязки объекта к базе данных (абстрагируемся).  В ```chinook/0``` все правила строятся на основе только сообщений без привязки к предикатам ```sqlite_*```.  Программу можно улучшить, если переименовать ```artists_album/3``` в ```album_of_artist/3```, следуя правилу "не преумножай сущности без необходимости".
+
+Пример работы объекта ```chinook/0```.
 
 <sample-output>
 
-Please type in the password: **kittycat**
-Welcome
+% Проверим генератор URL-ов
+
+?- **chinook<<artist_url('Дональд Трамп', URL).**
+URL = 'http://wikipedia.org/Дональд%20Трамп'.
+
+?- **chinook<<artists_album(Artist, Album, URL).**
+Artist = 'AC/DC',
+Album = 'For Those About To Rock We Salute You',
+URL = 'http://wikipedia.org/wiki/AC/DC' ;
+Artist = 'AC/DC',
+Album = 'Let There Be Rock',
+URL = 'http://wikipedia.org/wiki/AC/DC' ;
+Artist = 'Accept',
+Album = 'Balls to the Wall',
+URL = 'http://wikipedia.org/wiki/Accept' ;
+Artist = 'Accept',
+Album = 'Restless and Wild',
+URL = 'http://wikipedia.org/wiki/Accept' ;
+Artist = 'Aerosmith',
+Album = 'Big Ones',
+URL = 'http://wikipedia.org/wiki/Aerosmith'
 
 </sample-output>
 
-<sample-output>
-
-Please type in the password: **monkey**
-No admittance
-
-</sample-output>
-
-
-<in-browser-programming-exercise name="Age of maturity" tmcname="part02-04_age_of_maturity" height="400px">
-
-Please write a program which asks the user for their age. The program should then print out a message based on whether the user is of age or not, using 18 as the age of maturity.
-
-Some examples of expected behaviour:
-
-<sample-output>
-
-How old are you? **12**
-You are not of age!
-
-</sample-output>
-
-
-<sample-output>
-
-How old are you? **32**
-You are of age!
-
-</sample-output>
-
-</in-browser-programming-exercise>
-
-## Alternative branches using the elif statement
-
-Often there are more than two options the program should account for. For example, the result of a football match could go three ways: home wins, away wins, or there is a tie.
-
-A conditional statement can be added to with an `elif` branch. It is short for the words "else if", which means the branch will contain an alternative to the original condition. Importantly, an `elif` statement is executed only if none of the preceding branches is executed.
-
-<img src="2_2_2.png">
-
-Let's have a look at a program which determines the winner of a match:
-
-```python
-goals_home = int(input("Home goals scored: "))
-goals_away = int(input("Away goals scored: "))
-
-if goals_home > goals_away:
-    print("The home team won!")
-elif goals_away > goals_home:
-    print("The away team won!")
-else:
-    print("It's a tie!")
-```
-
-This program could print out three different statements given different inputs:
-
-<sample-output>
-
-Home goals scored: **4**
-Away goals scored: **2**
-The home team won!
-
-</sample-output>
-
-<sample-output>
-
-Home goals scored: **0**
-Away goals scored: **6**
-The away team won!
-
-</sample-output>
-
-<sample-output>
-
-Home goals scored: **3**
-Away goals scored: **3**
-It's a tie!
-
-</sample-output>
-
-In the above example there are three alternative branches, exactly one of which will always be executed. However, there is no limit to the number of `elif` branches a conditional statement can contain, and the `else` branch is not mandatory.
-
-This is also a valid conditional statement:
-
-```python
-print("Holiday calendar")
-date = input("What is the date today? ")
-
-if date == "Dec 26":
-    print("It's Boxing Day")
-elif date == "Dec 31":
-    print("It's Hogmanay")
-elif date == "Jan 1":
-    print("It's New Year's Day")
-
-print("Thanks and bye.")
-```
-
-<sample-output>
-
-Holiday calendar
-What is the date today? **Dec 31**
-It's Hogmanay
-Thanks and bye.
-
-</sample-output>
-
-Notice the previous example has no `else` branch. If the user inputs a date which is not mentioned in any of the `if` or `elif` branches, or inputs a date in a different format, none of the three branches of the conditional statement is executed.
-
-<sample-output>
-
-Holiday calendar
-What is the date today? **Dec 25**
-Thanks and bye.
-
-</sample-output>
-
-<in-browser-programming-exercise name="Greater than or equal to" tmcname="part02-05_greater_or_equal"  height="400px">
-
-Please write a program which asks for two integer numbers. The program should then print out whichever is greater. If the numbers are equal, the program should print a different message.
-
-Some examples of expected behaviour:
-
-<sample-output>
-
-Please type in the first number: **5**
-Please type in another number: **3**
-The greater number was: 5
-
-</sample-output>
-
-<sample-output>
-
-Please type in the first number: **5**
-Please type in another number: **8**
-The greater number was: 8
-
-</sample-output>
-
-<sample-output>
-
-Please type in the first number: **5**
-Please type in another number: **5**
-The numbers are equal!
-
-</sample-output>
-
-</in-browser-programming-exercise>
-
-
-<in-browser-programming-exercise name="The elder" tmcname="part02-06_elder" height="550px">
-
-Please write a program which asks for the names and ages of two persons. The program should then print out the name of the elder.
-
-Some examples of expected behaviour:
-
-<sample-output>
-
-Person 1:
-Name: **Alan**
-Age: **26**
-Person 2:
-Name: **Ada**
-Age: **27**
-The elder is Ada
-
-</sample-output>
-
-<sample-output>
-
-Person 1:
-Name: **Bill**
-Age: **1**
-Person 2:
-Name: **Jean**
-Age: **1**
-Bill and Jean are the same age
-
-</sample-output>
-
-</in-browser-programming-exercise>
-
-<in-browser-programming-exercise name="Alphabetically last" tmcname="part02-07_alphabetically_last"  height="500px">
-
-Python comparison operators can also be used on strings. String `a` is smaller than string `b` if it comes alphabetically before `b`. Notice however that the comparison is only reliable if
-- the characters compared are of the same case, i.e. both UPPERCASE or both lowercase
-- only the standard English alphabet of a to z, or A to Z, is used.
-
-Please write a program which asks the user for two words. The program should then print out whichever of the two comes alphabetically last.
-
-You can assume all words will be typed in lowercase entirely.
-
-Some examples of expected behaviour:
-
-<sample-output>
-
-Please type in the 1st word: **car**
-Please type in the 2nd word: **scooter**
-scooter comes alphabetically last.
-
-</sample-output>
-
-<sample-output>
-
-Please type in the 1st word: **zorro**
-Please type in the 2nd word: **batman**
-zorro comes alphabetically last.
-
-</sample-output>
-
-<sample-output>
-
-Please type in the 1st word: **python**
-Please type in the 2nd word: **python**
-You gave the same word twice.
-
-</sample-output>
-
-</in-browser-programming-exercise>
+Аналогично приведенному примеру можно объединять запросы от нескольких источников данных.  Основная проблема приведенных примеров - невысокая скорость работы Datalog-системы.  Однако его абстрактный синтаксис и семантика могут быть использованы, а именно сами определения методов в объекте, проанализированы и а) сгенерированы специализированные варианты комплексных SQL-запросов, реализующих метод, б) построены параллельные схемы реализации запросов.
 
 <!--
 
