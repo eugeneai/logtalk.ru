@@ -1,19 +1,28 @@
 ---
-path: '/part-2/3-combining-conditions'
-title: 'Combining conditions'
+path: '/part-2/3-pattern-directed-programming'
+title: 'Прогаммирование при помощи типовых конфигураций'
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name="Learning objectives">
+<text-box variant='learningObjectives' name="Цель изучения раздела">
 
-After this section
+В результате изучения раздела вы
 
-- You will know how to use the operators `and`, `or` and `not` in conditions
-- You will be able to write nested conditionals
+- Осоите методику проектирования программных систем на основе *образцев* (pattern-directed programming)
+- Освоите задание новых операций ```op/2``` типа стандартных "```:-```", "```->```", но предназначенных для вашей программы
+- Реализуем небольшую экспертную систему диагностики двигателя автомобиля
 
 </text-box>
 
-## Logical operators
+## Программирование при помощи типовых конфигураций
+
+_Программирование_ при помощи _типовых_ (ударение на "и") _конфигураций_ (образцов, pattern-directed programming) - популярная в 70-80-е годы XX века технологий проектирования прграммных систем, в частности, имитационных моделей (computer simulation), где программа строиться из большого набора простых модулей (образцов), состоящих из *шаблона* (секции "Если") и _тела_ (секция "То").  "Если" выполняется некоторое условие, например, в работчей памяти есть структуры, подходящие под шаблон, "То" выполнить тело образца.
+
+При исполнении тела, в общем случае, используются значения переменных, полученных при сопоставлении шаблона, то есть тело конкретизируется этими значениям.  В результате исполнения тела набор фактов в рабочей памяти меняется.  Процесс применения (активации) образцов идет до тех пор, пока хотябы образец активирован: шаблон образца получает значения переменных и условие является истинным.  Также остановить процесс можно специальной командой.
+
+
+
+
 
 You can combine conditions with the logical operators `and` and `or`. The operator `and` specifies that all the given conditions must be true at the same time. The operator `or` specifies that at least one of the given conditions must be true.
 
@@ -346,7 +355,7 @@ The letter in the middle is B
 
 <in-browser-programming-exercise name="Gift tax calculator" tmcname="part02-14_gift_tax_calculator"  height="500px">
 
-Some say paying taxes makes Finns happy, so let's see if the secret of happiness lies in one of the taxes set out in Finnish tax code. 
+Some say paying taxes makes Finns happy, so let's see if the secret of happiness lies in one of the taxes set out in Finnish tax code.
 
 [According to the Finnish Tax Administration](https://www.vero.fi/en/individuals/property/gifts/), a gift is a transfer of property to another person against no compensation or payment. If the total value of the gifts you receive from the same donor in the course of 3 years is €5,000 or more, you must pay gift tax.
 
