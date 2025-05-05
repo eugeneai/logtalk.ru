@@ -4,13 +4,13 @@ title: 'Loops with conditions'
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name="Learning objectives">
+<text-box variant='learningObjectives' name="Цель познания данного раздела">
 
-After this section
+После изучения этого раздела вы освоите
 
-- You will know how to create a while loop with a condition
-- You will know what roles initialisation, formulating a condition and updating variables perform in a loop
-- You will be able to create loops with different kinds of conditions
+- Создание параматризованных объектов - эффективного способа предоставления методам объекта общего контекста
+- Разработку методов с использованием параметров объекта
+- Использование переменных для упрощения использование параметрических объектов
 
 </text-box>
 
