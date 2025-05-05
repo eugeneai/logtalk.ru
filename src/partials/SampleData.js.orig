@@ -25,21 +25,11 @@ const Body = styled.div`
 
   em,
   strong {
+<<<<<<< HEAD
     color: blue;
-    font-weight: normal;
-  }
-
-  .errLog {
+=======
     color: red;
-    font-weight: normal;
-  }
-
-  .red {
-    color: red;
-    font-weight: normal;
-  }
-  .green {
-    color: green;
+>>>>>>> a71c56cac4ff2b90f0478112977423c8593e1589
     font-weight: normal;
   }
 `
@@ -50,13 +40,13 @@ const Note = styled.div`
   font-size: 0.75rem;
 `
 
-const SampleOutput = (props) => {
+const SampleData = (props) => {
   return (
     <Wrapper>
-      <Note>{props.t("sampleOutput")}</Note>
+      <Note>{props.t("sampleData")}</Note>
       <Body>{props.children}</Body>
     </Wrapper>
   )
 }
 
-export default withTranslation("common")(withSimpleErrorBoundary(SampleOutput))
+export default withTranslation("common")(withSimpleErrorBoundary(SampleData))

@@ -1,6 +1,11 @@
 ---
+<<<<<<< HEAD
+hidden: true
+banner: false
+=======
 banner: false
 hidden: true
+>>>>>>> a71c56cac4ff2b90f0478112977423c8593e1589
 hide_in_sidebar: true
 information_page: false
 overview: true

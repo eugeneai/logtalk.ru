@@ -1,6 +1,10 @@
 ---
 path: '/all-exercises'
-title: 'Список всех задач курса'
+<<<<<<< HEAD
+title: 'Все задачи подряд'
+=======
+title: 'All exercises'
+>>>>>>> a71c56cac4ff2b90f0478112977423c8593e1589
 hidden: false
 hide_in_sidebar: false
 sidebar_priority: 5000
