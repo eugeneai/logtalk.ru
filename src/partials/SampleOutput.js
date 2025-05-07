@@ -34,8 +34,18 @@ const Body = styled.div`
     font-weight: normal;
   }
 
+  .red {
+    color: red;
+    font-weight: normal;
+  }
+
   .green {
     color: green;
+    font-weight: normal;
+  }
+
+  .blue {
+    color: blue;
     font-weight: normal;
   }
 `

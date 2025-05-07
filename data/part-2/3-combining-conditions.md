@@ -156,10 +156,327 @@ true.
 
 ## Экспертная система выбора вина
 
-Итак, теперь самое интересное, реализуем экспертную систему ```wine``` выбора вина к застолью из статьи https://www.academia.edu/17305576/WINE_ADVISOR_EXPERT_SYSTEM_USING_DECISION_RULES .  Сразу замечу, пример приводится не с целью рекламы потребления алкогольных изделияй, просто набор правил попался раньше всего, и этот набор подходящего размера (чуть более 30 правил).
+Итак, теперь самое интересное, реализуем экспертную систему ```wine``` выбора вина к застолью из статьи https://www.academia.edu/17305576/WINE_ADVISOR_EXPERT_SYSTEM_USING_DECISION_RULES .  Сразу замечу, пример приводится не с целью рекламы потребления алкогольных изделияй, просто набор правил попался раньше всего, и этот набор подходящего размера (примерно 40 правил).
 
+Экспертная система кроме механизмма вывода еще содержит два модуля: *интерфейс пользователя*, *объяснение вывода*.  Задача интерфейса пользователя - задавать вопросы пользователю на понятном (естественном) языке и кодироват ответы в структуры, понимаемые машиной вывода (факты рабочей памяти).  Блок объяснения вывода отвечает на вопросы вида "как?" [получено заключение] (*how?*) и "почему?" [мне задается этот вопрос] (*why?*). Мы реализуем эти блоки в необходимой степени.
 
-</in-browser-programming-exercise>
+Сначала надо усовершенствовать машину вывода таким образом, чтобы сохранять порядок активации правил, имена которых обозначаются специальным предикатом ```rule/1```.
+
+```logtalk
+:- object(es_engine,
+   extends(pattern_engine)).
+
+   :- dynamic([fired_rule/1,
+      consider_rule/1]).
+   :- protected([fired_rule/1,
+      consider_rule/1]).
+   :- dynamic(answered/2).
+   :- protected(answered/2).
+
+   :- protected(rule/1).
+
+   rule(RuleName) :-
+      retractall(fired_rule(_)),
+      retractall(consider_rule(_)),
+      assertz(consider_rule(RuleName)).
+
+   run :-
+      :: >>>(Pattern, Body),
+      ::check(Pattern), !,
+      ::considered_rule(RuleName),
+      assertz(fired_rule(RuleName)),
+      ::execute(Body, Quit),
+      (Quit == true -> true;
+       run), !.
+
+   run.
+
+:- end_object.
+```
+
+Еще одно усовершенствование - собрать информацию о том, какие значения фактов можно вывести при помощи правил, а какие возможно только спросить у пользователя.
+
+```logtalk
+:- object(wine_es_scan,
+   extends(es_engine)).
+
+   :- op(1199, xfx, '>>>').
+
+   [::rule('Выбор вина для аперитива'),
+      ::
+      ::number(X), \+ ::sum(_)]
+
+:- end_object.
+```
+
+Далее интерпретируем правила из статьи в виде образцов.
+
+```logtalk
+:- object(wine_es_scan,
+   extends(es_engine)).
+
+   :- op(1199, xfx, '>>>').
+
+   [rule(1-'Выбор вина для аперитива'),
+      this_wine('для употребления до еды (аперитив)')]
+      >>>
+      [assert(recommended_generic_wine_type('вино для аперитива'))] .
+
+   [rule(2-'Выбор румынского вина'),
+      this_wine('вино для аперитива')]
+      >>>
+      [assert(recommended_generic_wine_type('румымское вино'))] .
+
+   % . . . . . . . . . .
+
+:- end_object.
+```
+
+## Приложение А Список правил экспертной системы
+
+```ini
+# APERITIF
+RULE 1 [Choosing a aperitif wine]
+If [this wine] = "to be consumed before a meal (aperitif)"
+Then [a recommended generic wine type] = "aperitif wine"
+
+RULE 2 [Choosing a Romanian wine]
+If [this wine] = "aperitif wine"
+Then [a recommended generic wine type] = "Romanian wine"
+
+RULE 3 [Choosing a full bodied aperitif Romanian]
+If [a recommended generic wine type] = "Romanian wine"
+[the preferred body] = "full" and
+Then [a recommended generic wine type] = "Cotnary vineyard wine"
+
+RULE 4
+If [a recommended generic wine type] = "Cotnary vineyard wine"
+And
+[a sparkling wine is preferred] = true
+Then [a recommended generic wine type] = "sparkling wine"
+
+RULE 5
+If [a recommended generic wine type] = “sparkling wine"
+Then [a recommended generic wine type] = "Champagne"
+
+RULE 6
+If [a recommended generic wine type] = "Champagne"
+And
+[the preferred colour] = white
+And
+[the preferred body] = "full/medium/light"
+Then [a recommended generic wine type] = "White Champagne"
+
+RULE 7
+If [a recommended generic wine type] = "Champagne"
+And
+[the preferred colour] = pink
+And
+[the preferred body] = "full/medium/light"
+Then [a recommended generic wine type] = "Pink Champagne"
+
+RULE 8
+If [a recommended generic wine type] = "Champagne"
+And
+[the preferred colour] = black
+And
+[the preferred body] = "full/medium/light"
+Then [a recommended generic wine type] = "Black Champagne"
+
+RULE 9
+If [a recommended generic wine type] = "Cotnary vineyard wine"
+And
+[a sparkling wine is preferred] = false;
+Then [a recommended generic wine type] = "table wine"
+
+RULE 10
+If [a recommended generic wine type] = "table wine"
+And
+[the colour]=white
+Then [a recommended wine] = " Tamaioasa Romaneasca "
+
+RULE 11
+If [a recommended generic wine type] = "table wine"
+And
+[the colour]=pink
+Then [a recommended wine] = " Busuioaca Romaneasca wine "
+
+RULE 12
+If [a recommended generic wine type] = "table wine"
+And
+[the colour]=red
+Then [a recommended wine] = " Cabernet Sauvignion wine "
+
+RULE 13
+If [a recommended generic wine type] = "Romanian wine"
+and
+[the preferred body] = "medium"
+Then [a recommended generic wine type] = "Dealu Mare vineyard wine"
+
+RULE 14
+If [a recommended generic wine type] = "Dealu Mare vineyard wine"
+And [a sparkling wine is preferred] = false;
+[the colour]=white;
+Then [a recommended wine ] = "Feteasca Regala wine"
+
+RULE 15
+If [a recommended generic wine type] = "Dealu Mare vineyard wine"
+And
+[a sparkling wine is preferred] = false
+And
+[the colour]=pink
+Then [a recommended wine ] = "Feteasca Roz wine"
+
+RULE 16
+If [a recommended generic wine type] = "Dealu Mare vineyard wine"
+And
+[a sparkling wine is preferred] = false
+And
+[the colour]=red
+Then [a recommended wine ] = "Feteasca Neagra,Pinot Noir or Cabernet Byzantium
+wine"
+
+RULE 17
+If [a recommended generic wine type] = "Romanian wine"
+and
+[the preferred body] = "light"
+Then [a recommended generic wine type] = "Jidvei vineyard wine"
+
+RULE 18
+If [a recommended generic wine type] = "Jidvei vineyard wine"
+And
+[a sparkling wine is preferred] = false
+And
+[the colour]=white
+Then [a recommended wine ] = "Sauvignion Blanc or Dry Muscat wine"
+
+RULE 19
+If [a recommended generic wine type] = "Jidvei vineyard wine"
+And
+[a sparkling wine is preferred] = false
+And
+[the colour]=pink
+Then [a recommended wine ] = "Feteasca Regala wine"
+
+RULE 20
+If [a recommended generic wine type] = "Jidvei vineyard wine"
+And
+[a sparkling wine is preferred] = false
+And
+[the colour]=red
+Then [a recommended wine ] = "Pinot Noir wine"
+
+RULE 21
+If [the wine is to accompany an entree]
+Then
+If [a recommended generic wine type] = "dinner(entree) wine"
+
+RULE 22 % [Is the wine for a white meat entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "white meat"
+[the colour]:”white”
+Then [a recommended wine] = "Muscat Sec,Samur Blanc or Griffin Vineyards
+Verdelho"
+
+RULE 23 % [Is the wine for a white meat entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "white meat"
+[the color]:”rose”
+Then [a recommended wine] = "Pinot Grigio Rose,Veneto or Cuvee des Amardies
+Rose"
+
+RULE 24 % [Is the wine for a white meat entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "white meat"
+[the color]:”red”
+Then [a recommended wine] = "Corbieres 2003,Domain Modelen or Mayor de
+Castilla 2004,Ribera del Duero"
+
+RULE 25 % [Is the wine for a steak entree?] 25
+If [this wine] = "entrée wine" and
+[the entree] : "steak" and
+[the colour]:”white”
+THEN [a recommended wine] = "Chateau Agnel 2000,Minervois(France) or Chateau
+Syrah 2004(France)"
+
+RULE 26 % [Is the wine for a steak entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "steak"
+[the color]:”rose”
+Then [a recommended wine ] = "Busuioaca Romaneasca"
+
+RULE 27 % [Is the wine for a steak entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "steak"
+[the color]:”red”
+Then [a recommended wine ] = "Rosso di Sicilia 2004,Cantine Settesoli(Italy)"
+
+RULE 28 % [Is the wine for a barbecues entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "barbecues"
+[the colour]:”white”
+Then [a recommended wine] = "Riojo Blanco CVNE 2003,Vino Real (Spain) or
+Chateau Camplazens Syrah 2004(France)"
+
+RULE 29 % [Is the wine for a barbecues entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "barbecues"
+[the color]:”rose”
+Then [a recommended wine type] = "Tamaioasa Regala(Romania)"
+
+RULE 30 % [Is the wine for a barbecues entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "barbecues"
+[the color]:”red”
+Then [a recommended wine type] = "Riojo Tempranillo 2003(Italy),Berberana(Spain)
+or Protocola Tinto(Spain)"
+
+RULE 31 % [Is the wine for a pizza entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "pizza"
+[a recommended wine type] = "Chianti wine"
+
+RULE 32 % [Is the wine for Chinese Food entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "Chinese Food"
+Then [a recommended wine type] = "White Riesling wine"
+
+RULE 33 % [Is the wine for cheese entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "cheese"
+Then [a recommended wine type] = "Burgundy wine"
+
+RULE 34 % [Is the wine for fish entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "fish"
+Then [a recommended wine type] = "Chardonnay wine"
+
+RULE 35 % [Is the wine for salads entree?]
+If [this wine] = "entrée wine" and
+[the entree] : "salads"
+Then [a recommended wine type] = "Bordeau Blanc wines"
+
+# DESSERT WINE
+
+RULE 36 % [dessert class]
+If [this wine] = "is to accompany an dessert" and
+Then [a recommended generic wine type] = “dessert wine"
+
+RULE 37 % [Fruit-based dessert]
+If [this wine] = "dessert wine" and
+[the dessert] = "fruit or primarily fruit"
+Then [a suggested wine type] = "Rougeon"
+
+RULE 38 % [Sweet dessert]
+If [this wine] = "dessert wine" and
+[the dessert] = "very sweet such as chocolate"
+Then [a recommended generic wine type] = "Port"
+
+# AFTER DINNER WINE
+
+RULE 39 % [After dinner]
+If [this wine] = "to be consumed after dinner"
+```
 
 <!--
 
