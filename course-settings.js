@@ -16,6 +16,14 @@ const courseSettings = {
       tmcOrganization: "isu",
       tmcCourse: "logtalk",
     },
+    {
+      tmcOrganization: "insviladegracia",
+      tmcCourse: "python-viladegracia-2024"
+    },
+    {
+      tmcOrganization: "laurea",
+      tmcCourse: "python-laurea-spring-2025-Katja-Deepak"
+    },
     // {
     //   tmcOrganization: "hbc",
     //   tmcCourse: "python-TVT21A",

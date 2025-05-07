@@ -1,0 +1,548 @@
+---
+<<<<<<< HEAD
+path: '/part-1/2-inheritance'
+title: 'Наследование'
+hidden: false
+---
+
+<text-box variant='learningObjectives' name='Цель изучения раздела'>
+
+В этом разделе вы узнаете, как
+
+- Задавать наследование в Logtalk между простыми объектами
+- Вызывать методы, унаследованные у родителя
+- Загружать небольшие объектные иерархии из файлов
+
+</text-box>
+
+_Наследование_ в объекно-ориентированных языках - это средство проектирования новых объектов на основе существующих, добавяля их свойства в создаваемый объект.  В Logtalk наследовать в том или ином виде свойства могут любые объекты.  Самый очевидный вариант наследования - это создание производных объектов из существующих.
+
+Давайте создадим объект ```family_base/0```, который будет описывать основные родственные отношения.
+
+```logtalk
+% File:family_base.lgt
+
+:- object(family_base).
+
+   :- public([
+      man/1,    % мужчина(<кто>)
+      woman/1,  % женщина(<кто>)
+      parent/2, % родитель(<кто>,<чей>)
+      mother/2, % отец(<кто>,<чей>)
+      father/2  % мать(<кто>,<чей>)
+   ]).
+
+   % Не будем здесь задавать
+   % конкретных людей и кто, чей
+   % родитель.
+   % Зададим
+   % правила распознавания для
+   % отца и матери
+
+   mother(Who, Whose) :-
+      woman(Who),
+      parent(Who, Whose).
+
+   father(Who, Whose) :-
+      man(Who),
+      parent(Who, Whose).
+
+:- end_object.
+```
+
+Выполнив запрос, как показано ниже, мы не получим положительного (```true``` или ```yes```) ответа.
+
+<sample-output>
+
+?- **{family_base}.**
+<p class="green">% [ /home/eugeneai/tmp/tst/family_base.lgt loaded ]
+% (0 warnings)</p>
+true.
+
+?- **family_base::mother(Who, Whose).**
+<b class='errLog'>false</b>.
+
+</sample-output>
+
+Ответ отрицательный, точнее _не положительный_: Logtalk не может вывести (установить) истинен ли запрос. В данном случае это невозможно, так как нет данных о конкретном составе семьи.  Соства мы можем сформировать в данном примере через наследование.  Состав мы можем инкапсулировать в отдельном объекте, помещенный в отдельный файл.
+
+```logtalk
+% File: family_pat.lgt
+
+:- object(family_pat,
+      extends(family_base)).
+
+   man(max).
+
+   woman(pat).
+   woman(jill).
+
+   parent(max, jill).
+   parent(pat, jill).
+
+:- end_object.
+```
+
+В коде выше, директива ```extends``` реализует вариант наследования, при котором объект ```family_pat/0``` строиться на основе ```family_base/0```, при этом методы ```mother/2``` и ```father/2``` "копируются" в ```family_pat/0```.  Теперь, последовательно загрузив два файла ```family_base.lgt``` и ```family_pat.lgt``` получаем два объекта.  Но запрос опять на приводит к желанному результату.
+
+<sample-output>
+
+?- **{family_base}**.
+<b class="green">% [ /home/eugeneai/tmp/tst/family_base.lgt already loaded; skipping ]
+% (0 warnings)</b>
+true.
+
+?- **{family_pat}**.
+<b class="green">% [ /home/eugeneai/tmp/tst/family_pat.lgt loaded ]
+% (0 warnings)</b>
+true.
+
+?- **family_pat::mother(Who, Whose).**
+<b class='errLog'>false.</b>
+
+</sample-output>
+
+Неочевидная проблема тут следующая: при задании правил использованы вызовы _локальных предикатов_. В Logtalk, как и в других языках ООП, сообщениями называются вызовы методов. Сообщения посылаются одним объектом к другому.  Сообщения посылаются или в виде ```<приемник>::<метод>[(<параметры>)]``` или ```::<метод>[(<параметры>)]```.  Квадратные скобки здесь обозначают тот факт, что параметры и круглые скобки могут отсутствовать, если мообщение не имеет параметров.  Второй вариант - это посылка сообщения к самому себе.  Мы задали правила ```mother/2``` и ```father/2``` в стиле Prolog, не задейстовав лператор ```::```.
+
+```text
+   % . . . . . . . . .
+
+   mother(Who, Whose) :-
+      woman(Who),
+      parent(Who, Whose).
+
+   father(Who, Whose) :-
+      man(Who),
+      parent(Who, Whose).
+
+   % . . . . . . . . .
+```
+
+В таком случае Logtalk считает, что ```man/1```, ```woman/1``` и ```parent/2``` - это какие-то вспомогательные предикаты, использованные для реализации методов ```mother/2``` и ```father/2``` - внутреннее дело объекта ```family_base```.  Чтобы наши методы "увидели" факты из ```family_pat/2```, надо в объект ```family_base``` добавить посылку сообщений ```::man(...)```, ```::woman(...)``` и ```parent(..., ...)``` к *самому себе*.
+
+```logtalk
+% File:family_base.lgt
+
+:- object(family_base).
+
+   :- public([
+      man/1,    % мужчина(<кто>)
+      woman/1,  % женщина(<кто>)
+      parent/2, % родитель(<кто>,<чей>)
+      mother/2, % отец(<кто>,<чей>)
+      father/2  % мать(<кто>,<чей>)
+   ]).
+
+   % Не будем здесь задавать
+   % конкретных людей и кто, чей
+   % родитель.
+   % Зададим
+   % правила распознавания для
+   % отца и матери
+
+   mother(Who, Whose) :-
+      ::woman(Who),
+      ::parent(Who, Whose).
+
+   father(Who, Whose) :-
+      ::man(Who),
+      ::parent(Who, Whose).
+
+:- end_object.
+```
+
+Теперь наш запрос выполняется успешно.
+
+<sample-output>
+
+?- **{family_base}.**
+<b class="green">% [ /home/eugeneai/tmp/tst/family_base.lgt loaded ]
+% (0 warnings)</b>
+true.
+
+?- **{family_pat}.**
+<b class="green">% [ /home/eugeneai/tmp/tst/family_pat.lgt loaded ]
+% (0 warnings)</b>
+true.
+
+?- **family_pat::mother(Who, Whose).**
+Who = pat,
+Whose = jill **;**
+<b class='errLog'>false</b>.
+
+</sample-output>
+
+Сперва выдается ответ ```Who = pat, Whose = jill```, что соответствует успешному результату, потом пользователь нажимает "```;```", пытаясь получить еще один положительный ответ, но не получает его, так как больше таких ответов нет.
+
+Терер, если первый вариант объекта ```family_base/0```, где ```mother/2``` реализован без посылки сообщений к самому себе, загрузить в режиме компиляции Logtalk, мы получим список ошибок.
+
+<sample-output>
+
+$ **swilgt family.lgt**
+Logtalk 3.86.0
+Copyright (c) 1998-2024 Paulo Moura
+<b class="green">% Очень много всяких строк настроек. </b>
+% . . . . . . .
+<b class='errLog'>\*     Declared static predicate called but not defined: woman/1
+\*       while compiling object family_base
+\*       in file /home/eugeneai/tmp/tst/family_base.lgt between lines 17-19
+\*
+\*     Declared static predicate called but not defined: parent/2
+\*       while compiling object family_base
+\*       in file /home/eugeneai/tmp/tst/family_base.lgt between lines 17-19
+\*
+% . . . . . . . </b>
+
+</sample-output>
+
+Ошибки показывают, например, что правило ```mother/2``` реализуется на освнове предикатов ```woman/2``` и ```parent/2```, используемыми локально и утилитарно.  Однако эти вспомогательные предикаты не определены!  Отсутствие ```woman/2``` и ```parent/2``` в локальном контексте приводит к одному из двух исходов в зависимости от натроек интерпретатора Prolog: 1) создается исключение, что эти предикаты не определены (это как раз наш рассматриваемый сейчас случай), либо 2) эти предикаты не могут быть выведены, то есть ложные (это случай первого примера в этом разделе).
+
+Таким образом, для того, чтобы **унаследованные** предикаты видели **новые** и наоборот, необходимо в реализации тел методов использовать сообщения ```::<метод>[(<параметры>)]``` к самому себе.
+
+## Вызовы унаследованных методов
+
+Все было хорошо в семье ```family_pat/0```, да родился еще один ребенок ```john```!  И стало в семье еще лучше!... Как нам представить новое положение дел в семье Патриции?
+
+Первый вариант - добавить Джона в объект ```family_pat/0```.  Способ простой, но только, если от существующего ранее положения дел зависили какие-то другие объекты (через посылку сообщей).  Новые ответы, неожиданные ответы, включающие Джона, в общем случае могут удивить старый код.
+
+Второй ваиант, уважающий природную "статическую" парадигму Logtalk - это создать новый объект ```family_pat_2/0```, наследующий все, что было в ```family_pat/0``` и добавляющий нового члена семьи.
+
+```logtalk
+% File: family_pat_2.lgt
+
+:- object(family_pat_2,
+      extends(family_pat)).
+
+   man(john).
+   parent(pat, john).
+   parent(max, john).
+
+:- end_object.
+```
+
+Посмотрим, что получилось. В выводе программы оставлена только необходимая раскарасска текста.
+
+<sample-output>
+
+?- **{family_base}.**
+% [ /home/eugeneai/tmp/tst/family_base.lgt loaded ]
+% (0 warnings)
+true.
+
+?- **{family_pat}.**
+% [ /home/eugeneai/tmp/tst/family_pat.lgt loaded ]
+% (0 warnings)
+true.
+
+?- **{family_pat_2}.**
+% [ /home/eugeneai/tmp/tst/family_pat_2.lgt loaded ]
+% (0 warnings)
+true.
+
+?- **family_pat_2::mother(Who, Whose).**
+Who = pat,
+Whose = john **;**
+<b class='errLog'>false.</b>
+
+</sample-output>
+
+Выдается только ответы для новорожденного Джона, и ничего не выдается для Джилл, а она ж дочь Патриции и Макса!  Дело в том, что Logtalk считает, что новые реализации методлов полностью обновляют старые при наследовании.  Чтобы включить в семью информацио про ```jill```, надо послать сообщение объекту-предку.  Для этого есть третья форма посылки сообщения ```^^<метод>[(<параметры>)]```, то есть как будто бы к самому себе, только (```::/1```) заменяется на (```^^/1```).  Очевидно, что (```^^/1```) может быть только одноаргументным.  Дополним необходимыми конструкциями наш объект ```family_pat_2/0```.
+
+```logtalk
+% File: family_pat_2.lgt
+
+:- object(family_pat_2,
+      extends(family_pat)).
+
+   man(john).
+   man(Who) :-
+      ^^man(Who).
+
+   parent(pat, john).
+   parent(max, john).
+   parent(Who, Whose) :-
+      ^^parent(Who, Whose).
+
+:- end_object.
+```
+
+Теперь все как надо!  Все дети на месте.
+
+<sample-output>
+% Загрузка объектов family_base, family_pat . . .
+
+?- **{family_pat_2}.**
+% [ /home/eugeneai/tmp/tst/family_pat_2.lgt loaded ]
+% (0 warnings)
+true.
+
+?- **family_pat_2::mother(Who, Whose).**
+Who = pat,
+Whose = john **;**
+Who = pat,
+Whose = jill **;**
+<b class='errLog'>false.</b>
+
+</sample-output>
+
+**Замечание 1.** При добавлении вариантов реализации метода при наследовании в Logtalk необхдоимо задумываться, на кокаом этапе следует включать вызовы унаследованных частей: до, после или в середине новой реализации, надо ли вообще вызывать?
+
+**Замечание 2.** Сообщения объектам-предкам не обязательно должны быть тлоько к таким же методам.  Logtalk никак не ограничивает какой метод потомка какой матод предка должен вызывать.
+
+**Замечание 3.** Если заменить в последней реализации ```family_pat_2/0``` вызовы к предку (```^^/1```) на вызовы к самому себе (```::/1```), то мы получим программу, генерирующую бесконечное количество ответов, или вообще получим "зациливание", не генерирующее ни одного ответа.  Внимательно следите за своим кодом. Впрочем, Logtalk в режиме компиляции отслеживает такой код и выдает сообщение об ошибке.
+
+Теперь на данном даже начальном этапе мы видим, в чем выразительная сила Logtalk по сравнении с Prolog, - это возможность *инкапсуляции* знаний в виде **целостных объектов** и *манимуляции* **наборами знаний** при использовании наследования, в частности.
+=======
+path: '/part-1/2-information-from-the-user'
+title: 'Information from the user'
+hidden: false
+---
+
+<text-box variant='learningObjectives' name='Learning objectives'>
+
+After this section
+
+- You will know how to write a program which uses input from the user
+- You will know how to use variables to store input and print it out
+- You will be able to combine strings
+
+</text-box>
+
+_Input_ refers to any information a user gives to the program. Specifically, the Python command `input` reads in a line of input typed in by the user. It may also be used to display a message to the user, to prompt for specific input.
+
+The following program reads in the name of the user with the `input` command. It then prints it out with the `print` command:
+
+```python
+name = input("What is your name? ")
+print("Hi there, " + name)
+```
+
+The execution of this program could look like this (input from the user in red):
+
+<sample-output>
+
+What is your name? **Paul Python**
+Hi there, Paul Python
+
+</sample-output>
+
+What this program prints out is partially dependent on input from the user. That means the execution of the program could also look like this:
+
+<sample-output>
+
+What is your name? **Paula Programmer**
+Hi there, Paula Programmer
+
+</sample-output>
+
+The word `name` in this program is a _variable_. In the context of programming, a variable is a location for storing some _value_, such as a string or a number. This value can be used later, and it can also be changed.
+
+<text-box variant="hint" name="Naming variables">
+
+In principle, variables can be named quite freely, within certain limits specified in the Python language.
+
+It is a common international programming practice to name variables in English, but you may come across code where variables are named in other languages, such as the native language of the programmer. The name of the variable has no direct effect on its content, so the name, in that sense, does not matter. However, it can often be helpful in understanding how code functions if variables are named logically and in English.
+
+</text-box>
+
+<in-browser-programming-exercise name="Name twice" tmcname="part01-06_name_twice">
+
+Please write a program which asks for the user's name and then prints it twice, on two consecutive lines.
+
+An example of the how the program should function:
+
+<sample-output>
+
+What is your name? **Paul**
+Paul
+Paul
+
+</sample-output>
+
+</in-browser-programming-exercise>
+
+## Referencing a variable
+
+A single variable can be referred to many times in a program:
+
+```python
+name = input("What is your name? ")
+
+print("Hi, " + name + "!")
+print(name + " is quite a nice name.")
+```
+
+If the user gives the name `Paul Python`, this program prints out the following:
+
+<sample-output>
+
+What is your name? **Paul Python**
+Hi, Paul Python!
+Paul Python is quite a nice name.
+
+</sample-output>
+
+Let's have a closer look at the way the `print` command is used above. Within the brackets of the command there is both text in quotation marks as well as variable names which refer to input from the user. These have been combined with a `+` operator, which _concatenates_ two strings into a single string.
+
+Strings and variables can be combined quite freely:
+
+```python
+name = input("What is your name? ")
+
+print("Hi " + name + "! Let me make sure: your name is " + name + "?")
+```
+
+If the user gives the name `Ellen Example` this prints out
+
+<sample-output>
+
+What is your name? **Ellen Example**
+Hi Ellen Example! Let me make sure: your name is Ellen Example?
+
+</sample-output>
+
+<in-browser-programming-exercise name="Name and exclamation marks" tmcname="part01-07_name_and_exclamation_marks">
+
+Please write a program which asks for the user's name and then prints it out twice on a single line so that there is an exclamation mark at the beginning of the line, another between the two names and a third one at the end of the line.
+
+The program should function as follows:
+
+<sample-output>
+
+What is your name? **Paul**
+!Paul!Paul!
+
+</sample-output>
+
+</in-browser-programming-exercise>
+
+## More than one input
+
+A program can ask for more than one input. Notice how below each `input` command stores the received value in a different variable.
+
+```python
+name = input("What is your name? ")
+email = input("What is your email address? ")
+nickname = input("What is your nickname? ")
+
+print("Let's make sure we got this right")
+print("Your name: " + name)
+print("Your email address: " + email)
+print("Your nickname: " + nickname)
+```
+
+The program could print out this, for example:
+
+<sample-output>
+
+What is your name? **Frances Fictitious**
+What is your email address? **frances99@example.com**
+What is your nickname? **Fran**
+Let's make sure we got this right
+Your name: Frances Fictitious
+Your email address: frances99@example.com
+Your nickname: Fran
+
+</sample-output>
+
+If the same variable is used to store more than one input, each new value will replace the previous one. For example:
+
+```python
+address = input("What is your address? ")
+print("So you live at address " + address)
+
+address = input("Please type in a new address: ")
+print("Your address is now " + address)
+```
+
+An example execution of the program:
+
+<sample-output>
+
+What is your address? **Python Path 101, Flat 3D**
+So you live at address Python Path 101, Flat 3D
+Please type in a new address: **New Road 999**
+Your address is now New Road 999
+
+</sample-output>
+
+This means that if the same variable is used to store two inputs in succession, there is no way to access the first input value after it has been replaced by the second:
+
+```python
+address = input("What is your address? ")
+address = input("Please type in a new address: ")
+
+print("Your address is now " + address)
+```
+
+An example of how the program's output might look like:
+
+<sample-output>
+
+What is your address? **Python Path 10**
+Please type in a new address: **Programmer's Walk 23**
+Your address is now Programmer's Walk 23
+
+</sample-output>
+
+<in-browser-programming-exercise name="Name and address" tmcname="part01-08_name_and_address">
+
+Please write a program which asks for the user's name and address. The program should also print out the given information, as follows:
+
+<sample-output>
+
+Given name: **Steve**
+Family name: **Sanders**
+Street address: **91 Station Road**
+City and postal code: **London EC05 6AW**
+Steve Sanders
+91 Station Road
+London EC05 6AW
+
+</sample-output>
+
+</in-browser-programming-exercise>
+
+<in-browser-programming-exercise name="Fix the code: Utterances" tmcname="part01-09_utterances">
+
+Here is a program which should ask for three utterances and print them out, like so:
+
+<sample-output>
+
+The 1st part: **hickory**
+The 2nd part: **dickory**
+The 3rd part: **dock**
+hickory-dickory-dock!
+
+</sample-output>
+
+However, there is something wrong with the code below. Please fix it.
+
+</in-browser-programming-exercise>
+
+<in-browser-programming-exercise name="Story" tmcname="part01-10_story">
+
+Please write a program which prints out the following story. The user gives a name and a year, which should be inserted into the printout.
+
+<sample-output>
+
+Please type in a name: **Mary**
+Please type in a year: **1572**
+
+Mary is a valiant knight, born in the year 1572. One morning Mary woke up to an awful racket: a dragon was approaching the village. Only Mary could save the village's residents.
+
+</sample-output>
+
+The story should change according to the input given by the user.
+
+
+</in-browser-programming-exercise>
+>>>>>>> a71c56cac4ff2b90f0478112977423c8593e1589
+
+<!--
+
+A quiz to review the contents of this section:
+
+<quiz id="10cb3510-d8a6-5e9b-b372-c85c4c7eb957"></quiz>
+
+-->

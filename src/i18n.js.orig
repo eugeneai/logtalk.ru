@@ -1,0 +1,48 @@
+import i18n from "i18next"
+import { initReactI18next } from "react-i18next"
+import CourseSettings from "../course-settings"
+import commonEN from "./locales/common/en"
+import pointsBalloonEN from "./locales/pointsBalloon/en"
+import userEN from "./locales/user/en"
+import commonFI from "./locales/common/fi"
+import pointsBalloonFI from "./locales/pointsBalloon/fi"
+import userFI from "./locales/user/fi"
+<<<<<<< HEAD
+import commonRU from "./locales/common/ru"
+import pointsBalloonRU from "./locales/pointsBalloon/ru"
+import userRU from "./locales/user/ru"
+=======
+>>>>>>> a71c56cac4ff2b90f0478112977423c8593e1589
+
+const resources = {
+  en: {
+    common: commonEN,
+    "points-balloon": pointsBalloonEN,
+    user: userEN,
+  },
+  fi: {
+    common: commonFI,
+    "points-balloon": pointsBalloonFI,
+    user: userFI,
+  },
+<<<<<<< HEAD
+  ru: {
+    common: commonRU,
+    "points-balloon": pointsBalloonRU,
+    user: userRU,
+  },
+=======
+>>>>>>> a71c56cac4ff2b90f0478112977423c8593e1589
+}
+
+i18n.use(initReactI18next).init({
+  resources,
+  ns: ["common", "user", "points-balloon"],
+  defaultNS: "common",
+  react: {
+    wait: true,
+  },
+  lng: CourseSettings.language,
+})
+
+export default i18n
