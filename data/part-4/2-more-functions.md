@@ -1,18 +1,110 @@
 ---
-path: '/part-4/2-more-functions'
-title: 'More functions'
+path: '/part-4/2-parametric-categories'
+title: 'Параметризованные категории'
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name="Learning objectives">
+<text-box variant='learningObjectives' name="Цель освоения материала">
 
-After this section
+Освоение данного раздела позволит вам
 
-- You will know more about the arguments and parameters of functions
-- You will know how to return values from functions, and how to use the values in your code
-- You will be able to add type hints for parameters and return values
+- Задавать параметризированные категории
+- Организовывать наследование свойств между параметризованными категориями
+- .....
 
 </text-box>
+
+В предыдущей части мы изучили параметричекие объекты, с категориями мы можем действовать аналогично - создавать термы с параметрами и структурами. . . . .
+
+Следующие сущности иллюстрируют использование параметрических категорий как вариант одного из предыдущих примеров с объектами-инкуапсуляциями.  Первая категория описывает вариант одежды.
+
+```logtalk
+
+:- category(dress(_Season)).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura',
+		date is 2010-02-17,
+		comment is 'Dress advice according to the season.',
+		parnames is ['Season']
+	]).
+
+	:- public(clothes/1).
+
+	clothes(Clothes) :-
+		parameter(1, Season),
+		clothes(Season, Clothes).
+
+	clothes(winter, [pants, sleeves, heavy]).
+	clothes(spring, [shorts, sleeves, light]).
+	clothes(summer, [shorts, light, white]).
+	clothes(autumn, [pants, sleeves, light]).
+
+:- end_category.
+```
+
+Зададим категорию для описания речей (тостов, высказываний, лекций и т.п.)
+
+```logtalk
+:- category(speech(_Event)).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura',
+		date is 2010-02-17,
+		comment is 'Speech advice according to the event.',
+		parnames is ['Event']
+	]).
+
+	:- public(speech/1).
+
+	speech(Speech) :-
+		parameter(1, Event),
+		speech(Event, Speech).
+
+	speech(wedding, [happy, jokes]).
+	speech(inauguration, [formal, long]).
+
+:- end_category.
+```
+
+Теперь в отличие от оригинального примера создаем "плоский" вариант объекта, где все элементы собраны в объекте.
+
+```logtalk
+:- object(speech(Season, Event),
+	imports((dress(Season), speech(Event)))).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura',
+		date is 2014-08-14,
+		comment is 'Speech and dress advice according to the season and the event.',
+		parnames is ['Season', 'Event']
+	]).
+
+	:- public(advice/0).
+	advice :-
+		^^clothes(Clothes),
+		write('Clothes: '), write(Clothes), nl,
+		^^speech(Speech),
+		write('Speech:  '), write(Speech), nl, nl.
+
+	:- public(advice/2).
+	advice(Clothes, Speech) :-
+		^^clothes(Clothes),
+		^^speech(Speech).
+
+:- end_object.
+```
+
+Соглашение по наимновамию файлов, содержащих категорию ...
+
+
+
+
+
+
 
 Let's quickly recap Python functions. Functions are defined with the keyword `def`:
 
@@ -79,7 +171,7 @@ This terminology may all seem a bit superfluous, but computer science as a disci
 
 ## Error messages when running tests
 
-Most exercises on this course have automatic tests attached to them. If your program doesn't work as specified in the task, the tests will show an error message, which may or may not be helpful. It is usually worth the trouble to read the error message carefully. 
+Most exercises on this course have automatic tests attached to them. If your program doesn't work as specified in the task, the tests will show an error message, which may or may not be helpful. It is usually worth the trouble to read the error message carefully.
 
 In some situations the error message might not tell you very much at all. In the next exercise below you may come across this error message:
 

@@ -1,6 +1,6 @@
 ---
-path: '/part-3/1-loops-with-conditions'
-title: 'Loops with conditions'
+path: '/part-3/1-parametric-objects'
+title: 'Параметризованные объекты'
 hidden: false
 ---
 
@@ -10,511 +10,267 @@ hidden: false
 
 - Создание параматризованных объектов - эффективного способа предоставления методам объекта общего контекста
 - Разработку методов с использованием параметров объекта
-- Использование переменных для упрощения использование параметрических объектов
+- Использование так называемых *переменных-параметров* для упрощения реализации параметрических объектов
 
 </text-box>
 
-*Параметрические*, *параметризованные*, *parametric* объекты - это объекты, имеющие параметры в своем названии.  При определении параметрического объекта параметры задаются при помощи переменных, однако при использовании этих объектов переменные параметров должны быть конкретизированы.  
+*Параметрические*, *параметризованные*, *parametric*- объекты - это объекты, имеющие параметры в своем названии.  При определении параметрического объекта параметры в самом объекте задаются при помощи переменных.  Параметрический объект используется как терм-функтор (терм, состоящий из других термов, включая переменные) сам по себе, либо ему посылаются сообщения.
 
-<!--the same text is in sections 3-1, 5-1 and 6-1, check them all if you're changing this-->
-<text-box variant='hint' name="Важность использования параматрических объектов">
+Основная идея, сложенная в параметрические объекты, та же - *инкапсуляция небора предикатов*, но в данном случае также *инкапсулируются* и *параметры объекта*, то есть и методы и параметры вместе.  Можно в первом приближении считать, что параметры входят неявно в каждый предикат в том или ином наборе.
+
+Рассмотрим классический пример - представление даты ```date(_Year, _Month, _Day)```: ```_Year``` (год), ```_Month``` (месяц),  ```_Day``` (день).  Обращаем винмание, что теперь в идентификаторе объекта есть параметры: ```date/3```. Из основных функций реализуем установку/получение отдельных компонент даты (```year/1``` и другие), текущую дату ```today/0```, проверку на високосный год ```leap/0```.
+
+В примере каждый из методов использует один или несколько параметров.  Чтобы получить доступ к каому-либо параметру объекта, Logtalk предоставляет встроенный локальный метод ```parameter/2```.  Первый параметр этого метода - номер параметра, начиная с 1, второй - переменная, унифицируемая с этим параметром.
 
 
+```logtalk
+% File: date_3.lgt
 
-Becoming a proficient programmer requires a lot of practice, sometimes even quite mechanical practice. It also involves developing problem solving skills and applying intuition. This is why there are a lot of exercises of different kinds on this course. Some of them ask you to quite straightforwardly apply what you have learnt in the material, but some of them are intentionally more challenging and open-ended.
+:- object(date(_Year, _Month, _Day)).
 
-Some of the exercises might at first seem overwhelming, but this is nothing to worry about. None of the exercises is strictly mandatory, and in fact _you need only 25 % of the points from each part to pass the course._ You can find more details about passing the course on the [page on grading](/grading-and-exams).
+	:- info([
+		version is 1:1:0,
+		author is 'Paulo Moura',
+		date is 2005-9-5,
+		comment is 'Dates as parametric objects.',
+		parnames is ['Year', 'Month', 'Day']
+	]).
 
-**The exercises are not in any specific order of difficulty.** Each section usually introduces some new programming concepts, and these are then practised with both simpler and more complicated exercises. **If you come across an exercise that feels too difficult, move on to the next one.** You can always come back to the more difficult exercises if you have time later.
+	:- public(year/1).
+	:- mode(year(?integer), one).
 
-When the going inevitably gets tough, a word of consolation: a task that seems impossibly difficult this week will likely feel rather easy in about four weeks' time.
+	:- public(month/1).
+	:- mode(month(?integer), one).
 
-</text-box>
+	:- public(day/1).
+	:- mode(day(?integer), one).
 
-In the previous section we learnt to use the `while True` loop to repeat sections of code. In that construction the condition of the loop is `True`, so the condition is fulfilled every time. We needed to explicitly break out from the loop each time to avoid an infinite loop. For example: 
+	:- public(today/0).
+	:- mode(today, one).
 
-```python
-# Print numbers until the variable a equals 5
-a = 1
-while True:
-    print(a)
-    a += 1
-    if a == 5:
-        break
+	:- public(leap_year/0).
+	:- mode(leap_year, zero_or_one).
+
+	year(Year) :-
+		parameter(1, Year).
+
+	month(Month) :-
+		parameter(2, Month).
+
+	day(Day) :-
+		parameter(3, Day).
+
+	today :-
+		today(Year, Month, Day),
+		parameter(1, Year),
+		parameter(2, Month),
+		parameter(3, Day).
+
+    % Вспомогательный предикат, реализованный встроенными
+    % в базовую библиотеку SWI-Prolog предикатами
+    today(Year, Month, Day) :-
+            get_time(TimeStamp),
+            stamp_date_time(TimeStamp,
+                date(Year, Month, Day, _,_,_,_,_,_),
+                'UTC').
+
+/*  % Альтернативные определения методов, использующие this/1 вместо parameter/2
+    % (каждый из способов исользования обладаетс своими приемуществами и недостатками):
+
+	year(Year) :-
+		this(date(Year, _, _)).
+
+	month(Month) :-
+		this(date(_, Month, _)).
+
+	day(Day) :-
+		this(date(_, _, Day)).
+
+	today :-
+		today(Year, Month, Day),
+		this(date(Year, Month, Day)).
+
+*/
+
+	leap_year :-
+		parameter(1, Year),
+		(	0 =:= mod(Year, 4), 0 =\= mod(Year, 100)
+		;	0 =:= mod(Year, 400)
+		), !.
+
+:- end_object.
 ```
 
+Другим способом, закомментированном в примере, является использование встроенного локального метода ```this/1```.  Private-метод ```this/1```, принадлежащий, по правде говоря, всем объектам, унифицирует свой единственный аргумент с термом, обозначающим объект.  В результате унификации можно сопоставить сразу все параметры.  Существуют еще способы получить параметры, но о них в следующих примерах.
+
+Оба варианта одинаково эффективны, поскольку вызовы методов «this/1» и «parameter/2» обычно компилируются в виде унификации с заголовком.   Недостатком второго решения является то, что вынуждены проверять все вызовы «this/1», если изменим струткуру терма объекта. Обратите внимание, что мы не можем использовать этот метод с операторами отправки сообщений.  Итак, ```parameter/2``` позволяет получать параметры по одному, ```this/1``` все сразу.
+
+Обратим внимание на поименование файла, в котором мы храним код нашего объекта. По соглашению название файла будет состоять из назавния объекта и его арности. Например, при определении объекта под названием ```date(_Year, _Month, _Day)```, предлагается его оформлять его код в текстовом файле ```date_3.lgt```.  Это соглашение позволяет избегать наложений имен файлов при определении объектов Logtalk, имеющих один и тот же функтор (название), но разные арности (количество аргументов).
+
+Общая логика использования параметров - это передача одного значения группе предикатов, использующих эти переменные в своем определении.  Если состояние объекта устанавливается только при создании объекта и никогда не изменяется, то это решение намного лучше, чем использование базы данных объекта, изменяемой предикатами ```assert/1``` и ```retract/1```.  Параметрические объекты также могут быть использованы для создания ассоциаций набора предикатов с термами, которые имеют общий функтор и арность.  В приведенном выше примере такой ассоциацией являются методы ```today/0```, ```leap_year/0```, ```year/1```, использующие общий параметр ```Year```.
+
+Потестируем наш объект.
+
 <sample-output>
 
-1
-2
-3
-4
+?- *date(Year, Month, Day)::today.*             % (1)
+Year = 2025,
+Month = 5,
+Day = 9.
+
+?- *Date=date(Year, Month, Day), Date::today.*  % (2)
+Date = date(2025, 5, 9),
+Year = 2025,
+Month = 5,
+Day = 9.
+
+?- *Date=date(Year, Month, Day), Date::today,*  % (3)
+*|     Date::leap_year.*
+<b class="red" >false.</b>
+
+?- *Date=date(2004, _, _), Date::leap_year.*    % (4)
+Date = date(2004, _, _).
+
+?- *Date=date(2004, _, _), Date::year(Year).*   % (5)
+Date = date(2004, _, _),
+Year = 2004.
 
 </sample-output>
 
-Of course, the condition doesn't always have to be `True`, but instead any Boolean expression can be used as the condition. The general structure of the `while` statement is as follows:
+В примере запросы промумерованы, прокомментируем их немного.  Запрос (1) унифицирует ```Year```, ```Month```, ```Day``` с текущей датой.  Тут все просто, только необчно то, что мы *получаем значения параметров* параметрического объекта, посылая сообщение объекту, а не используем переданные конкретные значения в параметры при обработка сообщения.  Запрос (2) демонстрирует, как можно терм параметрического объекта ```date(Year, Month, Day)``` унифицировать с переменной ```Date```, и далее испольовать ее для посылки сообщений, получая тот же эффект как и в запросе (1).  Запрос (3) проверяет, является текущй год високосным, ответ - отрицательный.  Запрос (4) gпроверяет, является ли 2004 год високосным - ответ "да".  Запрос (5), самый простой, показывает, как получить значение одного из параметров.
 
-```python
-while <condition>:
-    <block>
+Если одному объекту, не обязательно параметрическому, передается несколько сообщений, то их последовательность можно перечислить в круглых скобках.  Например, запросы (3) и (4)-й с (5)-м переписываются следующим образом:
+
+<sample-output>
+
+?- *Date=date(Year, Month, Day), Date::(today, leap_year).*
+<b class="red">false.</b>
+
+?- *Date=date(2004, Month, Day), Date::(leap_year, year(Year)).*
+Date = date(2004, Month, Day),
+Year = 2004.
+
+</sample-output>
+
+## Использование переременных-параметров
+
+Третий вариант доступа к параметрам объекта — использование *переменных-параметров* (*parameter variables*).  Несмотря на то, что переменные-параметры вводят понятие глобальных переменных внутри объекта, их специальный синтаксис вида "```_```имя_параметра```_```" позволяет избежать конфликтов и делает их легко узнаваемыми внутри описаний реализаций методов. Например:
+
+```logtalk
+% File: person_2.lgt
+
+:- object(person(_Name_, _Age_)).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura',
+		date is 2007-6-19,
+		comment is 'Простое представление данных о людях с использованием параметрических объектов.',
+		parnames is ['Name', 'Age']
+	]).
+
+	:- public(grow_older/1).
+	:- mode(grow_older(-object_identifier), one).
+	:- info(grow_older/1, [
+		comment is 'Увеличивает возраст человека, возвращая обновленный объект.',
+		argnames is ['NewPerson']
+	]).
+
+	grow_older(NewPerson) :-
+		::age(OldAge, NewAge, NewPerson),
+		NewAge is OldAge + 1.
+
+	:- protected(age/3).
+	:- mode(age(?integer, ?integer, -object_identifier), zero_or_one).
+	:- info(age/3, [
+		comment is 'Создает новый объект - человек с обновленным возрастом.',
+		argnames is ['OldAge', 'NewAge', 'NewPerson']
+	]).
+
+	% Здесь используются переменные-параметры.
+	age(_Age_, NewAge, person(_Name_, NewAge)).
+
+:- end_object.
 ```
 
-The idea here is that the execution goes back and forth, checking if the condition is true and executing the code within the block, over and over again. If the condition at any point is false, execution of the program continues from the line after the `while` block.
+Посмотрим, как теперь один объект порождает другой.
 
-<img src="3_1_1.png">
+<sample-output>
 
-In the following loop we have the condition `number < 10`. The block within the loop is executed only if the variable number is less than 10.
+?- *person('Donald Trump', 72)::grow_older(NewTrump).*
+NewTrump = person('Donald Trump', 73).
 
-```python
-number = int(input("Please type in a number: "))
+</sample-output>
 
-while number < 10:
-    print(number)
-    number += 1
+Объекту ```NewTrump``` можно снова послать сообщение и получить следующий объект и так далее.
 
-print("Execution finished.")
+
+## Наследование (расширение) параметрических объектов
+
+Наследование через расширение объектов делается вполне очевидным способом - передачей параметров через унификацию.
+
+```logtalk
+% File: employee_3.lgt
+
+:- object(employee(_Name_, _Age_, _Salary_),
+	extends(person(_Name_, _Age_))).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura',
+		date is 2007-6-19,
+		comment is 'Простое представление данных сотрудников с использованием параметрических объектов.',
+		parnames is ['Name', 'Age', 'Salary']
+	]).
+
+	:- public(give_raise/2).
+	:- mode(give_raise(+integer, -object_identifier), one).
+	:- info(give_raise/2, [
+		comment is 'Дает повышение сотруднику, возвращая обновленного сотрудника.',
+		argnames is ['Amount', 'NewEmployee']
+	]).
+
+	give_raise(Amount, NewEmployee) :-
+		::salary(OldSalary, NewSalary, NewEmployee),
+		NewSalary is OldSalary + Amount.
+
+	:- protected(salary/3).
+	:- mode(salary(?integer, ?integer, -object_identifier), zero_or_one).
+	:- info(salary/3, [
+		comment is 'Создает сотрудника с обновленной зарплатой.',
+		argnames is ['OldSalary', 'NewSalary', 'NewEmployee']
+	]).
+
+	salary(_Salary_, NewSalary, employee(_Name_, _Age_, NewSalary)).
+
+	age(_Age_, NewAge, employee(_Name_, NewAge, _Salary_)).
+
+:- end_object.
 ```
 
-This could print out:
+Потестируем новый объект, выполнив старый запрос и еще один новый.
 
 <sample-output>
 
-Please type in a number: **4**
-4
-5
-6
-7
-8
-9
-Execution finished.
+?- *employee('Donald Trump', 72, 1_000_000)::grow_older(NewTrump).*
+NewTrump = employee('Donald Trump', 73, 1000000).
+
+?- *employee('Donald Trump', 72, 1_000_000)::give_raise(100_000, NewTrump).*
+NewTrump = employee('Donald Trump', 72, 1100000).
 
 </sample-output>
 
-In this structure the condition is always checked before the block within the loop is executed. It may happen that the block never gets executed, like so:
+Метод ```age/3``` в объекте ```employee/3``` переопределен с целью адаптации к структуре ```employee/3```: он, например, возвращает новый объект не ```person/2```, а ```employee/3```.  Public-метод ```grow_older/1```, определенный в ```person/2``` и унаследованный в ```employee/3```, пользуется ```age/3```, посылая сообщение самому себе ```::age(...)```:
 
-<sample-output>
+```logtalk
+% контекст объекта person/3
 
-Please type in a number: **12**
-Execution finished.
-
-</sample-output>
-
-12 is not less than 10, so the program doesn't print out a single number.
-
-## Initialisation, condition and update
-
-To create a loop you'll often need to include three distinct steps: initialisation, condition, and updating the iteration variables.
-
-_Initialisation_ refers to setting the initial value(s) of the variable(s) used within the condition of the loop. These are often called the iteration or iterator variables. This is performed before the loop is first entered. The _condition_ defines for how long the loop is to be executed. It is set out at the very beginning of the loop. Finally, within each repetition of the loop the variables involved in the condition are _updated_, so that each iteration brings the loop one step closer to its conclusion. The following image illustrates these steps: 
-
-<!--- this is here in case the following image needs to be updated
-```python
-# Ask the user for a number
-number = int(input("Please type in a number: "))
-
-# Repeat while the number is less than 10
-while number < 10:
-
-    # Print out and increment
-    print(number)
-    number += 1
-
-print("Execution finished.")
-```
--->
-<img src="3_1_2.png">
-
-If any one of these three components is missing, the loop will likely not function correctly. A typical error is omitting the update step:
-
-```python
-number = 1
-
-while number < 10:
-    print(number)
-
-print("Execution finished.")
+	grow_older(NewPerson) :-
+		::age(OldAge, NewAge, NewPerson),
+		NewAge is OldAge + 1.
 ```
 
-Here, the value of the variable `number` never changes. The program is stuck in an infinite loop, and the exact same bit of code is repeated over and over again until the user stops the execution, for example by pressing `Control` + `C`:
-
-<sample-output>
-
-1
-1
-1
-1
-1
-(continued ad infinitum...)
-
-</sample-output>
-
-<in-browser-programming-exercise name="Print numbers" tmcname="part03-01_print_numbers">
-
-Please write a program which prints out all the even numbers between two and thirty, using a loop. Print each number on a separate line.
-
-The beginning of your output should look like this:
-
-<sample-output>
-2
-4
-6
-8
-etc...
-</sample-output>
-
-</in-browser-programming-exercise>
-
-
-<in-browser-programming-exercise name="Fix the code: Countdown" tmcname="part03-02_countdown">
-
-The program below has some syntactic issues:
-
-```python
-print("Are you ready?")
-number = int(input("Please type in a number: "))
-while number = 0:
-print(number)
-print("Now!")
-```
-
-Please fix it so that it prints out the following:
-
-<sample-output>
-
-Are you ready?
-Please type in a number: **5**
-5
-4
-3
-2
-1
-Now!
-
-</sample-output>
-
-This exercise is similar to the countdown exercise in the last section, but please don't use a `while True` loop this time round!
-
-
-</in-browser-programming-exercise>
-
-## Writing conditions
-
-Any Boolean expression or combination thereof is a valid condition in a loop. For example, the following program prints out every third number, but only as long as the number is less than 100 and not divisible by 5:
-
-```python
-number = int(input("Please type in a number: "))
-
-while number < 100 and number % 5 != 0:
-    print(number)
-    number += 3
-```
-
-Two examples of the program's execution with different inputs:
-
-<sample-output>
-
-Please type in a number: **28**
-28
-31
-34
-37
-
-</sample-output>
-
-<sample-output>
-
-Please type in a number: **96**
-96
-99
-
-</sample-output>
-
-When the input is 28, the loop ends with the number 37, because the next number is 40, which is divisible by 5. When the input is 96, the loop ends with the number 99, because the next number is 102, which is not less than 100.
-
-Whenever you write a loop you should make sure that the execution of the loop will always end at some point. The following program either finishes or doesn't, depending on the input:
-
-```python
-number = int(input("Please type in a number: "))
-
-while number != 10:
-    print(number)
-    number += 2
-```
-
-If the input is an even number and equals 10 or less, the loop will terminate:
-
-<sample-output>
-
-Please type in a number: **4**
-4
-6
-8
-
-</sample-output>
-
-In any other case the loop gets executed endlessly, as there is no way the variable could then ever equal 10. For example 3 or 12 are inputs that would end in an infinite loop.
-
-<in-browser-programming-exercise name="Numbers" tmcname="part03-03_numbers">
-
-Please write a program which asks the user for a number. The program then prints out all integer numbers greater than zero but smaller than the input.
-
-<sample-output>
-
-Upper limit: **5**
-1
-2
-3
-4
-
-</sample-output>
-
-Please don't use the value `True` as the condition of your `while` loop in this exercise!
-
-</in-browser-programming-exercise>
-
-## Debugging tips
-
-Imagine you are writing some slightly more complicated program, such as the one in the next exercise, _Powers of two_. The first efforts could look like this:
-
-```python
-limit = int(input("Upper limit:"))
-number = 1
-while number == limit:
-   # more code
-```
-
-Here the program starts with reading the input, and continues with the outline of the loop and some attempt at a condition.
-
-It is likely the code will not work as desired on the first try. It might have to be tested dozens or even hundreds of times before it works correctly.
-
-This bit of code always asks for input from the user, which makes testing it slow and cumbersome. Each time the program is tested, input must be typed in.
-
-One way around this is "hard-coding" the input while testing:
-
-```python
-# let's hard-code the input value for testing
-limit = 8 # int(input("Upper limit"))
-number = 1
-while number == limit:
-   # more code 
-```
-When the program works with the one hard-coded input, it is easy to test it with other hard-coded inputs as well. When it seems to work correctly all round, it can be tested with input from the user.
-
-This trick works with many of the tests that the exercises on this course are graded with. If the test tells you that the program works incorrectly when the input is, say, 42, that input can be hard-coded into the program while you look for the source of the bug:
-
-```python
-# the test said the program works incorrectly when the input is 42
-limit = 42 # int(input("Upper limit"))
-number = 1
-while number == limit:
-   # more code
-```
-
-Print statement debugging was mentioned a few times in the [previous part](/part-2) of the course. The programs you are asked to write will become more and more complex as the course advances. The amount of debugging you will have to do will likely increase accordingly. Common causes for bugs lie in the conditions that terminate loops; they may work correctly for some inputs and fail for others, and it is not always obvious why that is.
-
-That is why it is high time you included print statement debugging in your programming practices, if you haven't done so already. You can find debugging instructions in the [first](/part-2/1-programming-terminology) and the [fourth](/part-2/4-simple-loops) section of the previous part.
-
-Besides print statements, there are many other tools that can be used for debugging. One of these is the [visualisation tool](http://www.pythontutor.com/visualize.html#mode=edit) on the [Python Tutor](http://www.pythontutor.com/) website. The tool allows you to execute your code line by line, and also shows you the values stored in variables at each step.
-
-The slightly broken code from the debugging example in the [previous section](/part-2/4-simple-loops) is visualised with Python Tutor in the following image:
-
-<img src="3_1_3.png">
-
-The red arrow points to where the execution of the program is at the moment. The tool displays what has been printed out so far, and also shows the value each variable has at each step. The execution moves forward line by line as you press _Next_.
-
-All you need to do to use the visualisation tool is to copy your code and paste it into the [code window](http://www.pythontutor.com/visualize.html#mode=edit) of the tool. The tool does have some limitations compared to the version of Python used on this course. If you come across any cryptic error messages, it may be better to try some other debugging method. 
-
-More experienced programmers are rarely heavy users of the visualisation tool, but for a beginner it can be a valuable aid. Programming as a discipline has little room for luck or chance. It is essential that a programmer understands what values are created by their code at any given moment in the execution. If the values stored in variables are not as expected, there is most likely a bug in the program.
-
-The visualisation tool and debugging print statements are both great ways for a programmer to see with their own eyes that a program does exactly what was expected of it.
-
-<in-browser-programming-exercise name="Powers of two" tmcname="part03-04_powers_of_two">
-
-Please write a program which asks the user to type in an upper limit. The program then prints out numbers so that each subsequent number is the previous one doubled, starting from the number 1. That is, the program prints out powers of two in order.
-
-The execution of the program finishes when the next number to be printed would be greater than the limit set by the user. No numbers greater than the limit should be printed.
-
-<sample-output>
-
-Upper limit: **8**
-1
-2
-4
-8
-
-</sample-output>
-
-<sample-output>
-
-Upper limit: **20**
-1
-2
-4
-8
-16
-
-</sample-output>
-
-<sample-output>
-
-Upper limit: **100**
-1
-2
-4
-8
-16
-32
-64
-
-</sample-output>
-
-Please don't use the value `True` as the condition of your `while` loop in this exercise!
-
-**What are powers of two?** The first power of two is the number 1. The next one is 1 times 2, which is 2. The next is 2 times 2, which is 4. The next is 4 times 2, which is 8, and so forth. Each power in the sequence is multiplied by two to produce the next one.
-
-</in-browser-programming-exercise>
-
-<in-browser-programming-exercise name="Powers of base n" tmcname="part03-05_powers_of_base_n">
-
-Please change the program from the previous exercise so that the user gets to input also the base which is multiplied (in the previous program the base was always 2). 
-
-<sample-output>
-
-Upper limit: **27**
-Base: **3**
-1
-3
-9
-27
-
-</sample-output>
-
-<sample-output>
-
-Upper limit: **1234567**
-Base: **10**
-1
-10
-100
-1000
-10000
-100000
-1000000
-
-</sample-output>
-
-Please don't use the value `True` as the condition of your `while` loop in this exercise!
-
-</in-browser-programming-exercise>
-
-<in-browser-programming-exercise name="The sum of consecutive numbers, version 1" tmcname="part03-06_consecutive_sum_v1">
-
-Please write a program which asks the user to type in a limit. The program then calculates the sum of consecutive numbers (1 + 2 + 3 + ...) until the sum is at least equal to the limit set by the user. The program should function as follows:
-
-<sample-output>
-
-Limit: **2**
-3
-
-</sample-output>
-
-<sample-output>
-
-Limit: **10**
-10
-
-</sample-output>
-
-<sample-output>
-
-Limit: **18**
-21
-
-</sample-output>
-
-If you have trouble understanding how the desired output is calculated, the sample outputs in the next exercise may help. You may assume the number typed in by the user is always equal to 2 or higher.
-
-</in-browser-programming-exercise>
-
-## Building strings
-
-In the very [first week of the course](/part-1/2-information-from-the-user) we learnt that it is possible to "build" strings out of shorter strings with the `+` operator. For example, this is valid Python code:
-
-```python
-words = "pride"
-words = words + ", prejudice"
-words = words + " and python"
-
-print(words)
-```
-
-<sample-output>
-
-pride, prejudice and python
-
-</sample-output>
-
-The `+=` operator allows us to write this a little more compactly:
-
-```python
-words = "pride"
-words += ", prejudice"
-words += " and python"
-
-print(words)
-```
-
-This also applies to f-strings, which may come in handy if values stored in variables are needed as parts of the resulting string. For example this would work:
-
-```python
-course = "Introduction to Programming"
-grade = 4
-
-verdict = "You have received "
-verdict += f"the grade {grade} "
-verdict += f"from the course {course}"
-
-print(verdict)
-```
-
-<sample-output>
-
-You have received the grade 4 from the course Introduction to Programming
-
-</sample-output>
-
-In the previous exercise you calculated the sum of consecutive numbers by always adding a new value inside a loop.
-
-The exact same idea applies to strings as well: you can add new parts to a string within a loop. This technique should be useful in the following exercise.
-
-<in-browser-programming-exercise name="The sum of consecutive numbers, version 2" tmcname="part03-07_consecutive_sum_v2">
-
-Please write a new version of the program in the previous exercise. In addition to the result it should also print out the calculation performed:
-
-<sample-output>
-
-Limit: **2**
-The consecutive sum: 1 + 2 = 3
-
-</sample-output>
-
-<sample-output>
-
-Limit: **10**
-The consecutive sum: 1 + 2 + 3 + 4 = 10
-
-</sample-output>
-
-<sample-output>
-
-Limit: **18**
-The consecutive sum: 1 + 2 + 3 + 4 + 5 + 6 = 21
-
-</sample-output>
-
-You may assume the number typed in by the user is always equal to 2 or higher.
-
-</in-browser-programming-exercise>
+В качестве управжнения предлагается определить ```age/3``` в ```employee/3``` при помощи вызова к super-объекту ```^^age(...)``` (в ```person/2```).
 
 <!---
 A quiz to review the contents of this section:

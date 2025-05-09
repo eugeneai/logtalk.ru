@@ -1,19 +1,233 @@
 ---
-path: '/part-3/2-working-with-strings'
-title: 'Working with strings'
+path: '/part-3/2-combine-parametric-objects'
+title: 'Комбинирование параметрических объектов'
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name="Learning objectives">
+<text-box variant='learningObjectives' name="Цель освоения материала">
 
-After this section
+Изучив этот раздел вы научитесь
 
-- You will be able to use the operators `+` and `*` with strings
-- You will know how to find out the length of a string
-- You will know what is meant by string indexing
-- You will know how to look for substrings within a string
+- Создавать параметрические объекты, состоящие из других объектов
+- Обрабатывать "наборы" объектов с одинаковой сигнатурой в одном так называемом *proxy*-запросе
+- Разбивать реализацию объектов в зависимости от структурных ограничений параметров
 
 </text-box>
+
+## Комбинирование параметрических объектов
+
+/*	The following entities illustrate the use of parametric categories.
+*/
+```logtalk
+:- category(dress(_Season)).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura',
+		date is 2010-02-17,
+		comment is 'Dress advice according to the season.',
+		parnames is ['Season']
+	]).
+
+	:- public(clothes/1).
+
+	clothes(Clothes) :-
+		parameter(1, Season),
+		clothes(Season, Clothes).
+
+	clothes(winter, [pants, sleeves, heavy]).
+	clothes(spring, [shorts, sleeves, light]).
+	clothes(summer, [shorts, light, white]).
+	clothes(autumn, [pants, sleeves, light]).
+
+:- end_category.
+```
+
+```logtalk
+:- category(speech(_Event)).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura',
+		date is 2010-02-17,
+		comment is 'Speech advice according to the event.',
+		parnames is ['Event']
+	]).
+
+	:- public(speech/1).
+
+	speech(Speech) :-
+		parameter(1, Event),
+		speech(Event, Speech).
+
+	speech(wedding, [happy, jokes]).
+	speech(inauguration, [formal, long]).
+
+:- end_category.
+```
+
+```logtalk
+:- object(speech(Season, Event),
+	imports((dress(Season), speech(Event)))).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura',
+		date is 2014-08-14,
+		comment is 'Speech and dress advice according to the season and the event.',
+		parnames is ['Season', 'Event']
+	]).
+
+	:- public(advice/0).
+	advice :-
+		^^clothes(Clothes),
+		write('Clothes: '), write(Clothes), nl,
+		^^speech(Speech),
+		write('Speech:  '), write(Speech), nl, nl.
+
+	:- public(advice/2).
+	advice(Clothes, Speech) :-
+		^^clothes(Clothes),
+		^^speech(Speech).
+
+:- end_object.
+```
+
+## Объекты-заместители
+
+
+Сложные термины с одним и тем же функтором и с тем же количеством аргументов, что и параметрический идентификатор объекта, могут действовать как *прокси* (заместители) к другому параметрическому объекту. Прокси могут храниться в базе данных в виде фактов Пролога и использоваться для представления различных конкретизаций идентификатора параметрического объекта. Logtalk предоставляет удобную нотацию для доступа к прокси-объектам, представленных как факты Prolog-а. Эта нотация используется при отправке сообщения следующего вида:
+
+::
+
+   ..., {Proxy}::Message, ...
+
+В этом контексте (примере) аргумент "Proxy" доказывается как обычная цель Prolog-а. В случае успеха, отправляется сообщение соответствующему параметрическому объекту. Как правило, доказательство позволяет получить конкретные значения для параметров.  Эта конструкция может быть использована либо с прокси-аргументом, который достаточно конкретизирован, чтобы унифицироваться с какм-либо фактом Пролога, либо с прокси-аргументом, который унифицируется с несколькими фактами в процессе бэктрекинга.
+
+
+
+
+
+<!--the same text is in sections 3-1, 5-1 and 6-1, check them all if you're changing this-->
+<text-box variant='hint' name="Важность использования параматрических объектов">
+
+
+
+
+К параметрам можно получить доступ изнутри объекта, используя либо (1) встроенные методы выполнения-контекста параметр/2 и этот/1, либо (2) с использованием переменных параметров.
+
+
+
+## Параметрические объекты - варианты
+
+
+Этот пример иллюстрирует, как связать набор предикатов со сложным термином (функтором), причем для разных альтернатив можно задавать свой объект.  Данный параметрический объект задает несколько полезных предикатов манипуляций со списками.
+
+Распознать непустой список, первый вариант параметрического объекта, достаточно легко, он является сложным термом и унифицируется с термом ```[_ | _]```.
+
+```logtalk
+:- object([_| _]).
+
+	:- public(last/1).
+	:- mode(last(?term), zero_or_one).
+
+	:- public(length/1).
+	:- mode(length(?term), zero_or_one).
+
+	:- public(member/1).
+	:- mode(member(?term), zero_or_more).
+
+	:- public(nextto/2).
+	:- mode(nextto(?term, ?term), zero_or_more).
+
+	length(Count) :-
+		this([_Head| Tail]),
+		Tail::length(TL),
+        Count is TL + 1..
+
+	last(Last) :-
+		this([Head| Tail]),
+		last(Tail, Head, Last).
+
+	last([], Last, Last).
+	last([Head| Tail], _, Last) :-
+		last(Tail, Head, Last).
+
+	member(Element) :-
+		this(List),
+		member(Element, List).
+
+	member(Element, [Element| _]).
+	member(Element, [_| Tail]) :-
+		member(Element, Tail).
+
+	nextto(X, Y) :-
+		this([Head| Tail]),
+		nextto(X, Y, [Head| Tail]).
+
+	nextto(X, Y, [X, Y| _]).
+	nextto(X, Y, [_| Tail]) :-
+		nextto(X, Y, Tail).
+
+:- end_object.
+```
+
+Рассмотрим второй вариант аргумента - пустой список, частный случай непустого.  При использовании наследования серез расширение надо исключить неправильные варианты для пустых списков.  Пустой список является атомом, а не сложным термом, поэтому методы из ```'[_ | _]'``` в ```[]``` всегда будет ложными, то есть невыводимыми, так как неприменимы к пустому списку, за исключением метода ```length/1```.
+
+```logtalk
+:- object('[]',
+	extends([[_| _]])).
+
+    % переопределим унаследованные предикаты, чтобы
+    % решать задачу над пустыми списками.
+
+    length(0).
+
+	last(_) :-
+		fail.
+
+	member(_) :-
+		fail.
+
+	nextto(_, _) :-
+		fail.
+
+:- end_object.
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## String operations
 
@@ -147,7 +361,7 @@ The strings are equally long
 
 </in-browser-programming-exercise>
 
-As strings are essentially sequences of characters, any single character in a string can also be retrieved. The operator `[]` finds the character with the _index_ specified within the brackets. 
+As strings are essentially sequences of characters, any single character in a string can also be retrieved. The operator `[]` finds the character with the _index_ specified within the brackets.
 
 The index refers to a position in the string, counting up from zero. The first character in the string has index 0, the second character has index 1, and so forth.
 
@@ -602,7 +816,7 @@ o not found
 
 </in-browser-programming-exercise>
 
-The operator `in` returns a Boolean value, so it will only tell us _if_ a substring exists in a string, but it will not be useful in finding out _where_ exactly it is. Instead, the Python string method `find` can be used for this purpose. It takes the substring searched for as an argument, and returns either the first index where it is found, or `-1` if the substring is not found within the string. 
+The operator `in` returns a Boolean value, so it will only tell us _if_ a substring exists in a string, but it will not be useful in finding out _where_ exactly it is. Instead, the Python string method `find` can be used for this purpose. It takes the substring searched for as an argument, and returns either the first index where it is found, or `-1` if the substring is not found within the string.
 
 The image below illustrates how it is used:
 
@@ -662,7 +876,7 @@ Above we used the string _method_ `find`. Methods work quite similarly to the _f
 
 <in-browser-programming-exercise name="Find the first substring" tmcname="part03-20_find_first_substring">
 
-Please write a program which asks the user to type in a string and a single character. The program then prints the first three character slice which begins with the character specified by the user. You may assume the input string is at least three characters long. The program must print out three characters, or else nothing. 
+Please write a program which asks the user to type in a string and a single character. The program then prints the first three character slice which begins with the character specified by the user. You may assume the input string is at least three characters long. The program must print out three characters, or else nothing.
 
 Pay special attention to when there are less than two characters left in the string after the first occurrence of the character looked for. In that case nothing should be printed out, and there should not be any indexing errors when executing the program.
 
