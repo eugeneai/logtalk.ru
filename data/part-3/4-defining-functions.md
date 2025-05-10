@@ -1,7 +1,7 @@
 ---
 path: '/part-3/4-defining-functions'
 title: 'Defining functions'
-hidden: false
+hidden: true
 ---
 
 <text-box variant='learningObjectives' name="Learning objectives">

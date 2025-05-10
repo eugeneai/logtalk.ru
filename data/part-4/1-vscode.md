@@ -1,12 +1,12 @@
 ---
-path: '/part-4/1-vscode'
-title: 'The Visual Studio Code editor, Python interpreter and built-in debugging tool'
+path: '/part-4/1-categories'
+title: 'Категории'
 hidden: false
 ---
 
-<text-box variant='learningObjectives' name="Learning objectives">
+<text-box variant='learningObjectives' name="Цели изучения категорий">
 
-After this section
+После изучения данного раздела вы сможете
 
 - You will be equipped to use the Visual Studio Code editor to complete exercises on this course
 - You will be familiar with the interactive Python interpreter, and will be able to use it to run code
