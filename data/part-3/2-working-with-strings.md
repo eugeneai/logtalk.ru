@@ -16,21 +16,24 @@ hidden: false
 
 ## Комбинирование параметрических объектов
 
-/*	The following entities illustrate the use of parametric categories.
-*/
+Из объектов, которые являются термами, простыми и сложными, можно строить еще более сложные композиции, моделирующими, очевидно, объекты предметной области, напрример, графы-деревья, однонаправленные списки и т.п.
+
+В данном примере решается задача композиции объекта, представляющего рекомендации одежды по сезону и спича (тоста, локлада, лекции и т.п.) по определенному поводу.
+
 ```logtalk
-:- category(dress(_Season)).
+:- object(dress(_Season)).
 
 	:- info([
 		version is 1:0:0,
-		author is 'Paulo Moura',
-		date is 2010-02-17,
-		comment is 'Dress advice according to the season.',
+		author is 'Paulo Moura, Evgeny Cherkashin',
+		date is 2024-02-17,
+		comment is 'Советы по одежде в зависимости от сезона.',
 		parnames is ['Season']
 	]).
 
 	:- public(clothes/1).
 
+    % Выбор одежды по сезону
 	clothes(Clothes) :-
 		parameter(1, Season),
 		clothes(Season, Clothes).
@@ -40,17 +43,19 @@ hidden: false
 	clothes(summer, [shorts, light, white]).
 	clothes(autumn, [pants, sleeves, light]).
 
-:- end_category.
+:- end_object.
 ```
 
+Второй объект - представления спича.
+
 ```logtalk
-:- category(speech(_Event)).
+:- object(speech(_Event)).
 
 	:- info([
 		version is 1:0:0,
-		author is 'Paulo Moura',
-		date is 2010-02-17,
-		comment is 'Speech advice according to the event.',
+		author is 'Paulo Moura, Evgeny Cherkashin',
+		date is 2024-02-17,
+		comment is 'Речевые советы варианта спича по событию (поводу).',
 		parnames is ['Event']
 	]).
 
@@ -63,26 +68,67 @@ hidden: false
 	speech(wedding, [happy, jokes]).
 	speech(inauguration, [formal, long]).
 
-:- end_category.
+:- end_object.
+
 ```
 
+Третий объект - комбинация рекомендателей одежды и спича.
+
 ```logtalk
-:- object(speech(Season, Event),
-	imports((dress(Season), speech(Event)))).
+:- object(speech(_Season_, _Event_)).
 
 	:- info([
 		version is 1:0:0,
-		author is 'Paulo Moura',
-		date is 2014-08-14,
+		author is 'Paulo Mora, Evgeny Cherkashin',
+		date is 2024-08-14,
+		comment is 'Рекомендации по спичу и одежде в зависимости от сезона и события.',
+		parnames is ['Season', 'Event']
+	]).
+
+	:- public(advice/0).
+	advice :-
+        ::advice(Clothes, Speech),
+		write('Clothes: '), write(Clothes), nl,
+		write('Speech:  '), write(Speech), nl, nl.
+
+	:- public(advice/2).
+	advice(Clothes, Speech) :-
+		_Season_::clothes(Clothes),
+		_Event_::speech(Speech).
+
+:- end_object.
+```
+
+<sample-output>
+
+?- *dress(summer)::clothes(Clothes).*
+Clothes = [shorts, light, white].
+
+?- *speech(dress(summer), speech(wedding))::advice(Clothes, Speech).*
+Clothes = [shorts, light, white],
+Speech = [happy, jokes].
+
+</sample-output>
+
+С первого взгляда качется, что все усложняется: надо создавать сложный объект, потом запрос делать.  Но это только с первого взгляда. На практике такие конструкции формируются в результате решения других задач, используются при помощи ссылки их переменной.  На всякий случай еще пример - множественное наследование без "усложнения" структуры.
+
+
+```logtalk
+:- object(speech2(Season, Event),
+	extends((dress(Season), speech(Event)))).
+
+	:- info([
+		version is 1:0:0,
+		author is 'Paulo Moura, Evgeny Cherkashin',
+		date is 2024-08-14,
 		comment is 'Speech and dress advice according to the season and the event.',
 		parnames is ['Season', 'Event']
 	]).
 
 	:- public(advice/0).
 	advice :-
-		^^clothes(Clothes),
+        ::advice(Clothes, Speech),
 		write('Clothes: '), write(Clothes), nl,
-		^^speech(Speech),
 		write('Speech:  '), write(Speech), nl, nl.
 
 	:- public(advice/2).
@@ -92,20 +138,48 @@ hidden: false
 
 :- end_object.
 ```
+<sample-output>
+
+?- speech2(summer, wedding)::advice(Clothes, Speech).
+Clothes = [shorts, light, white],
+Speech = [happy, jokes].
+
+</sample-output>
+
+С такими объектами проще работать в статическом случае, когда не надо во время исполнения программы комбинировать оъекты.  Другой вариант эффективного применения множественного наследования - адаптер-фасад, объект реализующий "простой" интерфейс к интерфейсам сложного набора объектов некоторой библиотеки.
 
 ## Объекты-заместители
 
+Рассмотрим случай, где задан набор фактов о людях и сотрудников из предыдущего раздела.
 
-Сложные термины с одним и тем же функтором и с тем же количеством аргументов, что и параметрический идентификатор объекта, могут действовать как *прокси* (заместители) к другому параметрическому объекту. Прокси могут храниться в базе данных в виде фактов Пролога и использоваться для представления различных конкретизаций идентификатора параметрического объекта. Logtalk предоставляет удобную нотацию для доступа к прокси-объектам, представленных как факты Prolog-а. Эта нотация используется при отправке сообщения следующего вида:
+```logtalk
+
+person('Donald Trump', 71).
+person('Joseph Biden', 82).
+person('Barak Obama', 69).
+
+employee('Ilon Musk', 58, 1_000_000).
+employee('Steve Bulmer', 68, 100_000).
+employee('John Doe', 60, 10_000).
+
+```
+
+Теперь нам надо к каждому выполнить один и тот же запрос.
+
+<sample-output>
+
+?- Person::grow_older(NewPerson).
+
+</sample-output>
+
+
+Сложные термы с одним и тем же функциональным символом (идентификатором) и с jlbyfrjdsv количеством аргументов, что и идентификатор какого-нибудь параметрического объекта, могут действовать как *прокси* (заместители) к другому параметрическому объекту. Прокси могут храниться в базе данных в виде фактов Пролога и использоваться для представления различных конкретизаций идентификатора параметрического объекта. Logtalk предоставляет удобную нотацию для доступа к прокси-объектам, представленных как факты Prolog-а. Эта нотация используется при отправке сообщения следующего вида:
 
 ::
 
    ..., {Proxy}::Message, ...
 
 В этом контексте (примере) аргумент "Proxy" доказывается как обычная цель Prolog-а. В случае успеха, отправляется сообщение соответствующему параметрическому объекту. Как правило, доказательство позволяет получить конкретные значения для параметров.  Эта конструкция может быть использована либо с прокси-аргументом, который достаточно конкретизирован, чтобы унифицироваться с какм-либо фактом Пролога, либо с прокси-аргументом, который унифицируется с несколькими фактами в процессе бэктрекинга.
-
-
-
 
 
 <!--the same text is in sections 3-1, 5-1 and 6-1, check them all if you're changing this-->
