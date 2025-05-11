@@ -1,6 +1,6 @@
 ---
-path: '/part-5/2-references'
-title: 'References'
+path: '/part-5/2-new-operator-like'
+title: 'Динамические экземпляры'
 hidden: false
 ---
 

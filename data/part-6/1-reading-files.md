@@ -1,6 +1,6 @@
 ---
-path: '/part-6/1-reading-files'
-title: 'Reading files'
+path: '/part-6/1-object-list'
+title: 'Списки объектов и их свойства'
 hidden: false
 ---
 

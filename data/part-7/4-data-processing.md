@@ -1,6 +1,6 @@
 ---
-path: '/part-7/4-data-processing'
-title: 'Data processing'
+path: '/part-7/4-doumenter'
+title: 'Подготовка документации'
 hidden: false
 ---
 

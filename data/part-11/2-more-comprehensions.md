@@ -1,6 +1,6 @@
 ---
-path: '/part-11/2-more-comprehensions'
-title: 'More comprehensions'
+path: '/part-11/2-xml'
+title: 'Обработка XML'
 hidden: false
 ---
 

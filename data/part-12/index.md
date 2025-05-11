@@ -1,6 +1,6 @@
 ---
 path: '/part-12'
-title: 'Part 12'
+title: 'Часть 12. Многопоточность'
 overview: true
 hidden: false
 ---

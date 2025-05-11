@@ -1,6 +1,6 @@
 ---
-path: '/part-7/6-more-features'
-title: 'More Python features'
+path: '/part-7/6-help'
+title: 'Система подсказки'
 hidden: false
 ---
 

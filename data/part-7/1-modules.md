@@ -1,6 +1,6 @@
 ---
-path: '/part-7/1-modules'
-title: 'Modules'
+path: '/part-7/1-loader'
+title: 'Загрузчик модулей'
 hidden: false
 ---
 

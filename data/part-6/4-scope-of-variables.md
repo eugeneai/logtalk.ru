@@ -1,7 +1,7 @@
 ---
 path: '/part-6/4-scope-of-variables'
 title: 'Local and global variables'
-hidden: false
+hidden: true
 ---
 
 <text-box variant='learningObjectives' name="Learning objectives">

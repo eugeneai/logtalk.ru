@@ -1,6 +1,6 @@
 ---
-path: '/part-5/3-dictionary'
-title: 'Dictionary'
+path: '/part-5/3-objects-as-terms-of-dynamic-fact'
+title: 'Экземляры в базах данных'
 hidden: false
 ---
 

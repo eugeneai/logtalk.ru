@@ -1,6 +1,6 @@
 ---
 path: '/part-11'
-title: 'Part 11'
+title: 'Часть 11. Бандартная библиотека'
 overview: true
 hidden: false
 ---

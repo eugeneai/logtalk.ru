@@ -1,6 +1,6 @@
 ---
-path: '/part-10/2-access-modifiers'
-title: 'Access modifiers'
+path: '/part-10/2-dcg'
+title: 'Грамматика фраз (DCG)'
 hidden: false
 ---
 

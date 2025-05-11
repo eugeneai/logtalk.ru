@@ -1,6 +1,6 @@
 ---
-path: '/part-10/4-application-development'
-title: 'Developing a larger application'
+path: '/part-10/4-macro-es'
+title: 'Язык экспертных систем'
 hidden: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 path: '/part-1'
-title: 'Part 1'
+title: 'Часть 1. Инкапсуляция'
 overview: true
 hidden: false
 ---

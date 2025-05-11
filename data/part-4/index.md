@@ -1,6 +1,6 @@
 ---
 path: '/part-4'
-title: 'Part 4'
+title: 'Часть 4. Категории'
 overview: true
 hidden: false
 ---

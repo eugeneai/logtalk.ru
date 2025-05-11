@@ -1,6 +1,6 @@
 ---
 path: '/part-13'
-title: 'Part 13'
+title: 'Часть 13. Исключения'
 overview: true
 hidden: false
 ---

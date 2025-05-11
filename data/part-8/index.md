@@ -1,6 +1,6 @@
 ---
 path: '/part-8'
-title: 'Part 8'
+title: 'Часть 8. Компоненты'
 overview: true
 hidden: false
 ---

@@ -1,6 +1,6 @@
 ---
-path: '/part-10/3-oo-programming-techniques'
-title: 'Object oriented programming techniques'
+path: '/part-10/3-dcg-oop'
+title: 'Использование DCG с объектами'
 hidden: false
 ---
 

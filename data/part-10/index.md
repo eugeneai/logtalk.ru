@@ -1,6 +1,6 @@
 ---
 path: '/part-10'
-title: 'Part 10'
+title: 'Часть 10. Метапрограммирование'
 overview: true
 hidden: false
 ---

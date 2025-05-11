@@ -1,6 +1,6 @@
 ---
-path: '/part-10/1-class-hierarchies'
-title: 'Class hierarchies'
+path: '/part-10/1-macros'
+title: 'Макротрансформации'
 hidden: false
 ---
 

@@ -88,7 +88,7 @@ module.exports = {
                   insertBefore: {
                     function: {
                       superscript_keywords:
-                        /(object|end_object|category|end_category|protocol|end_protocol|public|private|protected|use_module|use|this|self|dynamic)/,
+                        /(object|end_object|category|end_category|protocol|end_protocol|public|private|protected|use_module|use|this|self|dynamic|info|meta_predicate|mode)/,
                     },
                   },
                 },

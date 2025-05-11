@@ -1,9 +1,9 @@
 ---
 path: '/part-7'
-title: 'Part 7'
+title: 'Часть 7. Инструменты разработки'
 overview: true
 hidden: false
-separator_after: "Advanced Course in Programming"
+separator_after: "Курс углубленного изучения"
 ---
 
 <pages-in-this-section></pages-in-this-section>

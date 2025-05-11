@@ -1,6 +1,6 @@
 ---
 path: '/part-9'
-title: 'Part 9'
+title: 'Часть 9. Перехват сообщений'
 overview: true
 hidden: false
 ---

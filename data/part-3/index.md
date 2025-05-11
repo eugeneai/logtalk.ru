@@ -1,6 +1,6 @@
 ---
 path: '/part-3'
-title: 'Part 3'
+title: 'Часть 3. Параметрические объекты'
 overview: true
 hidden: false
 ---

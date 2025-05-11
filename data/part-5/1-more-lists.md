@@ -1,6 +1,6 @@
 ---
-path: '/part-5/1-more-lists'
-title: 'More lists'
+path: '/part-5/1-standard-class-system'
+title: 'Стандартная иерархия классов'
 hidden: false
 ---
 

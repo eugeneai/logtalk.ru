@@ -1,6 +1,6 @@
 ---
-path: '/part-6/2-writing-files'
-title: 'Writing files'
+path: '/part-6/2-system-setup'
+title: 'Управление компилятором'
 hidden: false
 ---
 

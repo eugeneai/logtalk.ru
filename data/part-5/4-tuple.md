@@ -1,6 +1,6 @@
 ---
-path: '/part-5/4-tuple'
-title: 'Tuple'
+path: '/part-5/4-exersizes'
+title: 'Упражнения'
 hidden: false
 ---
 

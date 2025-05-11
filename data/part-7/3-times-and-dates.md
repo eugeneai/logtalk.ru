@@ -1,6 +1,6 @@
 ---
-path: '/part-7/3-times-and-dates'
-title: 'Times and dates'
+path: '/part-7/3-debugger'
+title: 'Отладчик'
 hidden: false
 ---
 

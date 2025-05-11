@@ -1,6 +1,6 @@
 ---
-path: '/part-6/3-errors'
-title: 'Handling errors'
+path: '/part-6/3-instance-generators'
+title: 'Настройка генераторов экземпляров'
 hidden: false
 ---
 

@@ -1,6 +1,6 @@
 ---
-path: '/part-7/5-creating-modules'
-title: 'Creating your own modules'
+path: '/part-7/5-testing'
+title: 'Разработка тестов'
 hidden: false
 ---
 

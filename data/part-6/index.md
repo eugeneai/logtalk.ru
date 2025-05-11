@@ -1,6 +1,6 @@
 ---
 path: '/part-6'
-title: 'Part 6'
+title: 'Часть 6. Саморефлексия'
 overview: true
 hidden: false
 ---

@@ -1,6 +1,6 @@
 ---
-path: '/part-11/1-list-comprehensions'
-title: 'List comprehensions'
+path: '/part-11/1-options'
+title: 'Библиотека "option"'
 hidden: false
 ---
 

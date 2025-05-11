@@ -1,6 +1,6 @@
 ---
-path: '/part-7/2-randomness'
-title: 'Randomness'
+path: '/part-7/2-tutor'
+title: 'Инструктор (tutor)'
 hidden: false
 ---
 

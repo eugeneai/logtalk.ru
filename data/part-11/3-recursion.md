@@ -1,6 +1,6 @@
 ---
-path: '/part-11/3-recursion'
-title: 'Recursion'
+path: '/part-11/3-dictionaries'
+title: 'Словари, хипы, очереди'
 hidden: false
 ---
 
