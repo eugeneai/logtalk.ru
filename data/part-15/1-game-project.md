@@ -1,219 +1,120 @@
 ---
-path: '/part-15/1-topic'
-title: 'Тема'
+path: '/part-15/1-document-preparation'
+title: 'Общая структура проекта'
 hidden: false
 ---
 
-In this part we will use pygame to create a somewhat larger game. It is a variation of the classic Sokoban game, where the player moves a robot on a grid and pushes boxes into correct locations with as few moves as possible.
+<text-box variant='learningObjectives' name='Идея решения'>
 
-The end result will look like this:
+После изучения материала этого раздела Вы
 
-<img src="game.png">
+- Напишите и выполните свою первую программу на Logtalk
+- Узнаете, как реализовывать инкапсуляцию в этом языке в виде объекта
+- Выполните несколько запросов к методам этого объекта
 
-## The game map
+</text-box>
 
-Let's begin by drawing the map used in the game. The game is implemented in the class `Sokoban`, which will contain all functionality required to play the game. In this first stage the contents of the class are as follows:
 
-```python
-import pygame
+## Проект URL
 
-class Sokoban:
-    def __init__(self):
-        pygame.init()
-        
-        self.load_images()
-        self.new_game()
-        
-        self.height = len(self.map)
-        self.width = len(self.map[0])
-        self.scale = self.images[0].get_width()
+https://github.com/stud-labs/logtalk-lab-gen
 
-        window_height = self.scale * self.height
-        window_width = self.scale * self.width
-        self.window = pygame.display.set_mode((window_width, window_height))
+## Решаемые задачи и требования к системе порождения документов
 
-        pygame.display.set_caption("Sokoban")
+Для порождения качественных документов необходимо
 
-        self.main_loop()
+- Реализовать системы представления данных для документов
+- Генерировать документ LuaLaTeX, который без ошибок должен быть сверстан
+- Поддерживать шаблоны документов, специализируемые под требования организации
+- Предусмотреть возможность генерации документов в другие форматы
 
-    def load_images(self):
-        self.images = []
-        for name in ["floor", "wall", "target", "box", "robot", "done", "target_robot"]:
-            self.images.append(pygame.image.load(name + ".png"))
+В качестве примера возьмем задачу порождения документов для формироавния заявки на гранты Потанина для студентов-магистров.
 
-    def new_game(self):
-        self.map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],
-                    [1, 2, 3, 0, 0, 0, 1, 0, 0, 1, 2, 3, 0, 0, 0, 0, 1],
-                    [1, 0, 0, 1, 2, 3, 0, 2, 3, 0, 0, 0, 1, 0, 0, 0, 1],
-                    [1, 0, 4, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+## Реализация требований уровня пользователя
 
-    def main_loop(self):
-        while True:
-            self.check_events()
-            self.draw_window()
+Пользователем программы является секретарь, программирующий на Logtalk.  Абсурдно, но пусть пока будут такие требования.  Далее можно улучшить систему, сделав WEB-интерфейс.
 
-    def check_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
+Итак нам надо распечатать документ, то есть, как вариант, сгенерировать PDF-файл.  Самый простой способ сделать качественный документ - использовать LuaLaTeX.  Благодяря тому, что исходный код документа - простой UTF8-текст и возможности настройки формата в отдельном файле (существуют десятки способов, как сделать настройку и удобно, и правильно, и быстро, и точно), сгенерировать документ достаточно просто.  Исходные данные для генератора - структура группы, оценки, и списко документов, адаптированных под университет и институт.
 
-    def draw_window(self):
-        self.window.fill((0, 0, 0))
+### Объект, представляющий группу студентов
 
-        for y in range(self.height):
-            for x in range(self.width):
-                square = self.map[y][x]
-                self.window.blit(self.images[square], (x * self.scale, y * self.scale))
+Студенты задаются согласно шаблону: именительный и родительный падеж в виде option-списка (см. раздел "Стандартная библиотека"), пол студента, дата рождения.  Первый аргумент ```el/4``` - идентификатор студента.
 
-        pygame.display.flip()
+```logtalk
+:- object(group_anon,
+   extends(studentGroup(02299-'ДМ'))). % TODO: где этот объект?
 
-if __name__ == "__main__":
-    Sokoban()
+   el(maz, student([nom='Иванова Наталья Александровна',
+                    dat='Ивановой Наталье Александровне'], f, 1987-05-30)).
+   el(kur, student([nom='Петрова Елена Максимовна',
+                    dat='Петровой Елене Максимовне'], f, 1983-12-12)).
+   el(pop, student([nom='Сидоров Николай Петрович',
+                    dat='Сидорову Николаю Петровичу'], m,  1999-09-13)).
+:- end_object.
 ```
 
-Running the program should display a window with the initial state of the game. Let's take a closer look at the code which achieves this.
+База данных оценок по предметам, представляется объектом ```notes/2```.  первый параметр - идентификатор студента, второй - option-список оценок.  Предметы в списке являются ключами и задаются идентификаторами.
 
-## The constructor
+```logtalk
+:- object(notes_anon,
+   implements(notesp)).
 
-The constructor of the class initializes the pygame modules and the essential variables and data structures involved in the game. It also calls the main loop method of the game.
+   notes(kur,
+    [
+        akm-5, is-5,
 
-```python
-    def __init__(self):
-        pygame.init()
-        
-        self.load_images()
-        self.new_game()
-        
-        self.height = len(self.map)
-        self.width = len(self.map[0])
-        self.scale = self.images[0].get_width()
+        fl1-ok, com-4, cmm-4, tpc-ok,
+        iot-4, ddb-5, ml-5, spr-5,
 
-        window_height = self.scale * self.height
-        window_width = self.scale * self.width
-        self.window = pygame.display.set_mode((window_width, window_height))
+        dis-5, sw-4, ssp-5,
 
-        pygame.display.set_caption("Sokoban")
+        ais-5, fl2-ok, rec-5, rnd-ok,
+        nn-5, ds-5, dda-5, kp1-5, ppr-5
+    ]).
+   notes(maz,
+    [
+        akm-5, is-5,
 
-        self.main_loop()
+        fl1-ok, com-5, cmm-5, tpc-ok,
+        iot-5, ddb-5, ml-5, spr-5,
+
+        dis-5, sw-4, ssp-5,
+
+        ais-4, fl2-ok, rec-4, rnd-ok, nn-4,
+        ds-4, dda-4, kp1-5, ppr-5
+    ]).
+   notes(pop,
+    [
+        akm-5, is-5,
+
+        fl1-ok, com-5, cmm-5, tpc-ok,
+        iot-5, ddb-5, ml-5, spr-5,
+
+        dis-5, sw-4, ssp-5,
+
+        ais-5, fl2-ok, rec-5, rnd-ok,
+        nn-5, ds-5, dda-5, kp1-5, ppr-5
+    ]).
+:- end_object.
 ```
 
-The `load_images` method loads the images used in the game into a list named `images`. The `new_game` method creates a two-dimensional list named `map`, which contains the state of the game grid in the beginning of the game.
+### Представление списка документов для генерации
 
-The variables `height` and `width` are initialized based on the dimensions of the game grid. The variable `scale` contains the length of the side of one square in the grid. As each image is a square of the exact same size, the size of all squares is covered by this one variable, and the width of the first image will do just fine for the value. This same value can be used to calculate the width and height of the entire grid, which lets us create a window of the appropriate size to display the game grid.
+Собственно задача - сгенерировать документы для анонимной группы.
 
-## Loading images
+```logtalk
+:- object(documents_anon).
+   :- use_module(library(lists), [member/2]).
+   :- public(gen/0).
+   gen :-
+       % debugger::trace,
+       forall(member(FileName,['doc-anon.tex']), % можно использовать user
+       % forall(member(FileName,[user]),         % для вывода на экран
+              potaninDocuments(latexRenderer(FileName), % в какой формат
+                   notes_anon, group_anon,              % документы
+                   curriculum2023,   % учебный план (здесь предметы описаны)
+                   fal)::gen).
 
-The `load_images` method loads all the images used in the game:
-
-```python
-    def load_images(self):
-        self.images = []
-        for name in ["floor", "wall", "target", "box", "robot", "done", "target_robot"]:
-            self.images.append(pygame.image.load(name + ".png"))
+   :- initialization(gen).  % инициализация
+:- end_object.
 ```
-
-The game makes use of the following images:
-
-### Floor square
-
-<img src="floor.png">
-
-* Filename: `floor.png`
-* Position in list: 0
-
-### Wall square
-
-<img src="wall.png">
-
-* Filename: `wall.png`
-* Position in list: 1
-
-### Target square
-
-<img src="target.png">
-
-* Filename: `target.png`
-* Position in list: 2
-* The robot should move some box to this square
-
-### Box
-
-<img src="box.png">
-
-* Filename: `box.png`
-* Position in list: 3
-
-### Robot
-
-<img src="robot.png">
-
-* Filename: `robot.png`
-* Position in list: 4
-
-### Box on a target square
-
-<img src="done.png">
-
-* Filename: `done.png`
-* Position in list: 5
-* The box has been moved to the target square
-
-### Robot on a target square
-
-<img src="target_robot.png">
-
-* Filename: `target_robot.png`
-* Position in list: 6
-* The robot can also be on an empty target square 
-
-## Creating the grid
-
-The `new_game` method creates the initial state of the game grid:
-
-```python
-    def new_game(self):
-        self.map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],
-                    [1, 2, 3, 0, 0, 0, 1, 0, 0, 1, 2, 3, 0, 0, 0, 0, 1],
-                    [1, 0, 0, 1, 2, 3, 0, 2, 3, 0, 0, 0, 1, 0, 0, 0, 1],
-                    [1, 0, 4, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
-```
-
-The method creates a two.dimensional list named `map` which uses the numbered positions of the images in _their_ list to mark up which image goes where. This way the game contains a record of the state of the game grid at all times.
-
-NB: in the beginning all spaces on the grid contain a number between 0 and 4. The numbers 5 and 6 are not included, as in the beginning no box or robot is on a target square.
-
-## The main loop
-
-The `main_loop` method is rather short. With each iteration it calls two methods: `check_events` goes through any events collected since the previous iteration, and the `draw_window` method updates the contents of the window.
-
-```python
-    def main_loop(self):
-        while True:
-            self.check_events()
-            self.draw_window()
-
-    def check_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
-
-    def draw_window(self):
-        self.window.fill((0, 0, 0))
-
-        for y in range(self.height):
-            for x in range(self.width):
-                square = self.map[y][x]
-                self.window.blit(self.images[square], (x * self.scale, y * self.scale))
-
-        pygame.display.flip()
-```
-
-At this stage the only event actually handled by the game is closing the game window, e.g. from the exit button. The game then exits by calling the Python `exit` function.
-
-Each time `draw_window` method is called the entire game grid is matrix is traversed, and the image corresponding to each square in the grid is drawn in the correct location.
-
-NB: the coordinates x and y are used in two different ways in the game. When dealing with the indexes of a two-dimensional list, it is logical to give the y coordinate first, as the y refers to the number of the row while x is the number of the column. On the other hand, when using pygame methods, x is usually passed first, as it quite often is when dealing with graphics, and also in mathematical contexts.
