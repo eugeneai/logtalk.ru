@@ -1,17 +1,21 @@
 ---
-path: '/part-8/2-objects-as-attributes'
+path: '/part-8/2-adapters'
 title: 'Адаптеры'
 hidden: False
 ---
 
-<text-box variant='learningObjectives' name="Learning objectives">
+<text-box variant='learningObjectives' name="Цель изучения адаптеров">
 
-After this section
+В этом разделе мы разработаем
 
-- You will know how to use objects as attributes in other objects
-- You will be familiar with the keyword `None`
+- Методикку проектирования клмпонент-адапткров
+- Простые механизмы (без использования сложных конструкций) декларации компонент-адаптеров
+- Разработаем компонент для регистрации адаптеров и механизм сцепки клмпонент-адаптеров
 
 </text-box>
+
+В этом разделе изучим *адаптер-ориентаированное* прогаммирование - методика проектаирование сложных программных систем, где функциональные блоки являются строго компонентами, и эти компоненты подстраиваются под интерфейсы друг друга при помощи адаптеров.  Механизм схож с тем, как электроприборы с китайскими плоскими вилками мы втыкаем в евророзетки при помощи специальных переходников. 
+
 
 We have already seen examples of classes which have lists as attributes. As there is thus nothing stopping us from including mutable objects as attributes in our classes, we might as well use instances of our own classes as attributes in other classes we've defined ourselves. In the following examples we will define the classes `Course`, `Student` and `CompletedCourse`. A completed course makes use of the first two classes. The class definitions are very short and simple in order to better concentrate on the technique of using instances of our own classes as attributes.
 
