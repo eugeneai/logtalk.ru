@@ -146,7 +146,14 @@ hidden: false
 
     % предикаты, видимые во всех классах
 
+    :- public(new/1).
+
+    new(Object) :-
+       self(Self),
+       create_object(Object, [instantiates(Self)], [], []).
+
 :- end_object.
+
 
 % восстанавливаем механизм отслеживания неизвестных объектов
 :- set_logtalk_flag(unknown_entities, warning).
@@ -161,6 +168,29 @@ hidden: false
     specializes(abstract_class)).
 
     % предикаты, видимые во всех экземплярах
+    :- public(implements_protocol/1).
+    implements_protocol(Proto):-
+       self(Instance),
+       current_object(Instance), % Не нужен
+       implements_protocol(Instance, Proto), !.
+    implements_protocol(Proto):-
+       self(Instance),
+       current_object(Instance), % Не нужен
+       instantiates_class(Instance, Class),
+       ci_implements_protocol(Class, Proto), !.
+    implements_protocol(Proto):-
+       self(Self),
+       format(atom(Message),
+          'is not an object or it does not implement ~q protocol', [Proto]),
+       throw(exception(
+          domain_error(object, Self),
+          context(Self, Message))).
+
+    ci_implements_protocol(Class, Proto) :-
+       implements_protocol(Class, Proto), !.
+    ci_implements_protocol(Class, Proto) :-
+       specializes_class(Class, SuperClass),
+       ci_implements_protocol(SuperClass, Proto).
 
 :- end_object.
 ```
@@ -170,7 +200,7 @@ hidden: false
 ```logtalk
 :- object(file(_Name_, _Size_),
    implements(file_p),
-   instantiates(class),
+   specializes(class),
    instantiates(abstract_class)).
 
    name(_Name_).
@@ -195,5 +225,85 @@ Size = 100.
 
 </sample-output>
 
-
 Все отлично работает.
+
+### Реализация каталога
+
+```logtalk
+:- object(catalog(_Name_),
+   implements(catalog_p),
+   specializes(class),
+   instantiates(abstract_class)).
+
+   :- protected(file_/1).
+   :- dynamic(file_/1).
+
+   name(_Name_).
+
+   :- use_module(library(apply), [foldl/4]).
+
+   size(Size) :-
+      findall(S,
+         (::file(File),
+          File::size(S)),
+         L),
+      foldl(plus, L, 0, Size).
+
+   add(File) :-
+      (::file(File) -> fail;
+       File::implements_protocol(file_p),
+       % \+ self(File),  % Не добавлять самого себя
+       ::assertz(file_(File))).
+
+   remove(File) :-
+      (::file(File) -> ::retract(file_(File));
+       fail).
+
+   file(File) :-
+      ::file_(File).
+
+:- end_object.
+```
+
+## Тестирование компонент
+
+Проведем серию тестов, посмотрим правильно ли функционирует наша система компонент. Сначала проведем функциональные тесты: создадим экземпляры файлов и каталогов, добавим файлы в каталоги, один каталог в другой.  В процессе будем также наблюдать, как меняется размер каталога (суммарный размер составляющих элементов).
+
+<sample-output>
+
+?- *catalog(main)::new(Cat), file('autoexec.bat', 400)::new(File), Cat::add(File).*
+Cat = o1,
+File = o2.
+
+?- *catalog(main)::new(Cat), file('autoexec.bat', 400)::new(File), Cat::add(File).*
+Cat = o3,
+File = o4.
+
+?- *o1::add(o4).*
+true.
+
+?- *o1::size(S).*
+S = 800.
+
+?- *o1::add(o3).*
+true.
+
+?- *o1::size(S).*
+S = 1200.
+
+?- *o1::file(File).*
+File = o2 *;*
+File = o4 *;*
+File = o3.
+
+</sample-output>
+
+Несколько неудобно использовать синтетические названия объектов ```oX/0```.  Предикат ```create_object/4``` можно настроить, чтоб он определенным образом синтезировал названия для новых объектов.
+
+Теперь проверим можно ли добавить объект "со стороны", объект, который не реализует протокол ```file_p```.
+
+<sample-output>
+
+
+
+</sample-output>
