@@ -6,6 +6,11 @@
        argnames is ['Identifier', 'Outcome', 'Options', 'TestGoal']
    ]).
 
+   :- public(run_tests/1).
+   :- mode(run_tests(+list(atom)), one).
+   :- info(run_tests/1, [
+      comment is 'Runs specific tests by name',
+      argnames is ['TestNames']
    :- meta_predicate(test(*,*,*,0)).
 
    :- public(run/0).
@@ -13,6 +18,13 @@
    :- info(run/0, [
       comment is 'Runs the unit tests, succeeds always and set total success flag.'
    ]).
+
+   :- public(test_count/3).
+   :- mode(test_count(-integer, -integer, -integer), one).
+   :- info(test_count/1, [
+      comment is 'Returns counts of success, failure, skipped tests',
+      argnames is ['Success', 'Failure', 'Skipped']
+   ).
 
    :- public(test_name/1).
    :- mode(test_name(-atom), one).
@@ -43,13 +55,46 @@
        ),
        ::debug(5,'Завершение набора тестов \'~w\'' + [TestName]).
 
+   :- public(run_tests/1).
+   run_tests(TestNames) :-
+       ::clear_results,
+       ::test_name(TestName),
+       ::debug(5,'Начало выполнения выбранных тестов \'~w\'' + [TestName]),
+       forall(
+           (::test(Name, Outcome, Options, Goal), member(Name, TestNames)),
+           process_env(Name, Outcome, Options, Goal)
+       ),
+       ::debug(5,'Завершение выбранных тестов \'~w\'' + [TestName]).
 
-   :- protected(process_env/4).
+   :- public(test_count/3).
+   test_count(Success, Failure, Skipped) :-
+       self(Self),
+       findall(_, ::test_result(Self, _, success), SuccessList),
+       findall(_, ::test_result(Self, _, failure), FailureList),
+       findall(_, ::test_result(Self, _, skipped), SkippedList),
+       length(SuccessList, Success),
+       length(FailureList, Failure),
+       length(SkippedList, Skipped).
+
+   :- protected(validate_test_options/2).
+   validate_test_options(Name, Options) :-
+       ^^option(each_test_name(_), Options), !,
+       (   ^^option(each_explain(_), Options)
+       ;   ^^option(each_condition(_), Options)
+       ->  true
+       ;   ::error("Тест '~w' с each_test_name требует each_explain или each_condition" + [Name])
+       ).
+
+   validate_test_options(_, _).
+
+    :- protected(process_env/4).
    process_env(Name-debug, Outcome, Options, Goal) :-
       debugger::trace,
       process_env(Name, Outcome, Options, Goal).
 
+   % Модифицировать process_env для валидации
    process_env(Name, Outcome, Options, Goal) :-
+      ::validate_test_options(Name, Options),
       self(Self),
       ( ::debug(10,'Начало теста \'~w\'' + [Name]),
            (^^option(trace(start), Options) -> ::info('debug\n'), debugger::trace ; true),
@@ -81,6 +126,13 @@
    worst_result(skipped, _, skipped).
    worst_result(_, skipped, skipped).
    worst_result(_, _, success).
+   
+:- protected(print_statistics/0).
+   print_statistics :-
+       ::test_count(Success, Failure, Skipped),
+       Total is Success + Failure + Skipped,
+       ::info("Статистика: ~w успешно, ~w провалено, ~w пропущено, всего ~w" +
+              [Success, Failure, Skipped, Total]).
 
 
    :- protected(process/5).
@@ -192,6 +244,11 @@
       ( call(Goal); true ).
 
    options_after(_, _).
+   
+% Расширить options_final для вывода статистики
+   options_final(Options, _):-
+       ^^option(statistics, Options), !,
+       ::print_statistics.
 
    options_final(Options, _):-
       ^^option(note(Atom), Options),

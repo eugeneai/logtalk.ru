@@ -7,52 +7,71 @@
         autor is 'Evgeny Cherkashin',
         date is 2024-12-22,
         comment is 'A student test case unit test framework'
+
+   :- public(print/1).
+   :- mode(print(+list(atom)), one).
+   :- info(print/1, [
+        comment is "Print results for specific tests",
+        argnames is ['TestNames']
       ]).
+   print(TestNames) :-
+       ::test_name(TaskName),
+       forall(
+           member(Name, TestNames),
+           (   ::test_result(Self, Name, Result),
+               format("~w: ~w - ~w~n", [TaskName, Name, Result])
+           )
+       ).
 
-   % :- public(print/1).
-   % :- mode(print(+integer), one).
-   % :- info(print/1, [
-   %      comment is "Print scores as 1's and 0's colored.",
-   %      argnames is ['NumberOfTests']
-   %    ]).
+   :- public(run_selected/1).
+   :- mode(run_selected(+list(atom)), one).
+   run_selected(TestNames) :-
+       ::run_tests(TestNames),
+       ::print(TestNames).
 
-   % print(MaxNum) :-
-   %     nl,
-   %     forall(between(1,MaxNum, V),
-   %        (N is V div 10,
-   %           (N == 0 -> write(' ') ; write(N)))),
-   %     nl,
-   %     forall(between(1,MaxNum, V),
-   %        (N is V mod 10, write(N))),
-   %     nl,
-   %     forall(between(1,MaxNum, V),
-   %        (score_(V, 1) -> write('\e[1;32m1\e[0m'); write('\e[1;31m0\e[0m'))),
-   %     nl.
+   :- public(export_results/1).
+   :- mode(export_results(+atom), one).
+   export_results(Filename) :-
+       open(Filename, write, Stream),
+       self(Self),
+       forall(
+           ::test_result(Self, Name, Result),
+           format(Stream, "test_result(~q, ~q, ~q).~n", [Self, Name, Result])
+       ),
+       close(Stream).
 
-   :- public(print/0).
-   :- mode(print, zero_or_one).
-   :- info(print/0, [
-        comment is "Print scores as 1's and 0's colored green and red.",
-        argnames is []
-      ]).
-   print :-
-      ::test_name(TaskName),!,
-      (
-        ::has_failed -> ::error("Задача '~w' не решена.\n" - [TaskName]);
-        ::has_skipped-> ::error("Часть тестов задачи '~w' пропущено.\n" - [TaskName]);
-        ::info("Задача '~w' решена!\n" - [TaskName])
+   :- public(import_results/1).
+   :- mode(import_results(+atom), one).
+   import_results(Filename) :-
+       open(Filename, read, Stream),
+       repeat,
+           read_term(Stream, Term, []),
+           (   Term == end_of_file
+           ->  !, close(Stream)
+           ;   assertz(Term),
+               fail
       ).
 
    :- protected(test_type/1).
    test_type(test).  % or test_type(problem)
 
+   % Улучшенный метод run с дополнительными опциями
    run :-
+       ::clear_results,
       ^^run,
       (::test_type(problem) -> ::print;
        ::test_type(problem_set) ->
           ::print,
+           ::print_statistics,
           ::info("Тестирование закончено.\n")
           ; true).
+
+   % Альтернативный метод ok с параметрами
+   :- public(ok/1).
+   :- mode(ok(+list(atom)), one).
+   ok(TestNames) :-
+       ::run_tests(TestNames),
+       \+ ::has_failed.
 
    :- public(ok/0).
    ok :-
@@ -85,6 +104,47 @@
         [_O_]))],
        ( current_object(_O_) )
    ).
+
+:- end_category.
+
+% Новые вспомогательные категории
+:- category(test_conditions_c,
+   implements(testing_p)).
+
+   :- protected(check_condition/1).
+   check_condition(requires(object_exists, Object)) :-
+       current_object(Object).
+   check_condition(requires(predicate_defined, Object::Predicate)) :-
+       functor(Predicate, Name, Arity),
+       current_predicate(Object::Name/Arity).
+   check_condition(requires(extends, Child-Parent)) :-
+       extends_object(Child, Parent).
+   check_condition(requires(implements, Object-Protocol)) :-
+       implements_protocol(Object, Protocol).
+
+:- end_category.
+
+:- category(test_utilities_c,
+   implements(testing_p)).
+
+   :- protected(assert_equals/2).
+   assert_equals(Expected, Actual) :-
+       Expected == Actual.
+
+   :- protected(assert_not_equals/2).
+   assert_not_equals(Expected, Actual) :-
+       Expected \== Actual.
+
+   :- protected(assert_fails/1).
+   :- meta_predicate(assert_fails(0)).
+   assert_fails(Goal) :-
+       \+ call(Goal).
+
+   :- protected(assert_throws/2).
+   :- meta_predicate(assert_throws(*, 0)).
+   assert_throws(ExpectedError, Goal) :-
+       catch(Goal, Error, true),
+       subsumes_term(ExpectedError, Error).
 
 :- end_category.
 
