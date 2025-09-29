@@ -623,6 +623,85 @@
 
 :- end_object.
 
+
+:- object(test_problem_12(_Factory_),
+   extends(studyunit),
+   imports(object_exists_and_predicates_c(
+     _Factory_, [create_cat/1 - public, create_dog/1 - public, list_animals/0 - public]))).
+
+   test_name("Задача 12").
+   test_type(problem).
+
+   test(A,B,C,D) :- ^^test(A,B,C,D).
+
+   setup :-
+        % Очищаем состояние перед каждым тестом
+        catch(_Factory_::retractall(animal(_,_)), _, true).
+
+   test(create_cat_works, true,
+        [condition(success(basic_predicates_defined)),
+         setup,
+         explain(::error("Метод create_cat/1 в объекте '~w' не создает кошку правильно" + [_Factory_]))],
+        (
+            _Factory_::create_cat(murka),
+            catch(_Factory_::animal(cat, murka), error(existence_error(procedure, _), _), fail)
+        )).
+
+   test(create_dog_works, true,
+        [condition(success(basic_predicates_defined)),
+         setup,
+         explain(::error("Метод create_dog/1 в объекте '~w' не создает собаку правильно" + [_Factory_]))],
+        (
+            _Factory_::create_dog(sharik),
+            catch(_Factory_::animal(dog, sharik), error(existence_error(procedure, _), _), fail)
+        )).
+
+   test(list_animals_shows_cats_and_dogs, true,
+        [condition(success(basic_predicates_defined)),
+         setup,
+         explain(::error("Метод list_animals/0 в объекте '~w' не выводит всех животных правильно" + [_Factory_]))],
+        (
+            _Factory_::create_cat(murka),
+            _Factory_::create_dog(sharik),
+            _Factory_::create_cat(barsik),
+            with_output_to(
+                string(Output),
+                _Factory_::list_animals()
+            ),
+            % Проверяем, что вывод содержит всех животных
+            sub_string(Output, _, _, _, "murka"),
+            sub_string(Output, _, _, _, "sharik"),
+            sub_string(Output, _, _, _, "barsik")
+        )).
+
+   test(list_animals_shows_correct_format, true,
+        [condition(success(basic_predicates_defined)),
+         setup,
+         explain(::error("Метод list_animals/0 в объекте '~w' не использует правильный формат вывода" + [_Factory_]))],
+        (
+            _Factory_::create_cat(murka),
+            _Factory_::create_dog(sharik),
+            with_output_to(
+                string(Output),
+                _Factory_::list_animals()
+            ),
+            % Проверяем формат "cat: murka" и "dog: sharik"
+            (sub_string(Output, _, _, _, "cat: murka") ; sub_string(Output, _, _, _, "dog: sharik"))
+        )).
+
+   test(animals_are_stored_separately, true,
+        [condition(success(basic_predicates_defined)),
+         setup,
+         explain(::error("Животные разных типов не различаются в объекте '~w'" + [_Factory_]))],
+        (
+            _Factory_::create_cat(murka),
+            _Factory_::create_dog(murka), % Такое же имя, но другой тип
+            catch(_Factory_::animal(cat, murka), error(existence_error(procedure, _), _), fail),
+            catch(_Factory_::animal(dog, murka), error(existence_error(procedure, _), _), fail)
+        )).
+
+:- end_object.
+
 :- object(tests,
    extends(studyunit)).
 
@@ -672,5 +751,9 @@
    test(11-door_lock_test, true,
        [],
        test_problem_11(door_lock, my_door_lock)::ok).
+
+   test(12-animal_factory_works, true,
+       [],
+       test_problem_12(animal_factory)::ok).
 
 :- end_object.
