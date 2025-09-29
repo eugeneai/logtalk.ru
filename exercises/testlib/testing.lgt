@@ -126,14 +126,13 @@
    worst_result(skipped, _, skipped).
    worst_result(_, skipped, skipped).
    worst_result(_, _, success).
-   
-:- protected(print_statistics/0).
+
+	:- protected(print_statistics/0).
    print_statistics :-
        ::test_count(Success, Failure, Skipped),
        Total is Success + Failure + Skipped,
        ::info("Статистика: ~w успешно, ~w провалено, ~w пропущено, всего ~w" +
               [Success, Failure, Skipped, Total]).
-
 
    :- protected(process/5).
    :- meta_predicate(process(*, *, *, 0, *)).
@@ -244,8 +243,8 @@
       ( call(Goal); true ).
 
    options_after(_, _).
-   
-% Расширить options_final для вывода статистики
+
+	% Расширить options_final для вывода статистики
    options_final(Options, _):-
        ^^option(statistics, Options), !,
        ::print_statistics.
@@ -397,7 +396,7 @@
    check_string(S) :-
       string(S),!.
    check_string(_) :-
-      ::error("Argument is not a string" + []),
+      ::error("Аргумент не является строкой" + []),
       halt.
 
    :- protected(debug_level/1).
