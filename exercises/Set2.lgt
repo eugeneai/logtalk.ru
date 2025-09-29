@@ -54,45 +54,38 @@
 
    :- use_module(library(lists), [member/2]).
 
-   query('Movie with Susan Bones', [MovieName]) :-
-      ::char('Susan Bones', Series),
-      member(Movie, Series),
-      ::movie(MovieName, Movie, _).
-
-   query('Movie without Susan Bones', [MovieName]) :-
-      % debugger::trace,
-      ::char('Susan Bones', Series),
-      ::movie(MovieName, Movie, _),
-      \+ member(Movie, Series).
-
    % В окончательных вариантах реализации запросов строку
    % to_be_done(....). надо убрать.
 
+   query('Movie with Susan Bones', [MovieName]) :-
+      % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+      % Найти фильм, в котором снималась Susan Bones
+      to_be_done('Movie with Susan Bones').
+
+   query('Movie without Susan Bones', [MovieName]) :-
+      % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+      % Найти фильм, в котором НЕ снималась Susan Bones
+      to_be_done('Movie without Susan Bones').
+
    query('Character having common series', [Char1, Char2]):-
-      ::char(Char1, Movies),
-      ::char(Char2, Movies),
-      Char1 \= Char2.
-      % to_be_done('Персонажи, появляющиеся в одних и тех же фильмах').
+      % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+      % Найти двух персонажей, которые снимались в одних и тех же фильмах
+      to_be_done('Персонажи, появляющиеся в одних и тех же фильмах').
 
    query('Movie having a character', [MovieName, Char]):-
-      ::char(Char, Movies),
-      member(Movie, Movies),
-      ::movie(MovieName, Movie, _).
-      % to_be_done('В Фильме присутствует Персонаж').
+      % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+      % Найти фильм и персонажа, который в нем снимался
+      to_be_done('В Фильме присутствует Персонаж').
 
    query('Character appearing only in one Movie', [Char, MovieName]) :-
-      ::char(Char, [Movie]),
-      ::movie(MovieName, Movie, _).
-      %to_be_done('Персонаж, присутствующий только в одном фильме').
+      % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+      % Найти персонажа, который снимался только в одном фильме
+      to_be_done('Персонаж, присутствующий только в одном фильме').
 
    query('Character filmed in a Movie without Dudley Dursley', [Char, MovieName]) :-
-      ::char('Dudley Dursley', MoviesD),
-      ::char(Char, MoviesC),
-      member(M, MoviesC),
-      \+ member(M, MoviesD),
-      ::movie(MovieName, M, _).
-      %to_be_done('Персонаж Фильма, в котором не появлдяется Dudley Dursley').
-
+      % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+      % Найти персонажа и фильм, в котором НЕ снимался Dudley Dursley
+      to_be_done('Персонаж Фильма, в котором не появляется Dudley Dursley').
 
    % Вспомогательный метод для вывода/отладки запросов
    :- public(print/1).
@@ -117,19 +110,12 @@
 % герой-актер."
 
 :- object(harry_potter_movie).
-   :- protected(cast/2).
-   :- dynamic(cast/2).
 
-   cast('Harry Potter', 'Daniel Radcliffe').
-   cast('Dudley Dursley', 'Harry Melling').
-
-   :- public(add/2).
-   add(A, B) :-
-      assertz(cast(A, B)).
-
-   :- public(remove/2).
-   remove(A, B) :-
-      retractall(cast(A, B)).
+   % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+   % Объявите protected dynamic cast/2
+   % Добавьте начальные факты про Harry Potter и Dudley Dursley
+   % Реализуйте add/2 для добавления новых ролей
+   % Реализуйте remove/2 для удаления ролей
 
 :- end_object.
 
@@ -184,7 +170,7 @@
 % add/1 - получает слово (например, car) и добавляет его
 % в частотный словарь, т.е., увеличивает на 1 количество
 % слов 'car' в словаре.
-% list(Word, Number) - показвыает какое количество соответствует
+% list(Word, Number) - показывает какое количество соответствует
 % слову Word.
 % print/0 - печатает словарь на экран.
 % Порядок следования слов в базе данных не важно, как
@@ -193,22 +179,11 @@
 :- object(freq_dict).
    :- public([add/1, list/2, print/0]).
 
-   :- private(word/2).
-   :- dynamic(word/2).
-
-   add(X):-
-      retract(word(X, N)), !,
-      N1 is N+1,
-      assertz(word(X, N1)).
-   add(X):-
-      assertz(word(X, 1)).
-
-   list(W, N):-
-      word(W, N).
-
-   print:-
-      forall(::list(W,N),
-        format('~q - ~q\n', [W, N])).
+   % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+   % Объявите private dynamic word/2
+   % Реализуйте add/1 - добавляет слово или увеличивает счетчик
+   % Реализуйте list/2 - показывает частоту слова
+   % Реализуйте print/0 - выводит весь словарь
 
 :- end_object.
 
@@ -227,21 +202,11 @@
 % Ряд Фибоначчи: 1, 1, 2, 3, 5, 8, ... A, B,   A+B, ...
 %             n: 1, 2, 3, 4, 5, 6, ... n, n+1, n+2, ...
 
-
 :- object(fibonacci).
   :- public(calc/2).
 
-  calc(1, 1) :- !.
-  calc(2, 1) :- !.
-  calc(N, V) :-
-    integer(N), N > 0, !,
-    N1 is N-1,
-    N2 is N-2,
-    calc(N1, V1),
-    calc(N2, V2),
-    V is V1+V2.
-  calc(N, _) :-
-    domain_error(positive_integer, N).
+   % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+   % Реализуйте рекурсивный алгоритм вычисления чисел Фибоначчи
 
 :- end_object.
 
@@ -257,14 +222,9 @@
 :- object(fibonacci_cached,
   extends(fibonacci)).
 
-  :- protected(cache/2).
-  :- dynamic(cache/2).
-
-  calc(N, M) :-
-     cache(N, M), !.
-  calc(N, M) :-
-     ^^calc(N, M),
-     assertz(cache(N, M)).
+   % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+   % Объявите protected dynamic cache/2
+   % Переопределите calc/2 для использования кэша
 
 :- end_object.
 
@@ -296,34 +256,18 @@
 % Усложнение задания: Сделать, чтобы поддерживался
 % современный стандарт <Name>(<Value>) без изменения
 % формата хранения настроек в локальной базе данных.
+% Требования:
+% * опции задаются внутри объекта-наследника или через set_option
+% * получение значений настроек - предикаты current_option/1, current_option/2
+% * поддерживать форматы: Name(Value), Name=Value, Name-Value
 
 :- object(setup).
+   :- public([set_option/1, set_option/2, current_option/1, current_option/2]).
 
-  :- protected([option/2, option/1]).
-  :- public([current_option/2, current_option/1]).
-  :- protected([option_/1]).
-  :- dynamic([option_/1]).
-
-  set_option(Name=Value) :-
-    validate_option(Name, Value),
-    retractall(option_(Name=Value)),
-    assertz(option_(Name=Value)).
-  set_option(Name-Value) :-
-    set_option(Name=Value).
-  set_option(Name, Value) :-
-    ::option(Name=Value).
-
-  current_option(Name=Value) :-
-    option_(Name=Value).
-  current_option(Name-Value) :-
-    option_(Name=Value).
-  current_option(Name,Value) :-
-    option_(Name=Value).
-
-  :- private(validate_option/2).
-  validate_option(Name, Value) :-
-    atom(Name),
-    ground(Value).
+   % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+   % Объявите protected dynamic option_/1
+   % Реализуйте set_option для различных форматов
+   % Реализуйте current_option для различных форматов
 
 :- end_object.
 
@@ -346,7 +290,7 @@
 :- end_object.
 
 % -----------------------------------------------------
-% Упражнение 7: Сейчас разработаем программу - самообучающуюся
+% Упражнение 7: Разработаем программу - самообучающуюся
 % "экспертную" систему ЭС.
 % 1. В самом начале экспертная система знает только "Зайка".
 % 2. Пользователь загадывает предмет/объект/героя мультика
@@ -367,18 +311,12 @@
   :- public(session/0).
   :- protected(session/1).
 
-  :- private(node/3).
-  :- dynamic(node/3).
+   :- private([node/3, leave/1, root/1]).
+   :- dynamic([node/3, leave/1, root/1]).
 
   % node(нет-поддерево, вопрос, да-поддерево).
 
-  :- private(leave/1).
-  :- dynamic(leave/1).
-
   % leave(ответ_ЭС).
-
-  :- private(root/1).
-  :- dynamic(root/1).
 
   % root(корневой вопрос или ответ).
 
@@ -421,7 +359,6 @@
      read_line_to_string(user_input, S),
      atom_string(Answer,S).
 
-
   update(yes, _).
   update(no, Name) :-
      format("Тогда что это?: ", []),
@@ -430,34 +367,20 @@
      get_answer(Question),
      update(Name, What, Question).
 
-  % Реализуйте update/3 здесь.
+  % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+  % Реализуйте update/3 для обучения системы
   % Name - это имя листовго узла, предположение ЭС
   % What - это имя нового листового узла,
   %        нечто, задуманное пользователем.
   % Question - это утверждение отличающее What от
   %        Name.
-  % Требуется:
-  %        1. перенаправить существующий узел, приводящий
-  %        ЭС к Name, таким, образом, чтоб он приводил
-  %        в Question.
-  %        2. Создать лист для What.
-  %        3. Создать узел объединяющий
-  %           Name, Question, What.
-  %        4. Если надо, обновить root/1 - корень дерева
-  %           ЭС.
+
   update(Name, What, Question) :-
-     (root(Name) ->
-       retractall(root(Name)),
-       assertz(root(Question)) ; true),
-     (node(Name, PQ1, Yes) ->
-        retractall(node(Name, PQ1, Yes)),
-        assertz(node(Question, PQ1, Yes));
-      node(No, PQ2, Name) ->
-        retractall(node(No, PQ2, Name)),
-        assertz(node(No, PQ2, Question));
-      true),
-     assertz(node(Name, Question, What)),
-     assertz(leave(What)).
+      % 1. Перенаправить существующий узел
+      % 2. Создать лист для What
+      % 3. Создать узел объединяющий Name, Question, What
+      % 4. Обновить root если нужно
+      format('Требуется реализовать обучение системы!~n').
 
   :- public(print/0).
   :- info(print/0, [
@@ -474,15 +397,16 @@
     forall( leave(Name),
       format('leave(~q).\n',[Name]) ).
 
+% Распечатка списка узлов ЭС из командной строки logtalk
 % forall(expert_system<<node(N, Q, Y), format("node(~q,~q,~q).\n", [N, Q, Y])).
 
 :- end_object.
 
 % -----------------------------------------------------
 % Упражнение 8: Программирование при помощи типовых
-% конфигураций. Задача вычисления набольшего общего делителя.
-% Алгоритм Евклида -
-% 1. Нати два числа X и Y, таких, что X > Y.
+% конфигураций. Задача вычисления наибольшего общего делителя.
+% Алгоритм Евклида:
+% 1. Найти два числа X и Y, таких, что X > Y.
 % 2. Заменить большее на разность большего и меньшего.
 % В противном случае распечатать число.
 % Перед началом работы необходимо инициализировать базу чисел:
@@ -494,16 +418,9 @@
    :- protected(number/1).
    :- dynamic(number/1).
 
-   % Правило, выполняющее вычитание.
-   rule(subtract) :-
-      number(X), number(Y), X>Y, !,
-      X1 is X-Y,
-      retract(number(X)),
-      assertz(number(X1)).
-
-   rule(print) :-  % При условии, что все числа одинаковые.
-      ::number(X), !,
-      format('Наибольший общий делитель: ~w\n.', [X]).
+   % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+   % Реализуйте правило subtract для вычитания
+   % Реализуйте правило print для вывода результата
 
    :- public(run/0).
    run :-
@@ -516,6 +433,14 @@
 
 % -----------------------------------------------------
 % Упражнение 9: Редуктор простых выражений
+% (задание будет добавлено в следующей версии)
+
+:- object(expression_reducer).
+   :- public(reduce/2).
+
+   % ЗАДАНИЕ БУДЕТ ДОБАВЛЕНО
+
+:- end_object.
 
 % -----------------------------------------------------
 % Упражнение 10: Построение остового дерева минимальной
@@ -564,15 +489,8 @@
    edge(d, e, 15).
 
    :- public(arc/3).
-   :- mode(arc(?atom, ?atom, ?number), zero_or_more).
-   :- info(arc/3, [
-      comment is "Public-интерфейс к дугам графа",
-      argnames is ['Vertex', 'Vertex', 'Cost']
-   ]).
-
    arc(A,B,C) :-
       edge(A,B,C).
-
    arc(A,B,C) :-
       edge(B,A,C).
 
@@ -583,67 +501,16 @@
 
    :- protected(edge/2).
    :- dynamic(edge/2).
-   :- mode(edge(+atom, +atom), zero_or_more).
-   :- info(edge/2, [
-      comment is "Ребро остового дерева. Редро соответствует graph::arc/3.",
-      argnames is ['Vertex', 'Vertex']
-   ]).
 
-   :- public(add/2).
-   :- mode(add(+atom, +atom), one).
-   :- info(add/2, [
-      comment is "Добавляет ребро в дерево",
-      argnames is ['Vertex', 'Vertex']
-   ]).
+   :- public([add/2, add/1, build/0, clear_db/0]).
 
-   add(A, B) :-
-      assertz(edge(A,B)).
+   % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
+   % Реализуйте add/2 для добавления ребра в дерево
+   % Реализуйте add/1 для добавления вершины
+   % Реализуйте build/0 для построения остового дерева
+   % Реализуйте clear_db/0 для очистки базы данных
 
-   :- public(add/1).
-   :- mode(add(+atom), one).
-   :- info(add/1, [
-      comment is "Добавляет вершину в список вершин остового дерева",
-      argnames is ['Vertex']
-   ]).
-
-   add(A) :-
-      assertz(vertex(A)).
-
-   % Ваша реализация add/2.
-   :- public(build/0).
-   :- info(build/0, [
-      comment is 'Процедура построения остового дерева'
-   ]).
-
-   % Ваша реализация build/0. Можно добавлять свои предикаты,
-   % динамические факты и т.д.
    :- private(vertex/1).
    :- dynamic(vertex/1).
-
-   init :-
-      ::arc(A,_,_),
-      assertz(vertex(A)).
-
-   build :-
-      init,
-      bt.
-
-   bt :-
-      findall(C-e(V, B),
-         (  vertex(V),
-            ::arc(V, B, C),
-            \+ vertex(B)
-         ), KeyList),
-      ( KeyList \= []
-      ->
-        keysort(KeyList, [_Least-(V1, V2)]),
-        add(V1, V2),
-        add(V2)
-      ; true ).
-
-   :- public(clear_db/0).
-   clear_db:-
-      retractall(vertex(_)),
-      retractall(edge(_,_)).
 
 :- end_object.
