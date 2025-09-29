@@ -110,6 +110,11 @@
 % динамический метод cast/2 и реализовать public-методы
 % add/2 и remove/2, таким образом, чтобы сработал тест
 % (второй объект).
+% Методы add/2 и remove/2 используются для управления
+% базой данных актеров. add(Character, Actor) должен
+% добавлять или заменять существующую запись.
+% remove(Character, Actor) должен удалять конкретную пару
+% герой-актер."
 
 :- object(harry_potter_movie).
    :- protected(cast/2).
@@ -229,11 +234,14 @@
   calc(1, 1) :- !.
   calc(2, 1) :- !.
   calc(N, V) :-
+    integer(N), N > 0, !,
     N1 is N-1,
     N2 is N-2,
     calc(N1, V1),
     calc(N2, V2),
     V is V1+V2.
+  calc(N, _) :-
+    domain_error(positive_integer, N).
 
 :- end_object.
 
@@ -297,6 +305,7 @@
   :- dynamic([option_/1]).
 
   set_option(Name=Value) :-
+    validate_option(Name, Value),
     retractall(option_(Name=Value)),
     assertz(option_(Name=Value)).
   set_option(Name-Value) :-
@@ -310,6 +319,11 @@
     option_(Name=Value).
   current_option(Name,Value) :-
     option_(Name=Value).
+
+  :- private(validate_option/2).
+  validate_option(Name, Value) :-
+    atom(Name),
+    ground(Value).
 
 :- end_object.
 
@@ -471,6 +485,10 @@
 % 1. Нати два числа X и Y, таких, что X > Y.
 % 2. Заменить большее на разность большего и меньшего.
 % В противном случае распечатать число.
+% Перед началом работы необходимо инициализировать базу чисел:
+% gcd::assertz(number(42)), gcd::assertz(number(56)).
+% Реализуйте правило subtract, которое находит два различных числа
+% и заменяет большее на их разность.
 
 :- object(gcd).
    :- protected(number/1).
