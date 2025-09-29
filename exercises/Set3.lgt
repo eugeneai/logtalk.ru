@@ -103,38 +103,48 @@
 :- object(figures,
    implements(parameter_p)).
 
+   :- private([circle/1, rectangle/2, square/1]).
+   :- dynamic([circle/1, rectangle/2, square/1]).
+
    circle(2).
    circle(3).
-
    rectangle(2,4).
    rectangle(4,5).
-
    square(2).
    square(8).
 
-   area(Sq) :-
-      findall(S, {circle(_)}::area(S), Sc),
-      findall(S, {rectangle(_,_)}::area(S), Sr),
-      findall(S, {square(_)}::area(S), Ss),
-      sum_list(Sc, S1), sum_list(Sr, S2),
-      sum_list(Ss, S3),
-      Sq is S1 + S2 + S3.
+   :- public(add_circle/1).
+   add_circle(R) :- assertz(circle(R)).
 
-   perimeter(Sq) :-
-      findall(S, {circle(_)}::perimeter(S), Sc),
-      findall(S, {rectangle(_,_)}::perimeter(S), Sr),
-      findall(S, {square(_)}::perimeter(S), Ss),
-      sum_list(Sc, S1), sum_list(Sr, S2),
-      sum_list(Ss, S3),
-      Sq is S1 + S2 + S3.
+   :- public(add_rectangle/2).
+   add_rectangle(W, H) :- assertz(rectangle(W, H)).
 
-   sum_list([],0).
-   sum_list([X|T], S) :-
-      sum_list(T, S1),
-      S ia S1 + X.
+   :- public(add_square/1).
+   add_square(S) :- assertz(square(S)).
+
+   area(Total) :-
+      findall(Area, (
+          (circle(R), {circle(R)}::area(Area));
+          (rectangle(W, H), {rectangle(W, H)}::area(Area));
+          (square(S), {square(S)}::area(Area))
+      ), Areas),
+      sum_list(Areas, Total).
+
+   perimeter(Total) :-
+      findall(Per, (
+          (circle(R), {circle(R)}::perimeter(Per));
+          (rectangle(W, H), {rectangle(W, H)}::perimeter(Per));
+          (square(S), {square(S)}::perimeter(Per))
+      ), Pers),
+      sum_list(Pers, Total).
+
+   :- private(sum_list/2).
+   sum_list([], 0).
+   sum_list([X|T], Sum) :-
+      sum_list(T, Rest),
+      Sum is X + Rest.
 
 :- end_object.
-
 % -----------------------------------------------------
 % Упражнение 5: Конечный детерминированный автомат.
 % Надо разработать абстрактный параметрический объект - конечный
@@ -175,20 +185,122 @@
 :- end_object.
 
 % -----------------------------------------------------
-% Упражнение 6: Программирование конкретного автомата
-% Мили (mealy)
-% Автомат, принимающий число с плавающей запятой
-% в инженерном формате
+% Упражнение 6: Программирование конкретного автомата Мили
+% Автомат, принимающий число с плавающей запятой в инженерном формате
+% Формат: [+-]?[0-9]+(\.[0-9]*)?([eE][+-]?[0-9]+)?
 
+:- object(float_automaton(_Initial_),
+   extends(automaton(_Initial_))).
+
+   :- protected(q/4).
+
+   % Состояния: start, integer, fraction, exponent, exponent_sign, exponent_digit, accept
+   q(start, Char, integer, '') :-
+      char_type(Char, digit).
+   q(start, '+', start, '').
+   q(start, '-', start, '').
+
+   q(integer, Char, integer, Char) :-
+      char_type(Char, digit).
+   q(integer, '.', fraction, '.').
+   q(integer, 'e', exponent, '').
+   q(integer, 'E', exponent, '').
+
+   q(fraction, Char, fraction, Char) :-
+      char_type(Char, digit).
+   q(fraction, 'e', exponent, '').
+   q(fraction, 'E', exponent, '').
+
+   q(exponent, '+', exponent_sign, '').
+   q(exponent, '-', exponent_sign, '').
+   q(exponent, Char, exponent_digit, Char) :-
+      char_type(Char, digit).
+
+   q(exponent_sign, Char, exponent_digit, Char) :-
+      char_type(Char, digit).
+
+   q(exponent_digit, Char, exponent_digit, Char) :-
+      char_type(Char, digit).
+
+   % Конечные состояния
+   q(integer, end, accept, '').
+   q(fraction, end, accept, '').
+   q(exponent_digit, end, accept, '').
+
+:- end_object.
 
 % -----------------------------------------------------
 % Упражнение 7: Генератор последовательностей, принимаемых
 % автоматом. Продолжение Задачи 6
 
+:- object(float_generator(_Initial_),
+   extends(float_automaton(_Initial_))).
+
+   :- public(generate/1).
+   :- mode(generate(-list), zero_or_more).
+
+   generate(Sequence) :-
+      ::model(Sequence, _, accept).
+
+   :- public(generate_valid/1).
+   generate_valid(Atom) :-
+      generate(Sequence),
+      atom_chars(Atom, Sequence),
+      catch(atom_number(Atom, _), _, fail). % Проверяем, что это валидное число
+
+:- end_object.
+
 % -----------------------------------------------------
 % Упражнение 8: Автомата для транслирования регулярного
 % выражения. Пример - безскобочная запись арифметического
 % выражения из целых чисел.
+
+:- object(arithmetic_automaton(_Initial_),
+   extends(automaton(_Initial_))).
+
+   :- protected(q/4).
+
+   % Состояния: start, number, operator, accept
+   q(start, Char, number, Char) :-
+      char_type(Char, digit).
+
+   q(number, Char, number, Char) :-
+      char_type(Char, digit).
+   q(number, Op, operator, Op) :-
+      member(Op, ['+', '-', '*', '/']).
+   q(number, end, accept, '').
+
+   q(operator, Char, number, Char) :-
+      char_type(Char, digit).
+
+   :- public(evaluate/2).
+   evaluate(Input, Result) :-
+      ::model(InputChars, _, accept),
+      atom_chars(InputAtom, InputChars),
+      parse_expression(InputAtom, Expression),
+      Result is Expression.
+
+   :- private(parse_expression/2).
+   parse_expression(Atom, Result) :-
+      atom_chars(Atom, Chars),
+      parse_expression(Chars, 0, Result).
+
+   parse_expression([], Acc, Acc).
+   parse_expression([Op, Num|Rest], Acc, Result) :-
+      char_type(Num, digit),
+      number_chars(Number, [Num]),
+      (   Op = '+' -> NewAcc is Acc + Number
+      ;   Op = '-' -> NewAcc is Acc - Number
+      ;   Op = '*' -> NewAcc is Acc * Number
+      ;   Op = '/' -> NewAcc is Acc / Number
+      ),
+      parse_expression(Rest, NewAcc, Result).
+   parse_expression([Num|Rest], Acc, Result) :-
+      char_type(Num, digit),
+      number_chars(Number, [Num]),
+      parse_expression(Rest, Number, Result).
+
+:- end_object.
 
 % -----------------------------------------------------
 % Упражнение 9: Разработка транслятора технического
@@ -234,13 +346,13 @@
 
    verb_group(I, O, vg(V, NG)) :-
       ::verb(I, R, V),
-      ::nonun_group(R, O, NG).
+      ::noun_group(R, O, NG).
 
    noun([Word | O], O, noun(Word)) :-
       _Lexic_::noun(Word).
 
    verb([Word | O], O, verb(Word)) :-
-      _Lexic_::noun(Word).
+      _Lexic_::verb(Word).
 
    determinant([Word | O], O, det(Word)) :-
       _Lexic_::determinant(Word).
@@ -314,3 +426,50 @@
 % -----------------------------------------------------
 % Упражнение 12: обработка дерева.
 % Балансировка двоичного дерева
+
+:- object(tree_balancer).
+
+   :- public(balance/2).
+   :- mode(balance(+term, -term), one).
+
+   % Представление дерева: tree(Value, Left, Right) или nil
+   balance(nil, nil).
+   balance(tree(Value, Left, Right), Balanced) :-
+      flatten_tree(tree(Value, Left, Right), List),
+      sort(List, Sorted),
+      build_balanced_tree(Sorted, Balanced).
+
+   :- private(flatten_tree/2).
+   flatten_tree(nil, []).
+   flatten_tree(tree(Value, Left, Right), List) :-
+      flatten_tree(Left, LeftList),
+      flatten_tree(Right, RightList),
+      append(LeftList, [Value|RightList], List).
+
+   :- private(build_balanced_tree/2).
+   build_balanced_tree([], nil).
+   build_balanced_tree(List, tree(Middle, Left, Right)) :-
+      length(List, Len),
+      Half is Len // 2,
+      length(LeftList, Half),
+      append(LeftList, [Middle|RightList], List),
+      build_balanced_tree(LeftList, Left),
+      build_balanced_tree(RightList, Right).
+
+   :- public(height/2).
+   height(nil, 0).
+   height(tree(_, Left, Right), Height) :-
+      height(Left, H1),
+      height(Right, H2),
+      Height is max(H1, H2) + 1.
+
+   :- public(is_balanced/1).
+   is_balanced(nil).
+   is_balanced(tree(_, Left, Right)) :-
+      height(Left, H1),
+      height(Right, H2),
+      abs(H1 - H2) =< 1,
+      is_balanced(Left),
+      is_balanced(Right).
+
+:- end_object.
