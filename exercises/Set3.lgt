@@ -69,7 +69,7 @@
    implements(parameter_p)).
 
    area(Sq) :-
-     _Width_ * _Height_.
+     Sq is _Width_ * _Height_.
 
    perimeter(Per) :-
      Per is (_Width_ + _Height_) * 2.
@@ -86,7 +86,7 @@
    test_type(problem).
 
    test(figure_parameters,
-      all((::object_list(L),::mem(Obj-q(Sq, Per)))),
+      all((::object_list(L),::mem(Obj-q(Sq, Per), L))),
        [],
        ((Eps = 0.001,
          Obj::area(Sq1),
@@ -133,7 +133,7 @@
       [
         square(2) - a(4, 8)
       |L]) :-
-      ::object_list(L).
+      ^^object_list(L).
 
 :- end_object.
 
@@ -215,15 +215,15 @@
 
 :- object(automaton(_InitialState_)).
    :- protected(q/4).
-   :- mode(q(+symbol, +symbol, +symbol, +symbol)).
+   :- mode(q(+symbol, +symbol, +symbol, +symbol), zero_or_more).
    :- info(q/4, [
       comment is 'Задает переход из одного состояния, имея на входе символ, выдавая на выход другой символ',
       argnames is ['CurState', 'InputSymbol','NewState','OutputSymbol']
    ]).
 
    :- public(model/3).
-   :- mode(model(?list[?symbol], ?list[?symbol], ?symbol)).
-   :- info(model/2, [
+   :- mode(model(?list(?symbol), ?list(?symbol), ?symbol), zero_or_more).
+   :- info(model/3, [
       comment is 'Моделирует переход из состояния в состояние соглавно входному потоку и генерирует выходной',
       argnames  is ['InputSybolList', 'OutputSymbolList', 'TerminateState']
    ]).
