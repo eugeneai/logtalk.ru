@@ -673,4 +673,22 @@
        [],
        test_problem_11(door_lock, my_door_lock)::ok).
 
+   % Дополнительная статистика
+   :- public(print_statistics/0).
+   print_statistics :-
+      ::info("=== СТАТИСТИКА ВЫПОЛНЕНИЯ ==="),
+      (::test(Name, true, _, _), ::info("✓ ~w" + [Name]), fail; true),
+      (::test(Name, fail, _, _), ::info("✗ ~w" + [Name]), fail; true),
+      findall(_, ::test(_, true, _, _), Successes),
+      findall(_, ::test(_, fail, _, _), Failures),
+      length(Successes, SCount),
+      length(Failures, FCount),
+      Total is SCount + FCount,
+      ::info("Успешно: ~w/~w тестов" + [SCount, Total]).
+
+   % Разкомментировать, если нужна статистика по отдельным тестам
+   % run :-
+   %    ^^run,
+   %    ::print_statistics.
+
 :- end_object.
