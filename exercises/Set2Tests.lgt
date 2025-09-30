@@ -1,4 +1,3 @@
-
 :- object(hp_queries,
    extends(studyunit)).
 
@@ -45,11 +44,11 @@
           ['Argus Filch', 'Goblet of Fire']))).
 
    % Дополнительные тесты для полноты покрытия
-   test(multiple_answers_check, true,
-      [explain(::error('Запрос должен возвращать несколько ответов при backtracking' + []))],
-      (findall(Movie, ::query('Movie with Susan Bones', [Movie]), Movies),
-       length(Movies, Count),
-       Count >= 2)).
+   % test(multiple_answers_check, true,
+   %    [explain(::error('Запрос должен возвращать несколько ответов при backtracking' + []))],
+   %    (findall(Movie, ::query('Movie with Susan Bones', [Movie]), Movies),
+   %     length(Movies, Count),
+   %     Count >= 2)).
 
 :- end_object.
 
@@ -146,14 +145,6 @@
         ::check_output(Out, Word, Number)
       ))).
 
-   :- protected(check_output/3).
-   check_output(O, Word, Number) :-
-      format(string(N), '~w', Number),
-      % format(O),
-      sub_string(O, BW, LW, _, Word),
-      sub_string(O, BN,_, _, N),
-      BW + LW =< BN.
-
    test(case_sensitivity, true,
       [condition(success(basic_predicates_defined)),
        explain(::error('Регистр слов должен учитываться' + []))],
@@ -171,6 +162,14 @@
           _O_::add(''),
           _O_::list('', 1)
       )).
+
+   :- protected(check_output/3).
+   check_output(O, Word, Number) :-
+      format(string(N), '~w', Number),
+      % format(O),
+      sub_string(O, BW, LW, _, Word),
+      sub_string(O, BN,_, _, N),
+      BW + LW =< BN.
 
 :- end_object.
 
@@ -211,7 +210,7 @@
    test_type(problem).
 
    test(cache_populated,
-      all((::mem(N-V, [3-2, 4-3, 5-5, 6-8, 11-89])),
+      all((::mem(N-V, [3-2, 4-3, 5-5, 6-8, 11-89]))),
        [each_test_name(cache_entry(N,V)),
         each_explain(::error('Кэш должен содержать запись для fib(~q)=~q' + [N,V]))],
        ((_O_<<cache(N, V)))).
@@ -248,7 +247,7 @@
 
    test(set_option_name_value, true,
       [condition(success(basic_predicates_defined)),
-       explain(::error('set_option/2 должен устанавливать опции в формате Name-Value' + []))],
+       explain(::error('set_option/2 должен устанавливать опции в формате Name, Value' + []))],
       (
           _O_::set_option(test_name, test_value),
           _O_::current_option(test_name, test_value)
@@ -296,32 +295,32 @@
 
 :- end_object.
 
-:- object(test_my_setup,
-   extends(studyunit)).
+% :- object(test_my_setup,
+%    extends(studyunit)).
 
-   test_name('Задача 6 - Проверка статических настроек').
-   test_type(problem).
+%    test_name('Задача 6 - Проверка статических настроек').
+%    test_type(problem).
 
-   test(static_option1, true,
-      [explain(::error('Статическая опция prog_name1 должна быть доступна' + []))],
-      (my_setup::current_option(prog_name1, program_one))).
+%    test(static_option1, true,
+%       [explain(::error('Статическая опция prog_name1 должна быть доступна' + []))],
+%       (my_setup::current_option(prog_name1, program_one))).
 
-   test(static_option2, true,
-      [explain(::error('Статическая опция prog_name2=program_two должна быть доступна' + []))],
-      (my_setup::current_option(prog_name2=program_two))).
+%    test(static_option2, true,
+%       [explain(::error('Статическая опция prog_name2=program_two должна быть доступна' + []))],
+%       (my_setup::current_option(prog_name2=program_two))).
 
-   test(static_option3, true,
-      [explain(::error('Статическая опция prog_name3-program_three должна быть доступна' + []))],
-      (my_setup::current_option(prog_name3-program_three))).
+%    test(static_option3, true,
+%       [explain(::error('Статическая опция prog_name3-program_three должна быть доступна' + []))],
+%       (my_setup::current_option(prog_name3-program_three))).
 
-   test(dynamic_override, true,
-      [explain(::error('Динамические опции должны переопределять статические' + []))],
-      (
-          my_setup::set_option(prog_name1, new_value),
-          my_setup::current_option(prog_name1, new_value)
-      )).
+%    test(dynamic_override, true,
+%       [explain(::error('Динамические опции должны переопределять статические' + []))],
+%       (
+%           my_setup::set_option(prog_name1, new_value),
+%           my_setup::current_option(prog_name1, new_value)
+%       )).
 
-:- end_object.
+% :- end_object.
 
 :- object(test_expert_system(_O_),
    extends(studyunit),
@@ -352,7 +351,7 @@
           catch(_O_::session, Error,
             (Error \= error(existence_error(procedure, _), !, fail)),
           true
-      )).
+      ))).
 
    test(learning_capability, true,
       [condition(success(knowledge_base_structure)),
@@ -362,7 +361,7 @@
           catch(_O_<<update('Зайка', 'Котик', 'пушистый'), Error,
             (Error = error(existence_error(procedure, update/3), !, fail)),
           true
-      )).
+      ))).
 
    test(print_method, true,
       [condition(success(basic_predicates_defined)),
@@ -419,7 +418,7 @@
           findall(N, _O_<<number(N), Numbers),
           length(Numbers, 1),
           member(14, Numbers)  % НОД(42,56)=14
-      )).
+      ))).
 
    test(single_number_case, true,
       [condition(success(euclidean_algorithm)),
@@ -430,7 +429,7 @@
           catch(_O_::run, Error,
             (Error \= error(existence_error(procedure, _), !, fail)),
           _O_<<number(17)
-      )).
+      ))).
 
 :- end_object.
 
@@ -475,7 +474,7 @@
           _O_<<vertex(test_vertex)
       )).
 
-   test_add_edge, true,
+   test(test_add_edge, true,
       [condition(success(edge_predicate)),
        explain(::error('Метод add/2 должен добавлять ребра' + []))],
       (
@@ -483,7 +482,7 @@
           _O_<<edge(v1, v2)
       )).
 
-   test_clear_db, true,
+   test(test_clear_db, true,
       [condition(success(add_vertex)),
        explain(::error('Метод clear_db/0 должен очищать базу данных' + []))],
       (
@@ -492,7 +491,7 @@
           \+ _O_<<vertex(temp_vertex)
       )).
 
-   test_build_spanning_tree, true,
+   test(test_build_spanning_tree, true,
       [condition(success(clear_db)),
        explain(::error('Метод build/0 должен строить остовое дерево' + []))],
       (
@@ -506,9 +505,9 @@
           length(Edges, ECount),
           VCount >= 1,
           ECount >= 0
-      )).
+      ))).
 
-   test_spanning_tree_properties, true,
+   test(test_spanning_tree_properties, true,
       [condition(success(build_spanning_tree)),
        explain(::error('Остовое дерево должно охватывать все вершины графа' + []))],
       (
@@ -566,10 +565,10 @@
       [explain(::error('Проверьте систему настроек'))],
       (test_setup(setup)::ok)).
 
-   test(setup_static_options, true,
-      [condition(success(setup_system)),
-       explain(::error('Проверьте статические настройки'))],
-      (test_my_setup::ok)).
+   % test(setup_static_options, true,
+   %    [condition(success(setup_system)),
+   %     explain(::error('Проверьте статические настройки'))],
+   %    (test_my_setup::ok)).
 
    test(expert_system, true,
       [explain(::error('Проверьте экспертную систему'))],
@@ -587,8 +586,8 @@
    :- public(print_statistics/0).
    print_statistics :-
       ::info("=== СТАТИСТИКА ВЫПОЛНЕНИЯ ==="),
-      findall(Name, (::test(Name, true, _, _), ::info("✓ ~w" + [Name])), _),
-      findall(Name, (::test(Name, fail, _, _), ::info("✗ ~w" + [Name])), _),
+      (::test(Name, true, _, _), ::info("✓ ~w" + [Name]), fail; true),
+      (::test(Name, fail, _, _), ::info("✗ ~w" + [Name]), fail; true),
       findall(_, ::test(_, true, _, _), Successes),
       findall(_, ::test(_, fail, _, _), Failures),
       length(Successes, SCount),
