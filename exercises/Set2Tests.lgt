@@ -348,20 +348,22 @@
        explain(::error('База знаний должна содержать корректную структуру узлов' + []))],
       (
           % Проверяем, что можно получить сессию без ошибок
-          catch(_O_::session, Error,
-            (Error \= error(existence_error(procedure, _), !, fail)),
+          catch(_O_::session,
+                Error,
+                (Error \= error(existence_error(procedure, _), !, fail))),
           true
-      ))).
+      )).
 
    test(learning_capability, true,
       [condition(success(knowledge_base_structure)),
        explain(::error('Система должна уметь обучаться через update/3' + []))],
       (
           % Проверяем, что update/3 определен и может быть вызван
-          catch(_O_<<update('Зайка', 'Котик', 'пушистый'), Error,
-            (Error = error(existence_error(procedure, update/3), !, fail)),
+          catch(_O_<<update('Зайка', 'Котик', 'пушистый'),
+                Error,
+                (Error = error(existence_error(procedure, update/3), !, fail))),
           true
-      ))).
+      )).
 
    test(print_method, true,
       [condition(success(basic_predicates_defined)),
