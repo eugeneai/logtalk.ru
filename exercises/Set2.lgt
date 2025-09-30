@@ -417,6 +417,7 @@
 :- object(gcd).
    :- protected(number/1).
    :- dynamic(number/1).
+   :- protected(rule/1).
 
    % ВАША РЕАЛИЗАЦИЯ ЗДЕСЬ
    % Реализуйте правило subtract для вычитания
