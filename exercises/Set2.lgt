@@ -125,6 +125,7 @@
 
    :- public(add/2).
    add(A, B) :-
+      remove(A,_),
       assertz(cast(A, B)).
 
    :- public(remove/2).
@@ -240,8 +241,8 @@
     calc(N1, V1),
     calc(N2, V2),
     V is V1+V2.
-  calc(N, _) :-
-    domain_error(positive_integer, N).
+%  calc(N, _) :-
+%    domain_error(positive_integer, N).
 
 :- end_object.
 
@@ -301,17 +302,18 @@
 
   :- protected([option/2, option/1]).
   :- public([current_option/2, current_option/1]).
+  :- public([set_option/2, set_option/1]).
   :- protected([option_/1]).
   :- dynamic([option_/1]).
 
   set_option(Name=Value) :-
     validate_option(Name, Value),
-    retractall(option_(Name=Value)),
+    retractall(option_(Name=_)),
     assertz(option_(Name=Value)).
   set_option(Name-Value) :-
     set_option(Name=Value).
   set_option(Name, Value) :-
-    ::option(Name=Value).
+    set_option(Name=Value).
 
   current_option(Name=Value) :-
     option_(Name=Value).
@@ -334,15 +336,14 @@
 :- object(my_setup,
   extends(setup)).
 
-  option(prog_name1, program_one).
-  option(prog_name2=program_two).
-  option(prog_name3-program_three).
+  option_(prog_name1=program_one).
+  option_(prog_name2=program_two).
+  option_(prog_name3=program_three).
 
 :- end_object.
 
-
 :- object(my_setup_ext).
-  option(prog_name(program)).
+  option_(prog_name=program).
 :- end_object.
 
 % -----------------------------------------------------
