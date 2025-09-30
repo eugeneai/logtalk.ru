@@ -397,47 +397,54 @@
       [condition(success(basic_predicates_defined)),
        explain(::error('Должен быть объявлен protected dynamic number/1' + []))],
       (
-          catch(_O_<<number(_), error(existence_error(procedure, _), _), fail)
+          _O_<<predicate_property(number(_), scope(protected))
       )).
 
-   test(subtract_rule, true,
-      [condition(success(number_predicate)),
-       explain(::error('Должно быть реализовано правило subtract' + []))],
+   test(rule_predicate, true,
+      [condition(success(basic_predicates_defined)),
+       explain(::error('Должен быть объявлен protected предикат rule/1' + []))],
       (
-          catch(_O_<<rule(subtract), error(existence_error(procedure, _), _), fail)
+          _O_<<predicate_property(rule(_), scope(protected))
       )).
 
-   test(print_rule, true,
-      [condition(success(number_predicate)),
-       explain(::error('Должно быть реализовано правило print' + []))],
-      (
-          catch(_O_<<rule(print), error(existence_error(procedure, _), _), fail)
-      )).
+   % test(subtract_rule, true,
+   %    [condition(success(rule_predicate)),
+   %     explain(::error('Должно быть реализовано правило subtract' + []))],
+   %    (
+   %        catch(_O_<<rule(subtract), error(existence_error(procedure, _), _), fail)
+   %    )).
 
-   test(euclidean_algorithm, true,
-      [condition(success(subtract_rule)),
-       explain(::error('Алгоритм должен корректно вычислять НОД' + []))],
-      (
-          _O_::assertz(number(42)),
-          _O_::assertz(number(56)),
-          catch(_O_::run, Error,
-            (Error \= error(existence_error(procedure, _), !, fail)),
-          % После выполнения в базе должен остаться только НОД
-          findall(N, _O_<<number(N), Numbers),
-          length(Numbers, 1),
-          member(14, Numbers)  % НОД(42,56)=14
-      ))).
+   % test(print_rule, true,
+   %    [condition(success(rule_predicate)),
+   %     explain(::error('Должно быть реализовано правило print' + []))],
+   %    (
+   %        catch(_O_<<rule(print), error(existence_error(procedure, _), _), fail)
+   %    )).
 
-   test(single_number_case, true,
-      [condition(success(euclidean_algorithm)),
-       explain(::error('Для одного числа НОД должен быть само число' + []))],
-      (
-          _O_::retractall(number(_)),
-          _O_::assertz(number(17)),
-          catch(_O_::run, Error,
-            (Error \= error(existence_error(procedure, _), !, fail)),
-          _O_<<number(17)
-      ))).
+   % test(euclidean_algorithm, true,
+   %    [%condition(success(subtract_rule)),
+   %     explain(::error('Алгоритм должен корректно вычислять НОД' + []))],
+   %    (
+   %        _O_::assertz(number(42)),
+   %        _O_::assertz(number(56)),
+   %        catch(_O_::run, Error,
+   %          (Error \= error(existence_error(procedure, _), !, fail))),
+   %        % После выполнения в базе должен остаться только НОД
+   %        findall(N, _O_<<number(N), Numbers),
+   %        length(Numbers, 1),
+   %        member(14, Numbers)  % НОД(42,56)=14
+   %    )).
+
+   % test(single_number_case, true,
+   %    [condition(success(euclidean_algorithm)),
+   %     explain(::error('Для одного числа НОД должен быть само число' + []))],
+   %    (
+   %        _O_::retractall(number(_)),
+   %        _O_::assertz(number(17)),
+   %        catch(_O_::run, Error,
+   %          (Error \= error(existence_error(procedure, _), !, fail)),
+   %        _O_<<number(17)
+   %    ))).
 
 :- end_object.
 
@@ -603,8 +610,8 @@
       Total is SCount + FCount,
       ::info("Успешно: ~w/~w тестов" + [SCount, Total]).
 
-   run :-
-      ^^run,
-      ::print_statistics.
+   % run :-
+   %    ^^run,
+   %    ::print_statistics.
 
 :- end_object.

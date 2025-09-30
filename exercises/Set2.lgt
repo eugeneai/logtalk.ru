@@ -494,6 +494,7 @@
 :- object(gcd).
    :- protected(number/1).
    :- dynamic(number/1).
+   :- protected(rule/1).
 
    % Правило, выполняющее вычитание.
    rule(subtract) :-
