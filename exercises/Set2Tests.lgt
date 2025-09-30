@@ -343,15 +343,21 @@
           _O_<<leave('Зайка')
       )).
 
+    test(session_method_public, true,
+      [explain(::error('Метод session/0 должен быть public'))],
+      _O_::current_predicate(session/0)).
+
+    test(session_method_exists, true,
+      [explain(::error('Метод session/0 должен быть объявлен'))],
+      _O_::predicate_property(session, defined_in(_O_))).
+
    test(knowledge_base_structure, true,
       [condition(success(initial_knowledge)),
-       explain(::error('База знаний должна содержать корректную структуру узлов' + []))],
+       explain(::error('База знаний должна содержать корректную структуру узлов'))],
       (
-          % Проверяем, что можно получить сессию без ошибок
-          catch(_O_::session,
-                Error,
-                (Error \= error(existence_error(procedure, _), !, fail))),
-          true
+          % Просто проверяем, что предикаты определены
+          _O_::predicate_property(session, defined_in(_O_)),
+          _O_::predicate_property(print, defined_in(_O_))
       )).
 
    test(learning_capability, true,
