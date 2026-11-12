@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkohjelmoinnin_mooc=self.webpackChunkohjelmoinnin_mooc||[]).push([[125],{23331:function(e,t,l){l.r(t);var n=l(96540),o=l(9211),a=l(25630),c=l(12713),i=l(68154);t.default=(0,c.ko)(()=>n.createElement(o.A,null,n.createElement(a.A,null,n.createElement(i.A,{title:"404"}),n.createElement("h1",null,"Ei löytynyt"),n.createElement("p",null,"Olet päätynyt osoitteeseen, jota ei ole olemassa."))))}}]);
-//# sourceMappingURL=component---src-pages-404-js-8dd4d260e28b80976025.js.map
