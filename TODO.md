@@ -5,8 +5,9 @@
 - [x] Обновить платформу сайта: Gatsby 3 → Gatsby 5.16.1, Node.js 16 → Node.js 22 LTS, React 18, Gatsby-плагины и `graphql` 16.
 - [x] Привести сборку к воспроизводимому виду: `src/Dockerfile` на `node:22`, CI на Node 22 и Yarn 1, `packageManager` в `package.json`, обновлённый `yarn.lock`. CI использует `yarn install --frozen-lockfile`, поэтому `package-lock.json` и `npm ci` больше не нужны.
 - [x] Убрать несовместимый `gatsby-plugin-material-ui` (он для MUI v5, а сайт на MUI v4) и добавить SSR JSS-стилей в `gatsby-ssr.js`.
-- [ ] Исправить падение статической генерации Gatsby 5: `property-information/lib/aria.js` и `rehype-react` v6 несовместимы с React 18. Нужно обновить `rehype-react` (или заменить связку `rehype-react`/`property-information`) и проверить рендеринг Markdown.
-- [ ] Проверить после исправления: `GATSBY_CPU_COUNT=1 NODE_OPTIONS=--max-old-space-size=1024 npm run build`, `npm run prettier-check`, работу `gatsby develop` и кастомных плагинов из `src/plugins/`. На текущей машине (1,9 ГБ RAM) сборка Gatsby 5 доходит до генерации HTML, но падает на несовместимости `rehype-react`; для полной проверки нужна машина с большим объёмом памяти.
+- [x] Исправить падение статической генерации Gatsby 5. Причина была не в `rehype-react`: Gatsby 5 по умолчанию ставит `trailingSlash: "always"`, поэтому `$path` в page query приходил с завершающим слэшем и `markdownRemark(frontmatter: { path: { eq: $path } })` возвращал `null`. Теперь `gatsby-node.js` передаёт исходный путь в контексте (`mdPath`), а шаблоны сравнивают с ним. Заодно исправлен `gatsby-plugin-sitemap` v6 (`excludes`, `allSitePage.nodes`, `output: "/"` вместо файла `/sitemap.xml`): теперь генерируются `sitemap-index.xml` и `sitemap-0.xml`.
+- [x] Проверить после исправления: чистая сборка (`rm -rf .cache public`) `GATSBY_CPU_COUNT=4 NODE_OPTIONS=--max-old-space-size=8192 yarn build` проходит за ~2,5 мин (пик ~2,4 ГБ RSS), 107 HTML-страниц, `yarn prettier-check` без замечаний. На 24 ядрах с настройками по умолчанию сборка нестабильна (воркер падает) — ограничивайте параллелизм `GATSBY_CPU_COUNT`. На VPS с ~2 ГБ RAM нужен swap и `GATSBY_CPU_COUNT=1`.
+- [ ] Проверить `gatsby develop` и кастомные плагины из `plugins/` после обновления.
 
 ## Удаление старого баннера
 

@@ -141,11 +141,14 @@ module.exports = {
     {
       resolve: `gatsby-plugin-sitemap`,
       options: {
-        output: `/sitemap.xml`,
+        // gatsby-plugin-sitemap v6 writes `sitemap-index.xml` and
+        // `sitemap-0.xml` into this directory (in `public`). Setting it to a
+        // file name such as `/sitemap.xml` would create a directory instead.
+        output: `/`,
         // Exclude specific pages or groups of pages using glob parameters
         // See: https://github.com/isaacs/minimatch
         // The example below will exclude the single `path/to/page` and all routes beginning with `category`
-        exclude: [
+        excludes: [
           "/missing-info",
           "/profile",
           "/sign-in",
@@ -162,10 +165,8 @@ module.exports = {
           }
 
           allSitePage {
-            edges {
-              node {
-                path
-              }
+            nodes {
+              path
             }
           }
       }`,

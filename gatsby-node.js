@@ -90,7 +90,10 @@ exports.createPages = ({ actions, graphql }) => {
       createPage({
         path: node.frontmatter.path,
         component: template,
-        context: {}, // additional data can be passed via context
+        // Gatsby 5 normalizes the page path with a trailing slash, so the
+        // page path can no longer be compared with markdown `path` frontmatter
+        // directly. Pass the original value explicitly for page queries.
+        context: { mdPath: node.frontmatter.path },
       })
     })
   })

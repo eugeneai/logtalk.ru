@@ -88,8 +88,8 @@ export default class CoursePartOverviewTemplate extends React.Component {
 }
 
 export const pageQuery = graphql`
-  query ($path: String!) {
-    page: markdownRemark(frontmatter: { path: { eq: $path } }) {
+  query ($mdPath: String!) {
+    page: markdownRemark(frontmatter: { path: { eq: $mdPath } }) {
       htmlAst
       html
       frontmatter {
