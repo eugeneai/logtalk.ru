@@ -1,6 +1,6 @@
 ---
 path: '/part-16'
-title: 'Часть 16. Реверс-инжениринг'
+title: 'Часть 16. Реверс-инжиниринг'
 overview: true
 hidden: false
 ---
