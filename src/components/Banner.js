@@ -13,8 +13,10 @@ const BannerWrapper = styled.header`
   justify-content: center;
   align-items: center;
   margin-bottom: 2rem;
-  background-color: #c0392b;
+  background-color: #295b9a;
   background-image: url(${BannerImage});
+  background-position: center;
+  background-size: cover;
   text-align: center;
   h1 {
   }
