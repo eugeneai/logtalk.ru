@@ -449,23 +449,24 @@
 
    :- public(print_progress/0).
    print_progress :-
+      self(Self),
       ::info("=== ПРОГРЕСС ВЫПОЛНЕНИЯ ==="),
       forall(
-         (::test(Name, true, _, _), ::info("✓ Упражнение завершено: ~w" + [Name])),
-         true
+         ::test_result(Self, Name, Result),
+         (   Result = success
+         ->  ::info("✓ Упражнение завершено: ~w" + [Name])
+         ;   Result = failure
+         ->  ::info("✗ Требуется доработка: ~w" + [Name])
+         ;   ::info("… Упражнение пропущено: ~w" + [Name])
+         )
       ),
-      forall(
-         (::test(Name, fail, _, _), ::info("✗ Требуется доработка: ~w" + [Name])),
-         true
-      ),
-      findall(_, ::test(_, true, _, _), Successes),
-      findall(_, ::test(_, fail, _, _), Failures),
-      length(Successes, SCount),
-      length(Failures, FCount),
-      Total is SCount + FCount,
-      ::info("Выполнено: ~w из ~w упражнений" + [SCount, Total]),
-      ( FCount = 0 -> ::info("🎉 Отлично! Все упражнения выполнены!");
-        ::info("💡 Совет: Читайте подсказки в сообщениях об ошибках для быстрого исправления.")).
+      ::test_count(SCount, FCount, SkCount),
+      Total is SCount + FCount + SkCount,
+      ::info("Выполнено: ~w из ~w упражнений, пропущено: ~w" + [SCount, Total, SkCount]),
+      (   FCount = 0, SkCount = 0
+      ->  ::info("🎉 Отлично! Все упражнения выполнены!")
+      ;   ::info("💡 Совет: Читайте подсказки в сообщениях об ошибках для быстрого исправления.")
+      ).
 
    run :-
       ^^run,

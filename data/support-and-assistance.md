@@ -1,34 +1,32 @@
 ---
 path: "/support-and-assistance"
-title: "Support and assistance"
+title: "Поддержка и помощь"
 hidden: false
 information_page: true
 sidebar_priority: 4000
 ---
 
-### Guidance during the summer
+## Каналы поддержки
 
-The 2024 course will offer guidance at both the Kumpula campus and on Discord. The sessions on campus are held in Exactum BK107. The guidance sessions are the following
+- Telegram: [@LogtalkEdu](https://t.me/LogtalkEdu)
+- Электронная почта: `eugeneai@irnok.net`
 
-| Time / Date | MON | TUE | WED | THU | FRI |
-|-----|----|----|----|----|----|
-| 10-11 | - | - | - | - | - |
-| 11-12 | - | - | - | - | - |
-| 12-13 | - | - | - | - | - |
-| 13-14 | - | - | - | - | - |
-| 14-15 | - | Campus | - | - | - |
-| 15-16 | - | Campus | - | - | - |
-| 16-17 | - | Campus | - | - | - |
-| 17-18 | - | Campus | - | - | - |
+В Telegram можно задавать вопросы по материалу, упражнениям и настройке окружения. Перед вопросом проверьте, что вы запускаете упражнения из каталога `exercises` и приложите текст ошибки.
 
-In the table **Campus** means that the guidance session will be on campus, **Discord** means its remotely on Discord. During the on-campus sessions there might be help available also on Discord if the assistants have time to follow the course Discord.
+## Как задать полезный вопрос
 
-*The schedule is subject to change.*
+1. Укажите часть курса и номер упражнения.
+2. Опишите, что вы пытались сделать.
+3. Приложите команду запуска и полный текст ошибки.
+4. Укажите версию Logtalk и Prolog, если проблема связана с загрузкой.
 
-#### Discord
+## Самостоятельная диагностика
 
-Discord is a communication platform which allows both text-based and voice/video chats. You can find out more about the platform [on the Discord website](https://discord.com/).
+- Подключите `tutor`: `logtalk_load(tutor(loader))`.
+- Запустите только проблемный набор, например `swilgt -l Set8TestsLoader.lgt -g halt`.
+- Проверьте, что все объекты из задания реализованы и объявлены публичными.
+- Для ошибок загрузки проверьте путь к файлу и текущий каталог.
 
-The course channels are available through [this link](https://study.cs.helsinki.fi/discord/join/ohjelmoinnin_mooc). See especially the `ohjelmoinnin_mooc_english` and the `ohjelmoinnin_mooc_voice` channels for support in English.
+## Лекции
 
-Instructor will be on standby on the course channels in Discord at guidance time. Instructor will also reply to questions sent via private messages. Discord also has a discussion about the course outside of the guidance hours, so it’s worth joining!
+Записи лекций и слайды публикуются в курсе и на YouTube-канале. Ссылки обновляются в `data/index.md` по мере проведения занятий.

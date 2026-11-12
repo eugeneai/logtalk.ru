@@ -214,7 +214,7 @@
       all((::mem(N-V, [3-2, 4-3, 5-5, 6-8, 11-89])),
        [each_test_name(cache_entry(N,V)),
         each_explain(::error('Кэш должен содержать запись для fib(~q)=~q' + [N,V]))],
-       ((_O_<<cache(N, V)))).
+       _O_<<cache(N, V))).
 
    test(cache_usage, true,
       [condition(success(cache_populated)),
@@ -347,21 +347,15 @@
    test(knowledge_base_structure, true,
       [condition(success(initial_knowledge)),
        explain(::error('База знаний должна содержать корректную структуру узлов' + []))],
-      (
-          % Проверяем, что можно получить сессию без ошибок
-          catch(_O_::session, Error,
-            (Error \= error(existence_error(procedure, _), !, fail)),
-          true
+      (   PI = session/0,
+          predicate_property(_O_::PI, _)
       )).
 
    test(learning_capability, true,
       [condition(success(knowledge_base_structure)),
        explain(::error('Система должна уметь обучаться через update/3' + []))],
-      (
-          % Проверяем, что update/3 определен и может быть вызван
-          catch(_O_<<update('Зайка', 'Котик', 'пушистый'), Error,
-            (Error = error(existence_error(procedure, update/3), !, fail)),
-          true
+      (   PI = update/3,
+          predicate_property(_O_::PI, _)
       )).
 
    test(print_method, true,
@@ -413,12 +407,10 @@
       (
           _O_::assertz(number(42)),
           _O_::assertz(number(56)),
-          catch(_O_::run, Error,
-            (Error \= error(existence_error(procedure, _), !, fail)),
-          % После выполнения в базе должен остаться только НОД
+          catch(_O_::run, _, fail),
           findall(N, _O_<<number(N), Numbers),
           length(Numbers, 1),
-          member(14, Numbers)  % НОД(42,56)=14
+          member(14, Numbers)
       )).
 
    test(single_number_case, true,
@@ -427,8 +419,7 @@
       (
           _O_::retractall(number(_)),
           _O_::assertz(number(17)),
-          catch(_O_::run, Error,
-            (Error \= error(existence_error(procedure, _), !, fail)),
+          catch(_O_::run, _, fail),
           _O_<<number(17)
       )).
 
@@ -475,7 +466,7 @@
           _O_<<vertex(test_vertex)
       )).
 
-   test_add_edge, true,
+   test(add_edge, true,
       [condition(success(edge_predicate)),
        explain(::error('Метод add/2 должен добавлять ребра' + []))],
       (
@@ -483,7 +474,7 @@
           _O_<<edge(v1, v2)
       )).
 
-   test_clear_db, true,
+   test(clear_db, true,
       [condition(success(add_vertex)),
        explain(::error('Метод clear_db/0 должен очищать базу данных' + []))],
       (
@@ -492,13 +483,12 @@
           \+ _O_<<vertex(temp_vertex)
       )).
 
-   test_build_spanning_tree, true,
+   test(build_spanning_tree, true,
       [condition(success(clear_db)),
        explain(::error('Метод build/0 должен строить остовое дерево' + []))],
       (
           _O_::clear_db,
-          catch(_O_::build, Error,
-            (Error \= error(existence_error(procedure, _), !, fail)),
+          catch(_O_::build, _, fail),
           % После построения должны быть добавлены вершины и ребра
           findall(V, _O_<<vertex(V), Vertices),
           findall(E, _O_<<edge(E, _), Edges),
@@ -508,7 +498,7 @@
           ECount >= 0
       )).
 
-   test_spanning_tree_properties, true,
+   test(spanning_tree_properties, true,
       [condition(success(build_spanning_tree)),
        explain(::error('Остовое дерево должно охватывать все вершины графа' + []))],
       (
@@ -586,15 +576,20 @@
    % Дополнительная статистика
    :- public(print_statistics/0).
    print_statistics :-
+      self(Self),
       ::info("=== СТАТИСТИКА ВЫПОЛНЕНИЯ ==="),
-      findall(Name, (::test(Name, true, _, _), ::info("✓ ~w" + [Name])), _),
-      findall(Name, (::test(Name, fail, _, _), ::info("✗ ~w" + [Name])), _),
-      findall(_, ::test(_, true, _, _), Successes),
-      findall(_, ::test(_, fail, _, _), Failures),
-      length(Successes, SCount),
-      length(Failures, FCount),
-      Total is SCount + FCount,
-      ::info("Успешно: ~w/~w тестов" + [SCount, Total]).
+      forall(
+          ::test_result(Self, Name, Result),
+          (   Result = success
+          ->  ::info("✓ ~w" + [Name])
+          ;   Result = failure
+          ->  ::info("✗ ~w" + [Name])
+          ;   ::info("… ~w (пропущен)" + [Name])
+          )
+      ),
+      ::test_count(SCount, FCount, SkCount),
+      Total is SCount + FCount + SkCount,
+      ::info("Успешно: ~w/~w тестов, пропущено: ~w" + [SCount, Total, SkCount]).
 
    run :-
       ^^run,

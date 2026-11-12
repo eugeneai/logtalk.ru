@@ -7,70 +7,103 @@ sidebar_priority: 2000
 separator_after: "Введение в программирование"
 ---
 
-Эта страница содержит информацию о наиболее распространенных сообщениях об ошибках, с которыми вы можете столкнуться при выполнении упражнений по программированию в этом курсе.
+На этой странице собраны типичные сообщения Logtalk и способы их исправить.
 
-<pre>
-### My printout looks identical to the example in the instructions, but my submission still fails
+## Existence error: procedure ... does not exist
 
-Make sure your program doesn't print any extra whitespace, such as space characters. Notice that the default behaviour of the `print` function is to add a space between any strings separated with a comma.
+Объект получил сообщение, для которого нет объявленного публичного предиката.
 
-```python
-    print("Hello","World!")    # This prints out: Hello World!
+```logtalk
+?- counter::value(Value).
+!     Existence error: procedure value/1 does not exist
 ```
 
-### SyntaxError: bad input on line [line number]
+Проверьте:
 
-This error message usually appears when there is a typo in your code which the Python interpreter finds hard to classify more specifically. For example, there may be a colon character missing from the end of an `if` statement, or a keyword, such as `while`, may have been misspelled. The only way to fix this problem is to inspect the line indicated in the error message.
+- объявлен ли предикат директивой `:- public(value/1).`;
+- загружен ли объект, которому отправляется сообщение;
+- не перепутаны ли имя и арность.
 
-```python
-    number1 = 1
-    number1 = 2
-    if number1 < number2    # ':' missing
-        print('number2 is greater')
+## Unknown message
+
+Сообщение отправлено объекту, но такой предикат не входит в его протокол:
+
+```logtalk
+?- counter::unknown(Value).
 ```
 
-If the line indicated in the error message looks correct, the error may often be one line above or below the line indicated, so check around the issue, too.
+В отличие от ошибки existence error, это может быть предупреждение компилятора, если вызов известен на этапе компиляции. Проверьте имя метода и область видимости.
 
-**NB: The programming exercises in the early parts of this course use a framework called Skulpt to run Python code in the browser.** Skulpt is quite limited compared to a regular Python interpreter, and thus the error messages printed out are often less informative. For example, the `bad input on line` error message may refer to many different programming errors, and it is difficult to find out the true cause of the error just based on this message.
+## Singleton variable
 
-### SyntaxError: unindent does not match any outer indentation level on line [line number]
+Компилятор предупреждает об одноразовой переменной:
 
-Your code is indented incorrectly at the line indicated in the error message. For example, all lines within an `if` block must be indented the same. To fix this error, indent all lines within a block of code with the exact same amount of whitespace.
-The following code would cause this error:
-
-```python
-    if True:
-        print('Indented correctly')
-       print('Indented incorrectly!')
+```logtalk
+*     Singleton variable: Name
 ```
 
-### NameError: name [variable name] is not defined on line [line number]
+Если переменная действительно не нужна, замените её на `_` или `_Name`. Если нужна — проверьте, не забыли ли вы использовать её в теле правила.
 
-You are trying to refer to a variable or object which does not exist at that specific point in your program. It may be that the variable has not yet been assigned a value, or there is a typo in the variable name. It may also be the case that you have defined a variable inside a function, and are trying to refer to that same variable outside the function. 
+## Undefined predicate
 
-```python
-    person = input('Please type in your name: ')
-    input('Please type in your age: ')
+Предикат объявлен, но не определён:
 
-    print("Hi", pearson)                # error: person was typed pearson
-    print("You are", age, "years old")  # error: the variable age has not been defined
+```logtalk
+*     Declared static predicate called but not defined: value/1
 ```
 
-### TypeError: unsupported operand type(s) for Add: 'int' and 'str' on line [line number]
+Добавьте предложения для предиката или удалите объявление. Для динамических предикатов проверьте директиву `:- dynamic(value/1).`.
 
-You may be trying to add an integer and a string together, without first converting the string into an integer value. Strings can be converted into integers with the `int()` function. A similar error message may appear if you try to perform other arithmetic operations, such as division or subtraction, on strings.
+## Type error / domain error
 
-It may also be the case that you are trying to create a new string by combining a string and an integer. You should first convert the integer into a string with the `str()` function. 
+Аргумент имеет неверный тип или недопустимое значение:
 
-```python
-    my_age = input("Please type in your age: ")
-    my_name = input("Please type in your name: ")
-
-    print(my_age//2)   # error: the variable my_age has not been converted into an integer 
+```logtalk
+!     Type error: expected integer but got hello
 ```
 
-### TypeError: cannot concatenate 'str' and 'int' objects on line [line number]
+Проверьте порядок аргументов и используйте проверки `integer/1`, `atom/1`, `is_list/1` перед вызовом.
 
-See above.
+## Syntax error
 
-</pre>
+Чаще всего причина — пропущенная точка в конце предложения или несбалансированная скобка:
+
+```logtalk
+:- object(example).
+    :- public(foo/1).
+    foo(X) :- X = 1    % пропущена точка
+:- end_object.
+```
+
+Компилятор указывает файл и строку. Если строка выглядит правильно, проверьте строку выше.
+
+## Dynamic predicate not declared
+
+При добавлении факта через `assertz/1` предикат должен быть динамическим:
+
+```logtalk
+:- private(count_/1).
+:- dynamic(count_/1).
+```
+
+Без директивы `dynamic/1` обновление может завершиться ошибкой или предупреждением.
+
+## Сообщение «No matching clause for goal»
+
+Локальный предикат вызван, но ни одно предложение не подошло. Проверьте:
+
+- аргументы вызова;
+- порядок предложений;
+- не забыли ли вы про отсечение или проверку типа.
+
+## Как читать сообщения компилятора
+
+- `!` — ошибка, файл не загружен;
+- `*` — предупреждение, файл обычно загружен;
+- `%` — информационное сообщение.
+
+Подключите инструмент `tutor`, чтобы получать пояснения к сообщениям:
+
+```logtalk
+?- logtalk_load(tutor(loader)).
+```

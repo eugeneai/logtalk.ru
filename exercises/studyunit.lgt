@@ -7,6 +7,17 @@
         autor is 'Evgeny Cherkashin',
         date is 2024-12-22,
         comment is 'A student test case unit test framework'
+   ]).
+
+   :- use_module(library(lists), [member/2]).
+
+   :- public(print/0).
+   print :-
+       self(Self),
+       forall(
+           ::test_result(Self, Name, Result),
+           format("~w: ~w - ~w~n", [Self, Name, Result])
+       ).
 
    :- public(print/1).
    :- mode(print(+list(atom)), one).
@@ -16,6 +27,7 @@
       ]).
 
    print(TestNames) :-
+       self(Self),
        ::test_name(TaskName),
        forall(
            member(Name, TestNames),
@@ -115,9 +127,8 @@
    :- protected(check_condition/1).
    check_condition(requires(object_exists, Object)) :-
        current_object(Object).
-   check_condition(requires(predicate_defined, Object::Predicate)) :-
-       functor(Predicate, Name, Arity),
-       current_predicate(Object::Name/Arity).
+   check_condition(requires(predicate_defined, Object-Predicate)) :-
+       predicate_property(Object::Predicate, _).
    check_condition(requires(extends, Child-Parent)) :-
        extends_object(Child, Parent).
    check_condition(requires(implements, Object-Protocol)) :-
@@ -127,6 +138,8 @@
 
 :- category(test_utilities_c,
    implements(testing_p)).
+
+   :- use_module(library(lists), [member/2]).
 
    :- protected(assert_equals/2).
    assert_equals(Expected, Actual) :-
@@ -147,7 +160,7 @@
    :- protected(assert_fails/1).
    :- meta_predicate(assert_fails(0)).
    assert_fails(Goal) :-
-       (   \+ call(Goal)
+       (   \+ Goal
        ->  true
        ;   ::error("Ожидалось, что цель потерпит неудачу, но она успешно выполнилась: ~w" + [Goal]),
            fail
@@ -187,7 +200,7 @@
    :- protected(assert_false/1).
    :- meta_predicate(assert_false(0)).
    assert_false(Goal) :-
-       (   \+ call(Goal)
+       (   \+ Goal
        ->  true
        ;   ::error("Ожидалось ложное значение, но цель вернула истину: ~w" + [Goal]),
            fail
@@ -278,7 +291,8 @@
    :- protected(assert_predicate_defined/2).
    assert_predicate_defined(Object, Predicate) :-
        functor(Predicate, Name, Arity),
-       (   current_predicate(Object::Name/Arity)
+       PI = Name/Arity,
+       (   predicate_property(Object::PI, _)
        ->  true
        ;   ::error("Ожидалось, что в объекте '~w' определен предикат '~w'/~w" + [Object, Name, Arity]),
            fail
@@ -287,7 +301,8 @@
    :- protected(assert_scope/3).
    assert_scope(Object, Predicate, Scope) :-
        functor(Predicate, Name, Arity),
-       (   predicate_property(Object::Name/Arity, Scope)
+       PI = Name/Arity,
+       (   predicate_property(Object::PI, Scope)
        ->  true
        ;   ::error("Ожидалось, что предикат '~w'/~w в объекте '~w' имеет область видимости '~w'" +
                    [Name, Arity, Object, Scope]),

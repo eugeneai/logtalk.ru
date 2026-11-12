@@ -11,6 +11,8 @@
    :- info(run_tests/1, [
       comment is 'Runs specific tests by name',
       argnames is ['TestNames']
+   ]).
+
    :- meta_predicate(test(*,*,*,0)).
 
    :- public(run/0).
@@ -21,10 +23,10 @@
 
    :- public(test_count/3).
    :- mode(test_count(-integer, -integer, -integer), one).
-   :- info(test_count/1, [
+   :- info(test_count/3, [
       comment is 'Returns counts of success, failure, skipped tests',
       argnames is ['Success', 'Failure', 'Skipped']
-   ).
+   ]).
 
    :- public(test_name/1).
    :- mode(test_name(-atom), one).
@@ -45,6 +47,7 @@
         comment is 'A student test case unit test framework inspired by Paulo Mora lgtunit'
       ]).
 
+   :- use_module(library(lists), [member/2]).
 
    run :-
        ::clear_results,
@@ -81,8 +84,10 @@
        ^^option(each_test_name(_), Options), !,
        (   ^^option(each_explain(_), Options)
        ;   ^^option(each_condition(_), Options)
+       ;   ^^option(explain(_), Options)
+       ;   ^^option(condition(_), Options)
        ->  true
-       ;   ::error("Тест '~w' с each_test_name требует each_explain или each_condition" + [Name])
+       ;   ::error("Тест '~w' с each_test_name требует explain/condition или each_explain/each_condition" + [Name])
        ).
 
    validate_test_options(_, _).
@@ -138,18 +143,21 @@
    :- meta_predicate(process(*, *, *, 0, *)).
    process(Name, true, _Options, Goal, Result) :-
       self(Self),
-      (call(Goal) -> Result = success; Result = failure ),
+      ::safe_goal(Goal, Outcome),
+      ::expected_outcome(true, Outcome, Result),
+      ::report_goal_error(Name, Outcome),
       assertz(test_result(Self, Name, Result)).
 
    process(Name, fail, _Options, Goal, Result) :-
-      debugger::debug,
       self(Self),
-      ( call(Goal) -> Result = failure; Result = success ),
+      ::safe_goal(Goal, Outcome),
+      ::expected_outcome(fail, Outcome, Result),
+      ::report_goal_error(Name, Outcome),
       assertz(test_result(Self, Name, Result)).
 
    process(Name, all(AllGoal), Options, Goal, Result) :-
       self(Self),
-      ( call(AllGoal),
+      ( catch(call(AllGoal), _, fail),
         ::each_to_one(Options, Opts),
         (
            ^^option(each_test_name(EachName), Opts) -> true ;
@@ -163,7 +171,7 @@
 
    process(Name, none(AllGoal), Options, Goal, Result) :-
       self(Self),
-      ( call(AllGoal),
+      ( catch(call(AllGoal), _, fail),
         ::each_to_one(Options, Opts),
         (
            ^^option(each_test_name(EachName), Opts) -> true ;
@@ -178,6 +186,33 @@
    process(Name, Type, Options, Goal, _) :- !,
       ::error("Не знакомый тип '~w' теста '~w' с опциями ~w и целью '~w'" +
         [Type, Name, Options, Goal]), halt.
+
+   :- protected(safe_goal/2).
+   :- meta_predicate(safe_goal(0, *)).
+   safe_goal(Goal, Outcome) :-
+      catch(
+          goal_outcome(Goal, Outcome),
+          Error,
+          Outcome = error(Error)
+      ).
+
+   :- protected(goal_outcome/2).
+   :- meta_predicate(goal_outcome(0, *)).
+   goal_outcome(Goal, success) :-
+      call(Goal), !.
+   goal_outcome(_, failure).
+
+   :- protected(expected_outcome/3).
+   expected_outcome(true, success, success) :- !.
+   expected_outcome(true, _, failure).
+   expected_outcome(fail, failure, success) :- !.
+   expected_outcome(fail, _, failure).
+
+   :- protected(report_goal_error/2).
+   report_goal_error(_Name, success) :- !.
+   report_goal_error(_Name, failure) :- !.
+   report_goal_error(Name, error(Error)) :-
+      ::debug(5, 'Исключение в тесте \'~w\': ~w' + [Name, Error]).
 
    :- protected(each_to_one/2).
    :- use_module(library(lists), [select/3]).
@@ -234,7 +269,7 @@
 
    options_before(Options, _):-
       ^^option(condition(Goal), Options),
-      call(Goal), !.
+      catch(call(Goal), _, fail), !.
 
    options_before(_, _).
 
@@ -370,7 +405,6 @@
       self(Self).
 
    :- protected(mem/2).
-   :- use_module(library(lists), [member/2]).
 
    mem(_,[]):-!, fail.
    mem(C,[X|T]) :- !,
