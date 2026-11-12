@@ -1,8 +1,8 @@
-FROM node:11
+FROM node:22
 
 COPY . /app
 WORKDIR /app
 
-RUN npm ci
+RUN corepack enable && yarn install --frozen-lockfile
 
-RUN npm run build && mv /app/public /public
+RUN yarn build && mv /app/public /public

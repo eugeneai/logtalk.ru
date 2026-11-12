@@ -119,12 +119,12 @@ class Layout extends React.Component {
                     {
                       name: "description",
                       content:
-                        "Learn the basics of programming with the Python programming language. The focus of the course is on programming, and you will learn how to write programs and understand how they work. For example, the basics of algorithms, control structures, subprograms, object-oriented programming are covered. The course is suitable to anyone who wants to learn programming. No prior programming experience is required.",
+                        "Курс объектно-ориентированного логического программирования на языке Logtalk: инкапсуляция, классы и экземпляры, категории, компоненты, метапрограммирование и практические проекты.",
                     },
                     {
                       name: "keywords",
                       content:
-                        "ohjelmointi, python, programming, CS1, MOOC, 2024, ohjelmointikurssi, open, free, university of helsinki",
+                        "Logtalk, Prolog, логическое программирование, ООП, MOOC, Иркутский государственный университет",
                     },
                   ]}
                 />

@@ -3,14 +3,16 @@ const GraphQLList = require("gatsby/graphql").GraphQLList
 const GraphQLObjectType = require("gatsby/graphql").GraphQLObjectType
 
 const quizRegex = /<\s*quiz\s*id\s*=\s*['"]\s*([\w-]+)\s*['"]\s*>/gm
-const crowdsorcererRegex = /<\s*crowdsorcerer\s*id\s*=\s*['"]\s*(\w+)\s*['"].*>/gm
+const crowdsorcererRegex =
+  /<\s*crowdsorcerer\s*id\s*=\s*['"]\s*(\w+)\s*['"].*>/gm
 const programmingExerciseTagRegex = /<\s*programming-exercise\s+(.*)\s*>/gm
-const inBrowserProgrammingExerciseTagRegex = /<\s*in-browser-programming-exercise\s+(.*)\s*>/gm
+const inBrowserProgrammingExerciseTagRegex =
+  /<\s*in-browser-programming-exercise\s+(.*)\s*>/gm
 const programmingExerciseNameRegex = /\bname\s*=\s*(["].*?["]|['].*?['])/gm
 const moodleRegex = /<\s*moodle-exercise\s*name\s*=\s*['"]\s*(.*)\s*['"]\s*>/gm
-const sqlTrainerRegex = /<\s*sqltrainer-exercise\s*name\s*=\s*['"]\s*(.*)\s*['"]\s*>/gm
-const commentRegex = /<!--.*?-->/mgs
-
+const sqlTrainerRegex =
+  /<\s*sqltrainer-exercise\s*name\s*=\s*['"]\s*(.*)\s*['"]\s*>/gm
+const commentRegex = /<!--.*?-->/gms
 
 function getMatches(string, regex, index) {
   index || (index = 1) // default to the first capturing group
@@ -51,11 +53,11 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
   if (type.name === `MarkdownRemark`) {
     return {
       moocfiExercises: {
-        type: GraphQLList(ExerciseType),
+        type: new GraphQLList(ExerciseType),
         resolve: (node, _fieldArgs) => {
           // nuke commented text
           const source = (node.rawMarkdownBody || "").replace(commentRegex, "")
-          const quizzes = getMatches(source, quizRegex, 1).map(res => {
+          const quizzes = getMatches(source, quizRegex, 1).map((res) => {
             return {
               id: res.match,
               location: res.location,
@@ -67,7 +69,7 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
             source,
             programmingExerciseTagRegex,
             1,
-          ).map(res => {
+          ).map((res) => {
             let id = "unknown"
             try {
               const match = getMatches(
@@ -89,7 +91,7 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
             source,
             inBrowserProgrammingExerciseTagRegex,
             1,
-          ).map(res => {
+          ).map((res) => {
             let id = "unknown"
             try {
               const match = getMatches(
@@ -108,7 +110,7 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
           })
 
           const crowdsorcerers = getMatches(source, crowdsorcererRegex, 1).map(
-            res => {
+            (res) => {
               return {
                 id: res.match,
                 location: res.location,
@@ -118,7 +120,7 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
             },
           )
 
-          const moodles = getMatches(source, moodleRegex, 1).map(res => {
+          const moodles = getMatches(source, moodleRegex, 1).map((res) => {
             return {
               id: res.match,
               location: res.location,
@@ -128,7 +130,7 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
           })
 
           const sqlTrainers = getMatches(source, sqlTrainerRegex, 1).map(
-            res => {
+            (res) => {
               return {
                 id: res.match,
                 location: res.location,
@@ -144,7 +146,7 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
             .concat(moodles)
             .concat(sqlTrainers)
             .concat(inBrowserProgrammingExercises)
-            .sort(function(a, b) {
+            .sort(function (a, b) {
               return a.location - b.location
             })
         },

@@ -2,9 +2,12 @@ const GraphQLString = require("gatsby/graphql").GraphQLString
 const GraphQLList = require("gatsby/graphql").GraphQLList
 const GraphQLObjectType = require("gatsby/graphql").GraphQLObjectType
 
-const vocabularyWordRegex = /<\s*vocabulary-word\s+name\s*=\s*['"]\s*([^"]*)\s*['"]\s*>/gm
-const withDescriptionRegex = /<\s*vocabulary-word\s+name\s*=\s*['"]\s*(.*)\s*['"]\s+description\s*=\s*['"]\s*(.*)\s*['"]\s*>/gm
-const withDescriptionRegex2 = /<\s*vocabulary-word\s+description\s*=\s*['"]\s*(.*)\s*['"]\s+name\s*=\s*['"]\s*(.*)\s*['"]\s*>/gm
+const vocabularyWordRegex =
+  /<\s*vocabulary-word\s+name\s*=\s*['"]\s*([^"]*)\s*['"]\s*>/gm
+const withDescriptionRegex =
+  /<\s*vocabulary-word\s+name\s*=\s*['"]\s*(.*)\s*['"]\s+description\s*=\s*['"]\s*(.*)\s*['"]\s*>/gm
+const withDescriptionRegex2 =
+  /<\s*vocabulary-word\s+description\s*=\s*['"]\s*(.*)\s*['"]\s+name\s*=\s*['"]\s*(.*)\s*['"]\s*>/gm
 
 function getMatches(string, regex, index) {
   index || (index = 1) // default to the first capturing group
@@ -55,20 +58,22 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
   if (type.name === `MarkdownRemark`) {
     return {
       vocabularyWords: {
-        type: GraphQLList(VocabularyWordType),
+        type: new GraphQLList(VocabularyWordType),
         resolve: (node, _fieldArgs) => {
           const source = node.rawMarkdownBody || ""
-          const words = getMatches(source, vocabularyWordRegex, 1).map(res => {
-            return {
-              name: res.match,
-              location: res.location,
-              type: "vocabularyWord",
-              parentPagePath: node.frontmatter.path,
-            }
-          })
+          const words = getMatches(source, vocabularyWordRegex, 1).map(
+            (res) => {
+              return {
+                name: res.match,
+                location: res.location,
+                type: "vocabularyWord",
+                parentPagePath: node.frontmatter.path,
+              }
+            },
+          )
 
           const wordsWithDesc = getMatches(source, withDescriptionRegex, 1).map(
-            res => {
+            (res) => {
               return {
                 name: res.match,
                 description: res.description,
@@ -83,7 +88,7 @@ exports.setFieldsOnGraphQLNodeType = ({ type }) => {
             source,
             withDescriptionRegex2,
             1,
-          ).map(res => {
+          ).map((res) => {
             return {
               name: res.description,
               description: res.match,

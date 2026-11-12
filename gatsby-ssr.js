@@ -1,7 +1,25 @@
 /**
- * Implement Gatsby's SSR (Server Side Rendering) APIs in this file.
- *
- * See: https://www.gatsbyjs.org/docs/ssr-apis/
+ * Server-side rendering of Material-UI v4 (JSS) styles.
+ * See https://material-ui.com/guides/server-rendering/
  */
+const React = require("react")
+const { ServerStyleSheets } = require("@material-ui/styles")
 
-// You can delete this file if you're not using it
+let sheets
+
+exports.wrapRootElement = ({ element }) => {
+  sheets = new ServerStyleSheets()
+  return sheets.collect(element)
+}
+
+exports.onRenderBody = ({ setHeadComponents }) => {
+  if (sheets) {
+    setHeadComponents([
+      <style
+        id="jss-server-side"
+        key="jss-server-side"
+        dangerouslySetInnerHTML={{ __html: sheets.toString() }}
+      />,
+    ])
+  }
+}

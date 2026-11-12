@@ -1,6 +1,6 @@
 import React, { useContext } from "react"
 import styled from "styled-components"
-import BackgroundImage from "../images/banner.svg"
+import BackgroundImage from "../../banner.svg"
 import { Card, CardContent } from "@material-ui/core"
 import { Link } from "gatsby"
 import { withTranslation } from "react-i18next"

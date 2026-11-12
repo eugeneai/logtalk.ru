@@ -178,9 +178,6 @@ module.exports = {
       resolve: "gatsby-transformer-vocabulary",
     },
     `gatsby-plugin-top-layout`,
-    {
-      resolve: "gatsby-plugin-material-ui",
-    },
     `gatsby-plugin-meta-redirect`, // make sure to put last in the array
   ],
 }
