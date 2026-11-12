@@ -9,12 +9,33 @@ const path = require("path")
 exports.createPages = ({ actions, graphql }) => {
   const { createPage, createRedirect } = actions
 
-  // createRedirect({
-  //   fromPath: `/osa-1/4-muuttujat`,
-  //   isPermanent: true,
-  //   redirectInBrowser: true,
-  //   toPath: `/osa-1/4-laskentaa`,
-  // })
+  const redirects = [
+    ["/part-12/1-functions-as-arguments", "/part-12/1-threads"],
+    ["/part-12/2-generators", "/part-12/2-synchronization"],
+    ["/part-12/3-functional-programming", "/part-12/3-synchronized"],
+    ["/part-12/4-regular-expressions", "/part-12/4-patterns"],
+    ["/part-13/1-pygame", "/part-13/1-catch-throw"],
+    ["/part-13/2-animation", "/part-13/2-error-terms"],
+    ["/part-13/3-events", "/part-13/3-cleanup"],
+    ["/part-13/4-more-pygame-techniques", "/part-13/4-custom-errors"],
+    ["/part-14/1-game-project", "/part-14/1-dynamic-objects"],
+    ["/part-14/2-robot-and-boxes", "/part-14/2-protocols-categories"],
+    ["/part-14/3-finishing-the-game", "/part-14/3-delegation"],
+    ["/part-14/4-your-own-game", "/part-14/4-reflection"],
+    ["/part-17/1-topic", "/part-17/1-rdf"],
+    ["/part-18/1-topic", "/part-18/1-planning"],
+    ["/part-19/1-topic", "/part-19/1-request-response"],
+    ["/part-20/1-topic", "/part-20/1-models"],
+  ]
+
+  redirects.forEach(([fromPath, toPath]) => {
+    createRedirect({
+      fromPath,
+      toPath,
+      isPermanent: true,
+      redirectInBrowser: true,
+    })
+  })
 
   const courseMaterialTemplate = path.resolve(
     `src/templates/CourseContentTemplate.js`,
@@ -59,7 +80,7 @@ exports.createPages = ({ actions, graphql }) => {
   }
     `
 
-  return graphql(query).then(result => {
+  return graphql(query).then((result) => {
     if (result.errors) {
       return Promise.reject(result.errors)
     }
@@ -85,7 +106,7 @@ exports.createPages = ({ actions, graphql }) => {
       }
       if (!node.frontmatter.path) {
         // To prevent a bug that happens in development from time to time
-        return;
+        return
       }
       createPage({
         path: node.frontmatter.path,
