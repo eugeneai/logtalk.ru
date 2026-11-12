@@ -18,7 +18,18 @@
 - Production build verified: `yarn build` completes (~2.5 min, peak ~2.4 GB RSS) when parallelism is capped, e.g. `GATSBY_CPU_COUNT=4 NODE_OPTIONS=--max-old-space-size=8192 yarn build`. On many-core hosts the default worker count can make a worker exit mid-build ("Worker exited before finishing task"), so cap `GATSBY_CPU_COUNT`. On a ~2 GB VPS use `GATSBY_CPU_COUNT=1` plus swap.
 - Page queries must not compare `$path` with markdown `path` frontmatter: Gatsby 5 normalizes page paths with a trailing slash (`trailingSlash: "always"`). `gatsby-node.js` passes the original frontmatter path as `context.mdPath`; templates query `eq: $mdPath`.
 - Format check: `yarn prettier-check`; auto-fix: `yarn format`. Prettier only covers `src/**/*.js`; it does not cover `gatsby-config.js`, `gatsby-ssr.js`, or `plugins/**/*.js`, so check those separately with `npx prettier --check ...`. The pre-commit hook `src/bin/check-code-style.sh` runs the configured check.
-- Deploy: production uses the local build. After updating: `cd src && git pull origin main && yarn install --frozen-lockfile && yarn build`. GitHub Actions builds on pushes to `main` and deploys `public` to `gh-pages`.
+- Deploy: **never build on the production VPS** (it runs out of memory). Build on a machine with enough RAM, commit the result to the orphan `build` branch, and update the VPS checkout from that branch.
+  - Build: `cd src && git pull origin main && yarn install --frozen-lockfile && rm -rf .cache public && GATSBY_TELEMETRY_DISABLED=1 GATSBY_CPU_COUNT=4 NODE_OPTIONS=--max-old-space-size=8192 yarn build`.
+  - Publish: refresh the orphan `build` branch with the contents of `public/` at its root. Do not commit artifacts to `main` and do not force-add ignored files there. One way, without touching the working tree:
+    ```bash
+    rm -rf /tmp/build && mkdir -p /tmp/build && cp -a public/. /tmp/build/
+    git -C /tmp/build init -q -b build && git -C /tmp/build add -A
+    git -C /tmp/build commit -m "build: static site output from $(git rev-parse --short HEAD)"
+    git fetch /tmp/build build:build && git push origin build
+    ```
+    The commit message should name the `main` commit it was built from.
+  - VPS: `git clone -b build git@github.com:eugeneai/logtalk.ru.git /var/www/logtalk`; updates are `git -C /var/www/logtalk pull`. nginx serves that directory.
+  - GitHub Actions still builds on pushes to `main` and deploys `public` to `gh-pages`; that is a separate publishing channel from the `build` branch.
 
 ### Gatsby 5 / platform notes
 
@@ -52,4 +63,5 @@
 ## Git
 
 - `src` and `api` are separate git histories; commit only in the intended repo and never commit/push unless asked.
+- `main` holds sources only. The built site lives on the orphan `build` branch (contents of `public/` at the branch root, no shared history with `main`); `/public` stays in `.gitignore`. Commit source/config changes to `main` first, then rebuild and refresh `build`, naming the source commit in the build commit message.
 - If a commit hook fails only because the local Node version is below 22.12, run the checks explicitly and use `git commit --no-verify`; do not lower the documented Node requirement.
